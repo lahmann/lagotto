@@ -258,7 +258,7 @@ class Article < ActiveRecord::Base
   end
 
   def citations
-    @citations ||= Source.installed(name: "scopus").present? ? event_count("scopus") : event_count("crossref")
+    @citations ||= Source.active(name: "scopus").present? ? event_count("scopus") : event_count("crossref")
   end
 
   alias_method :viewed, :views
