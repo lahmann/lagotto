@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Reddit < Source
+class Reddit < Agent
   def parse_data(result, article, options={})
     return result if result[:error]
 

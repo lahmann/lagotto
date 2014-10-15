@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class PubMed < Source
+class PubMed < Agent
   def get_query_url(article)
     return nil unless article.get_ids && article.pmid.present?
 

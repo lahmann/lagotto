@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Datacite < Source
+class Datacite < Agent
   def get_events(result)
     result["response"] ||= {}
     Array(result["response"]["docs"]).map { |item| { event: item, event_url: "http://doi.org/#{item['doi']}" } }

@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class PlosComments < Source
+class PlosComments < Agent
   def get_query_url(article)
     return nil unless article.doi =~ /^10.1371/
 

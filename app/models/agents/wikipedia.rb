@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Wikipedia < Source
+class Wikipedia < Agent
   # MediaWiki API Sandbox at http://en.wikipedia.org/wiki/Special:ApiSandbox
   def get_query_url(article, options={})
     host = options[:host] || "en.wikipedia.org"

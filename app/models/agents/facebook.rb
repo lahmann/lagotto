@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Facebook < Source
+class Facebook < Agent
   def get_query_url(article, options={})
     return nil unless article.get_url
 

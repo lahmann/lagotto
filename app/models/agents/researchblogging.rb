@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Researchblogging < Source
+class Researchblogging < Agent
   def request_options
     { content_type: 'xml', username: username, password: password }
   end

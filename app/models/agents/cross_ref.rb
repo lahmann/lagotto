@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class CrossRef < Source
+class CrossRef < Agent
   def get_query_url(article)
     return nil if article.doi.nil? || Time.zone.now - article.published_on.to_time < 1.day
 

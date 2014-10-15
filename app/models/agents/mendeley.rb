@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Mendeley < Source
+class Mendeley < Agent
   def parse_data(result, article, options={})
     # When Mendeley doesn't return a proper API response it can return
     # - a 404 status and error hash

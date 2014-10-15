@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class F1000 < Source
+class F1000 < Agent
   def parse_data(result, article, options={})
     # properly handle not found errors
     result = { 'data' => [] } if result[:status] == 404

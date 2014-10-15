@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class PmcEuropeData < Source
+class PmcEuropeData < Agent
   def get_query_url(article)
     if url.starts_with?("http://www.ebi.ac.uk/europepmc/webservices/rest/MED/")
       return nil unless article.get_ids && article.pmid.present?

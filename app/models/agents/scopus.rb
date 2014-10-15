@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Scopus < Source
+class Scopus < Agent
   def request_options
     { :headers => { "X-ELS-APIKEY" => api_key, "X-ELS-INSTTOKEN" => insttoken } }
   end

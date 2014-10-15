@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Openedition < Source
+class Openedition < Agent
   def request_options
     { content_type: 'xml' }
   end

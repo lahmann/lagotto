@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class TwitterSearch < Source
+class TwitterSearch < Agent
   def get_query_url(article, options={})
     return nil unless get_access_token && article.doi.present? && article.get_url
 

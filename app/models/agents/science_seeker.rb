@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class ScienceSeeker < Source
+class ScienceSeeker < Agent
   def request_options
     { content_type: 'xml' }
   end

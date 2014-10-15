@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Wos < Source
+class Wos < Agent
   def get_query_url(article)
     return nil unless article.doi.present?
 

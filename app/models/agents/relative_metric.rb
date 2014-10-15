@@ -1,4 +1,6 @@
-class RelativeMetric < Source
+# encoding: UTF-8
+
+class RelativeMetric < Agent
   def get_query_url(article)
     return nil unless article.doi =~ /^10.1371/
 

@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class Pmc < Source
+class Pmc < Agent
   def parse_data(result, article, options={})
     # properly handle not found errors
     result = { 'data' => [] } if result[:status] == 404
