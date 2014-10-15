@@ -11,7 +11,22 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141011165435) do
+ActiveRecord::Schema.define(:version => 20141015112518) do
+
+  create_table "agents", :force => true do |t|
+    t.string   "type",                                            :null => false
+    t.string   "name",                                            :null => false
+    t.string   "display_name",                                    :null => false
+    t.boolean  "queueable",    :default => true
+    t.integer  "state"
+    t.string   "state_event"
+    t.text     "config"
+    t.integer  "group_id",                                        :null => false
+    t.datetime "run_at",       :default => '1970-01-01 00:00:00', :null => false
+    t.datetime "created_at",                                      :null => false
+    t.datetime "updated_at",                                      :null => false
+    t.datetime "cached_at",    :default => '1970-01-01 00:00:00', :null => false
+  end
 
   create_table "alerts", :force => true do |t|
     t.integer  "source_id"
@@ -221,25 +236,19 @@ ActiveRecord::Schema.define(:version => 20141011165435) do
   add_index "reviews", ["state_id"], :name => "index_reviews_on_state_id"
 
   create_table "sources", :force => true do |t|
-    t.string   "type",                                            :null => false
     t.string   "name",                                            :null => false
     t.string   "display_name",                                    :null => false
-    t.datetime "run_at",       :default => '1970-01-01 00:00:00', :null => false
-    t.text     "config"
     t.integer  "group_id",                                        :null => false
     t.boolean  "private",      :default => false
     t.datetime "created_at",                                      :null => false
     t.datetime "updated_at",                                      :null => false
     t.text     "description"
-    t.integer  "state"
-    t.boolean  "queueable",    :default => true
-    t.string   "state_event"
+    t.boolean  "active",       :default => false
     t.datetime "cached_at",    :default => '1970-01-01 00:00:00', :null => false
   end
 
+  add_index "sources", ["active"], :name => "index_sources_on_state"
   add_index "sources", ["name"], :name => "index_sources_on_name", :unique => true
-  add_index "sources", ["state"], :name => "index_sources_on_state"
-  add_index "sources", ["type"], :name => "index_sources_on_type", :unique => true
 
   create_table "users", :force => true do |t|
     t.string   "email",                  :default => "",     :null => false

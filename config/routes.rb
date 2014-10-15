@@ -7,7 +7,8 @@ Lagotto::Application.routes.draw do
 
   # constraints is added to allow dot in the url (doi is used to show article)
   resources :articles, :constraints => { :id => /.+?/, :format => /html|js/ }
-  resources :sources do
+  resources :sources
+  resources :agents do
     resources :publisher_options, only: [:show, :edit, :update]
   end
   resources :users
