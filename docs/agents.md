@@ -1,9 +1,9 @@
 ---
 layout: page
-title: "Sources"
+title: "Agents"
 ---
 
-The ALM application provides a number of public sources. Most sources require a user account with the service (see table below).
+Lagotto comes with a number of agents for popular sources. Most agents require a user account with the service (see table below).
 
 ### Viewed
 * [PubMed Central Usage Stats](/docs/pmc)
@@ -36,18 +36,12 @@ The ALM application provides a number of public sources. Most sources require a 
 ### Recommended
 * [F1000Prime](/docs/f1000)
 
-### PLOS-specific Sources
+### PLOS-specific Agents
 * [PLOS Usage Stats](/docs/counter)
 * [PLOS Figshare Usage Stats](/docs/figshare)
 * [PLOS Comments](/docs/plos_comments)
 
-### Retired Sources
-* [Biod](/docs/biod)
-* [Bloglines](/docs/bloglines)
-* [Connotea](/docs/connotea)
-* [Postgenomic](/docs/postgenomic)
-
-Please use the [Issue Tracker](https://github.com/articlemetrics/alm/issues) for questions or feedback regarding sources.
+Please use the [Issue Tracker](https://github.com/articlemetrics/alm/issues) for questions or feedback regarding agents.
 
 <table>
 <tbody>
@@ -264,5 +258,5 @@ Most sources return information about each individual event (citation, bookmark,
 </tbody>
 </table>
 
-## Creating a new source
-Basically, each of the APIs that the ALM application is calling will be defined as a **source**. The ALM application provides a number of services to each source to help it get what it needs. Note the samples provided at [http://github.com/articlemetrics/alm/tree/master/app/models/sources](http://github.com/articlemetrics/alm/tree/master/app/models/sources).
+## Creating a new agent
+Lagotto provides a number of services to each agent to help it get what it needs. Note the samples provided at [http://github.com/articlemetrics/alm/tree/master/app/models/agents](http://github.com/articlemetrics/alm/tree/master/app/models/agents).
