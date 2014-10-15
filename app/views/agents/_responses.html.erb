@@ -1,0 +1,34 @@
+<p>Number of articles that have been updated with new information from agents.</p>
+
+<% unless Agent.visible.empty? %>
+  <table class="table" id="ResponsesTable">
+    <thead>
+      <tr>
+        <th class="group">Group</th>
+        <th class="name">Agent</th>
+        <th>Status</th>
+        <th class="number">Responses&nbsp;(24&nbsp;hours)</th>
+        <th class="number">Average&nbsp;(ms)</th>
+        <th class="number">Errors (24&nbsp;hours)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @groups.visible.each do |group| %>
+        <% group.agents.visible.each do |agent| %>
+          <tr>
+            <% if group.agents.visible.first.name == agent.name %>
+              <td <%= "rowspan=#{group.agents.visible.count}" %>><h4><%= h(group.display_name) %></h4></td>
+            <% end %>
+            <td><%= link_to agent.display_name, agent_path(agent) %></td>
+            <td><%= state_label(agent.human_state_name).html_safe %></td>
+            <td class="number" id="response_count_<%= agent.name %>"><%= number_hiding_zero(agent.response_count) %></td>
+            <td class="number" id="average_count_<%= agent.name %>"><%= number_hiding_zero(agent.average_count) %></td>
+            <td class="number" id="error_count_<%= agent.name %>"><%= source.error_count > 0 ? link_to(number_hiding_zero(agent.error_count), alerts_path(agent: agent.name)) : "" %></td>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <div class="alert alert-info">No agents found</div>
+<% end %>

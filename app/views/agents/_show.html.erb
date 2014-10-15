@@ -1,0 +1,49 @@
+<table class="table table-striped" id="SummaryTable">
+  <thead>
+    <tr>
+      <th/>
+      <th class="number">Articles&nbsp;with&nbsp;Events</th>
+      <th class="number">All Events</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Events</th>
+      <td class="number" id="article_count"><%= number_hiding_zero(@source.article_count) %></td>
+      <td class="number" id="event_count"><%= number_hiding_zero(@source.event_count) %></td>
+    </tr>
+
+    <% if can?(:read, Alert) %>
+      <tr>
+        <th/>
+        <th class="number">Pending</th>
+        <th class="number">Working</th>
+      </tr>
+      <tr>
+        <th>Jobs</th>
+        <td class="number" id="pending_count"><%= number_hiding_zero(@source.pending_count) %></td>
+        <td class="number" id="working_count"><%= number_hiding_zero(@source.working_count) %></td>
+      </tr>
+      <tr>
+        <th/>
+        <th class="number">Responses</th>
+        <th class="number">Errors</th>
+      </tr>
+      <tr>
+        <th>Responses in the last 24 Hours</th>
+        <td class="number" id="response_count"><%= number_hiding_zero(@source.response_count) %></td>
+        <td class="number" id="error_count"><%= link_to_if(@source.error_count > 0, number_hiding_zero(@source.error_count), alerts_path(:source => @source.name)) %></td>
+      </tr>
+      <tr>
+        <th/>
+        <th class="number">Average</th>
+        <th class="number">Maximum</th>
+      </tr>
+      <tr>
+        <th>Response duration in the last 24 Hours (ms)</th>
+        <td class="number" id="average_count"><%= number_hiding_zero(@source.average_count) %></td>
+        <td class="number" id="maximum_count"><%= number_hiding_zero(@source.maximum_count) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
