@@ -1,49 +1,46 @@
-<table class="table table-striped" id="SummaryTable">
-  <thead>
-    <tr>
-      <th/>
-      <th class="number">Articles&nbsp;with&nbsp;Events</th>
-      <th class="number">All Events</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Events</th>
-      <td class="number" id="article_count"><%= number_hiding_zero(@source.article_count) %></td>
-      <td class="number" id="event_count"><%= number_hiding_zero(@source.event_count) %></td>
-    </tr>
+<% if can?(:manage, Source) && (controller.action_name == "edit" or (controller.action_name == "update" && !@source.errors.empty?)) %>
+  <%= simple_form_for @source, :url => source_path(@source.name), :html => { :remote => true } do |f| %>
+    <fieldset>
+      <legend>Edit Source</legend>
 
-    <% if can?(:read, Alert) %>
-      <tr>
-        <th/>
-        <th class="number">Pending</th>
-        <th class="number">Working</th>
-      </tr>
-      <tr>
-        <th>Jobs</th>
-        <td class="number" id="pending_count"><%= number_hiding_zero(@source.pending_count) %></td>
-        <td class="number" id="working_count"><%= number_hiding_zero(@source.working_count) %></td>
-      </tr>
-      <tr>
-        <th/>
-        <th class="number">Responses</th>
-        <th class="number">Errors</th>
-      </tr>
-      <tr>
-        <th>Responses in the last 24 Hours</th>
-        <td class="number" id="response_count"><%= number_hiding_zero(@source.response_count) %></td>
-        <td class="number" id="error_count"><%= link_to_if(@source.error_count > 0, number_hiding_zero(@source.error_count), alerts_path(:source => @source.name)) %></td>
-      </tr>
-      <tr>
-        <th/>
-        <th class="number">Average</th>
-        <th class="number">Maximum</th>
-      </tr>
-      <tr>
-        <th>Response duration in the last 24 Hours (ms)</th>
-        <td class="number" id="average_count"><%= number_hiding_zero(@source.average_count) %></td>
-        <td class="number" id="maximum_count"><%= number_hiding_zero(@source.maximum_count) %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+      <%= f.input :display_name %>
+      <%= f.input :active, :as => :boolean, hint: "Source is receiving events" %>
+      <%= f.input :private, :as => :boolean, hint: "Source not made available via API" %>
+      <%= f.input :description, :input_html => { :rows => 3 } %>
+
+      <div class="form-group">
+        <%= f.submit "Save ", class: "btn btn-default" %>
+        <%= link_to 'Cancel', source_path(@source.name), { :remote => true, :class => 'btn' } %>
+      </div>
+    </fieldset>
+  <% end %>
+<% else %>
+  <div class="page-header">
+    <h1 id="api_key" data-name="<%= @source.name %>" data-api_key="<%= CONFIG[:api_key] %>" data-uid_type="<%= CONFIG[:uid] %>" data-page="<%= @page %>" data-per_page="15" data-q="" data-class_name="" data-source="<%= @source.name %>" data-order="<%= @order.present? ? @order.name : "" %>" data-publisher="<%= @publisher.present? ? @publisher.crossref_id : "" %>">
+      <% if can?(:manage, Source) %>
+        <%= link_to '<span class="glyphicon glyphicon-pencil"></span>'.html_safe, edit_source_path(@source.name), { :remote => true, :class => 'btn btn-default btn-sm pull-right configuration-edit', :title => "Edit" } %>
+      <% end %>
+      <%= @source.display_name %> <small id="update_date"><%= date_from_iso8601(@source.update_date) + ' UTC' %>
+      <%= link_to image_tag("feed-icon-28x28.png"), source_path(@source, format: "rss") %></small>
+    </h1>
+
+    <dl class="dl-horizontal" id="dl-horizontal">
+      <% unless @source.group.blank? %>
+        <dt>Group</dt>
+        <dd><%= h(@source.group.display_name) %></dd>
+      <% end %>
+      <% unless @source.description.blank? %>
+        <dt>Description</dt>
+        <dd><%= @source.description %></dd>
+      <% end %>
+      <% if @source.private %>
+        <dt>Private source</dt>
+        <dd>Source not made available via API</dd>
+      <% end %>
+      <dt>Articles with Events</dt>
+      <dd id="article_count"><%= number_hiding_zero(@source.article_count) %></dd>
+      <dt>All Events</dt>
+      <dd id="event_count"><%= number_hiding_zero(@source.event_count) %></dd>
+    </dl>
+  </div>
+<% end %>
