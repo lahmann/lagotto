@@ -20,7 +20,7 @@
       <div class="panel-body">
         <h2 id="events_count"><%= number_with_delimiter(@status.events_count) %></h2>
       </div>
-      <div class="panel-footer"><%= link_to "Events", sources_path %></div>
+      <div class="panel-footer"><%= link_to "Events", agents_path %></div>
     </div>
   </div>
   <div class="col-md-3 text-center">
@@ -48,7 +48,7 @@
         <div class="panel-body">
           <h2 id="delayed_jobs_active_count"><%= number_with_delimiter(@status.delayed_jobs_active_count) %></h2>
         </div>
-        <div class="panel-footer"><%= link_to "Pending and working jobs", sources_path %></div>
+        <div class="panel-footer"><%= link_to "Pending and working jobs", agents_path %></div>
       </div>
     </div>
     <div class="col-md-3 text-center">
@@ -56,7 +56,7 @@
         <div class="panel-body">
           <h2 id="responses_count"><%= number_with_delimiter(@status.responses_count) %></h2>
         </div>
-        <div class="panel-footer"><%= link_to "API responses last 24 hours", sources_path %></div>
+        <div class="panel-footer"><%= link_to "API responses last 24 hours", agents_path %></div>
       </div>
     </div>
     <div class="col-md-3 text-center">

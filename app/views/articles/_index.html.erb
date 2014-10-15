@@ -53,7 +53,7 @@
         <ul class="dropdown-menu pull-right">
           <li><%= link_to "All Sources", articles_path(q: params[:q], class_name: params[:class_name], publisher: params[:publisher], order: params[:order]) %></li>
           <% Group.order("id").each do |group| %>
-            <% group.sources.visible.each_with_index do |source, i| %>
+            <% group.sources.active.each_with_index do |source, i| %>
               <%= '<li class="divider"></li>'.html_safe if i == 0 %>
               <li><%= link_to source.display_name, articles_path(q: params[:q], class_name: params[:class_name], publisher: params[:publisher], source: source.name) %></li>
             <% end %>
@@ -78,7 +78,7 @@
           <li><%= link_to "Sort by Date", articles_path(q: params[:q], class_name: params[:class_name], publisher: params[:publisher], source: params[:source]) %></li>
           <% if @source.nil? %>
             <% Group.order("id").each do |group| %>
-              <% group.sources.visible.each_with_index do |source, i| %>
+              <% group.sources.active.each_with_index do |source, i| %>
                 <%= '<li class="divider"></li>'.html_safe if i == 0 %>
                 <li><%= link_to "Sort by #{source.display_name}", articles_path(q: params[:q], class_name: params[:class_name], publisher: params[:publisher], source: params[:source], order: source.name) %></li>
               <% end %>
