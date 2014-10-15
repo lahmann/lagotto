@@ -7,9 +7,9 @@ class SourcesController < ApplicationController
 
   def show
     @doc = Doc.find(@source.name)
-    if current_user && current_user.publisher && @source.by_publisher?
-      @publisher_option = PublisherOption.find_or_create_by_publisher_id_and_source_id(current_user.publisher_id, @source.id)
-    end
+    @page = params[:page] || 1
+    @publisher = Publisher.where(crossref_id: params[:publisher]).first
+    @order = Source.active.where(name: params[:order]).first
 
     respond_with(@source) do |format|
       format.rss do
@@ -39,7 +39,7 @@ class SourcesController < ApplicationController
 
   def update
     params[:source] ||= {}
-    params[:source][:state_event] = params[:state_event] if params[:state_event]
+    params[:source][:active] = params[:active] if params[:active]
     @source.update_attributes(safe_params)
     if @source.invalid?
       error_messages = @source.errors.full_messages.join(', ')
@@ -47,7 +47,7 @@ class SourcesController < ApplicationController
       @flash = flash
     end
     respond_with(@source) do |format|
-      if params[:state_event]
+      if params[:active]
         @groups = Group.includes(:sources).order("groups.id, sources.display_name")
         format.js { render :index }
       else
@@ -70,30 +70,8 @@ class SourcesController < ApplicationController
   def safe_params
     params.require(:source).permit(:display_name,
                                    :group_id,
-                                   :state_event,
                                    :private,
-                                   :by_publisher,
-                                   :queueable,
                                    :description,
-                                   :job_batch_size,
-                                   :priority,
-                                   :workers,
-                                   :rate_limiting,
-                                   :wait_time,
-                                   :staleness_week,
-                                   :staleness_month,
-                                   :staleness_year,
-                                   :staleness_all,
-                                   :cron_line,
-                                   :timeout,
-                                   :max_failed_queries,
-                                   :max_failed_query_time_interval,
-                                   :disable_delay,
-                                   :url,
-                                   :url_with_type,
-                                   :url_with_title,
-                                   :related_articles_url,
-                                   :api_key,
-                                   *@source.config_fields)
+                                   :active)
   end
 end

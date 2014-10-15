@@ -2,10 +2,6 @@ class SourceDecorator < Draper::Decorator
   delegate_all
   decorates_association :group
 
-  def state
-    human_state_name
-  end
-
   def group
     object.group.name
   end

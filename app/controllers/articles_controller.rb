@@ -11,8 +11,8 @@ class ArticlesController < ApplicationController
     @q = params[:q]
     @class_name = params[:class_name]
     @publisher = Publisher.where(crossref_id: params[:publisher]).first
-    @source = Source.visible.where(name: params[:source]).first
-    @order = Source.visible.where(name: params[:order]).first
+    @source = Source.active.where(name: params[:source]).first
+    @order = Source.active.where(name: params[:order]).first
   end
 
   def show
