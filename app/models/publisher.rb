@@ -56,7 +56,7 @@ class Publisher < ActiveRecord::Base
     timestamp = now.utc.iso8601
 
     send("article_count=", timestamp)
-    Source.visible.each { |source| send("article_count_by_source=", source.id, timestamp) }
+    Source.active.each { |source| send("article_count_by_source=", source.id, timestamp) }
 
     update_column(:cached_at, now)
   end

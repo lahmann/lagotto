@@ -18,8 +18,8 @@ describe "/api/v5/articles" do
         item["doi"].should eql(article.doi)
         item["issued"]["date-parts"][0].should eql([article.year, article.month, article.day])
         item_source = item["sources"][0]
-        item_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        item_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        item_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        item_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         item_source["metrics"].should include("comments")
         item_source["metrics"].should include("likes")
         item_source["metrics"].should include("html")
@@ -44,8 +44,8 @@ describe "/api/v5/articles" do
         item["doi"].should eql(article.doi)
         item["issued"]["date-parts"][0].should eql([article.year, article.month, article.day])
         item_source = item["sources"][0]
-        item_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        item_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        item_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        item_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         item_source["metrics"].should include("comments")
         item_source["metrics"].should include("likes")
         item_source["metrics"].should include("html")

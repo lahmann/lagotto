@@ -35,6 +35,7 @@ Lagotto::Application.routes.draw do
 
     namespace :v5 do
       resources :articles, :constraints => { :id => /.+?/, :format=> false }, only: [:index]
+      resources :agents, :constraints => { :format=> false }, only: [:index, :show]
       resources :sources, :constraints => { :format=> false }, only: [:index, :show]
       resources :status, :constraints => { :format=> false }, only: [:index]
       resources :api_requests, :constraints => { :format=> false }, only: [:index]

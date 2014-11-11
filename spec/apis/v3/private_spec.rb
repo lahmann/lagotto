@@ -16,9 +16,9 @@ describe "/api/v3/articles" do
         response_source = response["sources"][0]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eq(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].should eq(article.traces.first.event_count)
         response_source["metrics"].should include("citations")
-        response_source["metrics"]["shares"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["shares"].should eq(article.traces.first.event_count)
         response_source["metrics"].should include("comments")
         response_source["metrics"].should include("groups")
         response_source["metrics"].should include("html")
@@ -36,9 +36,9 @@ describe "/api/v3/articles" do
         response_source = response["sources"]["source"]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eql(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].to_i.should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].to_i.should eq(article.traces.first.event_count)
         response_source["metrics"]["citations"].should be_nil
-        response_source["metrics"]["shares"].to_i.should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["shares"].to_i.should eq(article.traces.first.event_count)
         response_source["metrics"]["groups"].should be_nil
         response_source["metrics"]["html"].should be_nil
         response_source["metrics"]["likes"].should be_nil
@@ -60,9 +60,9 @@ describe "/api/v3/articles" do
         response_source = response["sources"][0]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eq(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].should eq(article.traces.first.event_count)
         response_source["metrics"].should include("citations")
-        response_source["metrics"]["shares"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["shares"].should eq(article.traces.first.event_count)
         response_source["metrics"].should include("comments")
         response_source["metrics"].should include("groups")
         response_source["metrics"].should include("html")
@@ -80,9 +80,9 @@ describe "/api/v3/articles" do
         response_source = response["sources"]["source"]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eql(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].to_i.should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].to_i.should eq(article.traces.first.event_count)
         response_source["metrics"]["citations"].should be_nil
-        response_source["metrics"]["shares"].to_i.should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["shares"].to_i.should eq(article.traces.first.event_count)
         response_source["metrics"]["groups"].should be_nil
         response_source["metrics"]["html"].should be_nil
         response_source["metrics"]["likes"].should be_nil

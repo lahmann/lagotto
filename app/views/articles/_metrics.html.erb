@@ -1,4 +1,4 @@
-<% if @article.retrieval_statuses.sum(:event_count) > 0 %>
+<% if @article.traces.sum(:event_count) > 0 %>
   <div class="text-muted" id="loading">Loading page … <%= image_tag "spinner.gif" %></div>
   <%= javascript_include_tag 'articles/alm' %>
 <% else %>

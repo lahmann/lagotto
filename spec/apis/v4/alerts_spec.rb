@@ -46,13 +46,13 @@ describe "/api/v4/alerts" do
       end
     end
 
-    context "with source" do
+    context "with agent" do
       let(:user) { FactoryGirl.create(:admin_user) }
-      let(:uri) { "/api/v4/alerts?source=citeulike" }
+      let(:uri) { "/api/v4/alerts?agent=citeulike" }
 
       before(:each) do
         FactoryGirl.create_list(:alert, 2)
-        FactoryGirl.create(:alert_with_source)
+        FactoryGirl.create(:alert_with_agent)
       end
 
       it "JSON" do
@@ -63,7 +63,7 @@ describe "/api/v4/alerts" do
         data = response["data"]
         data.length.should == 1
         alert = data.first
-        alert["source"].should eq ("citeulike")
+        alert["agent"].should eq ("citeulike")
       end
     end
 

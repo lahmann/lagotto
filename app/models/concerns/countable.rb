@@ -37,7 +37,7 @@ module Countable
 
     def event_count=(timestamp)
       Rails.cache.write("#{name}/event_count/#{timestamp}",
-                        retrieval_statuses.sum(:event_count))
+                        traces.sum(:event_count))
     end
 
     def article_count
@@ -55,7 +55,7 @@ module Countable
 
     def queued_count=(timestamp)
       Rails.cache.write("#{name}/queued_count/#{timestamp}",
-                        retrieval_statuses.queued.size)
+                        tasks.queued.size)
     end
 
     def stale_count
@@ -64,7 +64,7 @@ module Countable
 
     def stale_count=(timestamp)
       Rails.cache.write("#{name}/stale_count/#{timestamp}",
-                        retrieval_statuses.stale.size)
+                        tasks.stale.size)
     end
 
     def response_count
@@ -104,7 +104,7 @@ module Countable
 
     def with_events_by_day_count=(timestamp)
       Rails.cache.write("#{name}/with_events_by_day_count/#{timestamp}",
-                        retrieval_statuses.with_events(1).size)
+                        traces.with_events(1).size)
     end
 
     def without_events_by_day_count
@@ -113,7 +113,7 @@ module Countable
 
     def without_events_by_day_count=(timestamp)
       Rails.cache.write("#{name}/without_events_by_day_count/#{timestamp}",
-                        retrieval_statuses.without_events(1).size)
+                        traces.without_events(1).size)
     end
 
     def with_events_by_month_count
@@ -122,7 +122,7 @@ module Countable
 
     def with_events_by_month_count=(timestamp)
       Rails.cache.write("#{name}/with_events_by_month_count/#{timestamp}",
-                        retrieval_statuses.with_events(31).size)
+                        traces.with_events(31).size)
     end
 
     def without_events_by_month_count
@@ -131,7 +131,7 @@ module Countable
 
     def without_events_by_month_count=(timestamp)
       Rails.cache.write("#{name}/without_events_by_month_count/#{timestamp}",
-                        retrieval_statuses.without_events(31).size)
+                        traces.without_events(31).size)
     end
   end
 end

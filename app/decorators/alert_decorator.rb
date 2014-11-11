@@ -10,8 +10,8 @@ class AlertDecorator < Draper::Decorator
     model.human_level_name
   end
 
-  def source
-    source_id ? model.source.name : nil
+  def alert
+    alert_id ? model.alert.name : nil
   end
 
   def article

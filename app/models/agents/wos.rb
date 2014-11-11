@@ -67,7 +67,7 @@ class Wos < Agent
     xml = ::Builder::XmlMarkup.new(indent: 2)
     xml.instruct!
     xml.request(xmlns: 'http://www.isinet.com/xrpc42',
-                src: "app.id=#{CONFIG[:useragent]},env.id=#{Rails.env},partner.email=#{CONFIG[:notification_email]}") do
+                src: "app.id=Lagotto,env.id=#{Rails.env},partner.email=#{CONFIG[:notification_email]}") do
       xml.fn(name: "LinksAMR.retrieve") do
         xml.list do
           xml.map

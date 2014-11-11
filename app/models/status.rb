@@ -2,6 +2,9 @@ class Status
   # include HTTP request helpers
   include Networkable
 
+  # include CouchDB helpers
+  include Couchable
+
   def articles_count
     Rails.cache.read("status/articles_count/#{update_date}").to_i
   end
@@ -25,7 +28,7 @@ class Status
 
   def events_count=(timestamp)
     Rails.cache.write("status/events_count/#{timestamp}",
-                      RetrievalStatus.joins(:source).where("state > ?", 0)
+                      Trace.joins(:source).where("active = ?", 1)
                         .where("name != ?", "relativemetric").sum(:event_count))
   end
 
@@ -82,7 +85,7 @@ class Status
   end
 
   def couchdb_size
-    RetrievalStatus.new.get_lagotto_database["disk_size"] || 0
+    get_lagotto_database["disk_size"] || 0
   end
 
   def update_date

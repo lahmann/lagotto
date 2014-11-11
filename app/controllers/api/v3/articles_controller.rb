@@ -11,8 +11,8 @@ class Api::V3::ArticlesController < Api::V3::BaseController
     type = { "doi" => :doi, "pmid" => :pmid, "pmcid" => :pmcid, "mendeley" => :mendeley_uuid }.values_at(params[:type]).first || Article.uid_as_sym
 
     ids = params[:ids].nil? ? nil : params[:ids].split(",")[0...50].map { |id| Article.clean_id(id) }
-    id_hash = { :articles => { type => ids }, :retrieval_statuses => { :source_id => source_ids }}
-    @articles = ArticleDecorator.where(id_hash).includes(:retrieval_statuses).order("articles.updated_at DESC").decorate(context: { days: params[:days], months: params[:months], year: params[:year], info: params[:info], source: params[:source] })
+    id_hash = { :articles => { type => ids }, :traces => { :source_id => source_ids }}
+    @articles = ArticleDecorator.where(id_hash).includes(:traces).order("articles.updated_at DESC").decorate(context: { days: params[:days], months: params[:months], year: params[:year], info: params[:info], source: params[:source] })
 
     # Return 404 HTTP status code and error message if article wasn't found, or no valid source specified
     if @articles.blank?
@@ -29,8 +29,8 @@ class Api::V3::ArticlesController < Api::V3::BaseController
     # Load one article given query params
     source_ids = get_source_ids(params[:source])
 
-    id_hash = { :articles => Article.from_uri(params[:id]), :retrieval_statuses => { :source_id => source_ids }}
-    @article = ArticleDecorator.includes(:retrieval_statuses).where(id_hash).decorate(context: { days: params[:days], months: params[:months], year: params[:year], info: params[:info], source: params[:source] })
+    id_hash = { :articles => Article.from_uri(params[:id]), :traces => { :source_id => source_ids }}
+    @article = ArticleDecorator.includes(:traces).where(id_hash).decorate(context: { days: params[:days], months: params[:months], year: params[:year], info: params[:info], source: params[:source] })
 
     # Return 404 HTTP status code and error message if article wasn't found, or no valid source specified
     if @article.blank?

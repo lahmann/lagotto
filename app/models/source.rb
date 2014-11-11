@@ -1,16 +1,11 @@
 # encoding: UTF-8
 
-require 'cgi'
-require "addressable/uri"
-
 class Source < ActiveRecord::Base
   # include summary counts
   include Countable
 
-  has_many :retrieval_statuses, :dependent => :destroy
-  has_many :articles, :through => :retrieval_statuses
-  has_many :alerts
-  has_many :api_responses
+  has_many :traces, :dependent => :destroy
+  has_many :articles, :through => :traces
   belongs_to :group
 
   validates :name, :presence => true, :uniqueness => true
@@ -51,25 +46,25 @@ class Source < ActiveRecord::Base
     update_column(:cached_at, now)
   end
 
-  # Remove all retrieval records for this source that have never been updated,
+  # Remove all traces records for this source that have never been updated,
   # return true if all records are removed
-  def remove_all_retrievals
-    rs = retrieval_statuses.where(:retrieved_at == '1970-01-01').delete_all
-    retrieval_statuses.count == 0
+  def remove_all_traces
+    rs = traces.where(:retrieved_at == '1970-01-01').delete_all
+    traces.count == 0
   end
 
-  # Create an empty retrieval record for every article for the new source
-  def create_retrievals
-    article_ids = RetrievalStatus.where(:source_id => id).pluck(:article_id)
+  # Create an empty traces record for every article for the new source
+  def create_traces
+    article_ids = Trace.where(:source_id => id).pluck(:article_id)
 
     (0...article_ids.length).step(1000) do |offset|
       ids = article_ids[offset...(offset + 1000)]
-      delay(priority: 2, queue: "retrieval-status").insert_retrievals(ids)
+      delay(priority: 2, queue: "trace").insert_traces(ids)
     end
   end
 
-  def insert_retrievals(ids)
-    sql = "insert into retrieval_statuses (article_id, source_id, created_at, updated_at, scheduled_at) select id, #{id}, now(), now(), now() from articles"
+  def insert_traces(ids)
+    sql = "insert into traces (article_id, source_id, created_at, updated_at) select id, #{id}, now(), now() from articles"
     sql += " where articles.id not in (#{article_ids.join(",")})" if ids.any?
 
     ActiveRecord::Base.connection.execute sql

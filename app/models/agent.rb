@@ -1,3 +1,6 @@
+require 'cgi'
+require "addressable/uri"
+
 class Agent < ActiveRecord::Base
   # include state machine
   include Statable
@@ -23,10 +26,9 @@ class Agent < ActiveRecord::Base
   # include hash helper
   include Hashie::Extensions::DeepFetch
 
-  has_many :retrieval_statuses, :dependent => :destroy
-  has_many :articles, :through => :retrieval_statuses
-  has_many :publishers, :through => :publisher_options
-  has_many :publisher_options
+  has_many :tasks, :dependent => :destroy
+  has_many :articles, :through => :tasks
+  has_many :publishers, :through => :tasks
   has_many :alerts
   has_many :api_responses
   has_many :delayed_jobs, primary_key: "name", foreign_key: "queue", :dependent => :destroy
@@ -50,18 +52,14 @@ class Agent < ActiveRecord::Base
   validates :staleness_all, :numericality => { :only_integer => true, :greater_than => 0 }
   validate :validate_cron_line_format, :allow_blank => true
 
-  scope :available, where("state = ?", 0).order("group_id, sources.display_name")
-  scope :installed, where("state > ?", 0).order("group_id, sources.display_name")
-  scope :retired, where("state = ?", 1).order("group_id, sources.display_name")
-  scope :visible, where("state > ?", 1).order("group_id, sources.display_name")
-  scope :inactive, where("state = ?", 2).order("group_id, sources.display_name")
-  scope :active, where("state > ?", 2).order("group_id, sources.display_name")
-  scope :for_events, where("state > ?", 2).where("name != ?", 'relativemetric').order("group_id, sources.display_name")
-  scope :queueable, where("state > ?", 2).where("queueable = ?", true).order("group_id, sources.display_name")
-
-  # some sources cannot be redistributed
-  scope :public_sources, lambda { where("private = ?", false) }
-  scope :private_sources, lambda { where("private = ?", true) }
+  scope :available, where("state = ?", 0).order("group_id, agents.display_name")
+  scope :installed, where("state > ?", 0).order("group_id, agents.display_name")
+  scope :retired, where("state = ?", 1).order("group_id, agents.display_name")
+  scope :visible, where("state > ?", 1).order("group_id, agents.display_name")
+  scope :inactive, where("state = ?", 2).order("group_id, agents.display_name")
+  scope :active, where("state > ?", 2).order("group_id, agents.display_name")
+  scope :for_events, where("state > ?", 2).where("name != ?", 'relativemetric').order("group_id, agents.display_name")
+  scope :queueable, where("state > ?", 2).where("queueable = ?", true).order("group_id, agents.display_name")
 
   def to_param  # overridden, use name instead of id
     name
@@ -227,7 +225,7 @@ class Agent < ActiveRecord::Base
   def publisher_configs
     return [] unless by_publisher?
 
-    publisher_options.pluck_all(:publisher_id, :config)
+    tasks.pluck_all(:publisher_id, :config)
   end
 
   def publisher_config(publisher_id)
@@ -282,40 +280,34 @@ class Agent < ActiveRecord::Base
     timestamp = now.utc.iso8601
 
     # loop through cached attributes we want to update
-    [:event_count,
-     :article_count,
-     :queued_count,
+    [:queued_count,
      :stale_count,
      :response_count,
      :average_count,
-     :maximum_count,
-     :with_events_by_day_count,
-     :without_events_by_day_count,
-     :with_events_by_month_count,
-     :without_events_by_month_count].each { |cached_attr| send("#{cached_attr}=", timestamp) }
+     :maximum_count].each { |cached_attr| send("#{cached_attr}=", timestamp) }
 
     update_column(:cached_at, now)
   end
 
-  # Remove all retrieval records for this source that have never been updated,
+  # Remove all tasks for this agent that have never been updated,
   # return true if all records are removed
-  def remove_all_retrievals
-    rs = retrieval_statuses.where(:retrieved_at == '1970-01-01').delete_all
-    retrieval_statuses.count == 0
+  def remove_all_tasks
+    t = tasks.where(:retrieved_at == '1970-01-01').delete_all
+    tasks.count == 0
   end
 
-  # Create an empty retrieval record for every article for the new source
-  def create_retrievals
-    article_ids = RetrievalStatus.where(:source_id => id).pluck(:article_id)
+  # Create an empty task for every article for the new agent
+  def create_tasks
+    article_ids = Task.where(:agent_id => id).pluck(:article_id)
 
     (0...article_ids.length).step(1000) do |offset|
       ids = article_ids[offset...(offset + 1000)]
-      delay(priority: 2, queue: "retrieval-status").insert_retrievals(ids)
+      delay(priority: 2, queue: "task").insert_tasks(ids)
     end
   end
 
-  def insert_retrievals(ids)
-    sql = "insert into retrieval_statuses (article_id, source_id, created_at, updated_at, scheduled_at) select id, #{id}, now(), now(), now() from articles"
+  def insert_tasks(ids)
+    sql = "insert into tasks (article_id, source_id, created_at, updated_at, scheduled_at) select id, #{id}, now(), now(), now() from articles"
     sql += " where articles.id not in (#{article_ids.join(",")})" if ids.any?
 
     ActiveRecord::Base.connection.execute sql

@@ -14,7 +14,6 @@ CONFIG.symbolize_keys!
 # reasonable defaults
 CONFIG[:uid] ||= "doi"
 CONFIG[:sitename] ||= "ALM"
-CONFIG[:useragent] ||= "Lagotto"
 
 addrinfo = Socket.getaddrinfo(Socket.gethostname, nil, nil, Socket::SOCK_DGRAM, nil, Socket::AI_CANONNAME)
 CONFIG[:hostname] ||= addrinfo[0][2]

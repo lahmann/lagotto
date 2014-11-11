@@ -15,8 +15,8 @@ class ArticleDecorator < Draper::Decorator
     collection = collection.order("name").pluck(:id)
   end
 
-  def filtered_retrieval_statuses
-    model.retrieval_statuses.select { |rs| source_ids.include?(rs.source_id) }
+  def filtered_traces
+    model.traces.select { |t| source_ids.include?(t.source_id) }
   end
 
   def publication_date

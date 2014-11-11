@@ -53,8 +53,8 @@ describe "/api/v5/articles" do
         item["doi"].should eq(article.doi)
         item["issued"]["date-parts"][0].should eq([article.year, article.month, article.day])
         item_source = item["sources"][0]
-        item_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        item_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        item_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        item_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         item_source["by_day"].should_not be_nil
         item_source["by_month"].should_not be_nil
         item_source["by_year"].should_not be_nil
@@ -71,8 +71,8 @@ describe "/api/v5/articles" do
         item["doi"].should eq(article.doi)
         item["issued"]["date-parts"][0].should eq([article.year, article.month, article.day])
         item_source = item["sources"][0]
-        item_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        item_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        item_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        item_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         item_source["by_day"].should_not be_nil
         item_source["by_month"].should_not be_nil
         item_source["by_year"].should_not be_nil
@@ -124,8 +124,8 @@ describe "/api/v5/articles" do
         item["issued"]["date-parts"][0].should eq([article.year, article.month, article.day])
 
         item_source = item["sources"][0]
-        item_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        item_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        item_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        item_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         item_source["events"].should_not be_nil
         item_source["by_day"].should_not be_nil
         item_source["by_month"].should_not be_nil
@@ -144,8 +144,8 @@ describe "/api/v5/articles" do
         item["issued"]["date-parts"][0].should eq([article.year, article.month, article.day])
 
         item_source = item["sources"][0]
-        item_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        item_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        item_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        item_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         item_source["events"].should_not be_nil
         item_source["by_day"].should_not be_nil
         item_source["by_month"].should_not be_nil
@@ -169,8 +169,8 @@ describe "/api/v5/articles" do
         item["doi"].should eq(article.doi)
         item["issued"]["date-parts"][0].should eq([article.year, article.month, article.day])
         item_source = item["sources"][0]
-        item_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        item_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        item_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        item_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         item_source["by_day"].should_not be_nil
         item_source["by_month"].should_not be_nil
         item_source["by_year"].should_not be_nil
@@ -189,8 +189,8 @@ describe "/api/v5/articles" do
         item["doi"].should eq(article.doi)
         item["issued"]["date-parts"][0].should eq([article.year, article.month, article.day])
         item_source = item["sources"][0]
-        item_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        item_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        item_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        item_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         item_source["by_day"].should_not be_nil
         item_source["by_month"].should_not be_nil
         item_source["by_year"].should_not be_nil

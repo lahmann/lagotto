@@ -12,8 +12,8 @@ class Article < ActiveRecord::Base
   include Resolvable
 
   belongs_to :publisher, primary_key: :crossref_id
-  has_many :retrieval_statuses, :dependent => :destroy
-  has_many :sources, :through => :retrieval_statuses
+  has_many :traces, :dependent => :destroy
+  has_many :sources, :through => :traces
   has_many :alerts
   has_many :api_responses
 
@@ -23,16 +23,16 @@ class Article < ActiveRecord::Base
   validate :validate_published_on, if: proc { |article| article.year.present? }
 
   before_validation :sanitize_title
-  after_create :create_retrievals
+  after_create :create_traces
 
   scope :query, lambda { |query| where("doi like ?", "#{query}%") }
 
   scope :last_x_days, lambda { |duration| where("published_on >= ?", Date.today - duration.days) }
-  scope :is_cited, lambda { includes(:retrieval_statuses)
-    .where("retrieval_statuses.event_count > ?", 0) }
-  scope :is_cited_by_source, lambda { |source_id| includes(:retrieval_statuses)
-    .where("retrieval_statuses.source_id = ?", source_id)
-    .where("retrieval_statuses.event_count > ?", 0) }
+  scope :is_cited, lambda { includes(:traces)
+    .where("traces.event_count > ?", 0) }
+  scope :is_cited_by_source, lambda { |source_id| includes(:traces)
+    .where("traces.source_id = ?", source_id)
+    .where("traces.event_count > ?", 0) }
 
   def self.from_uri(id)
     return nil if id.nil?
@@ -147,16 +147,16 @@ class Article < ActiveRecord::Base
   end
 
   def events_count
-    @events_count ||= retrieval_statuses.reduce(0) { |sum, r| sum + r.event_count }
+    @events_count ||= traces.reduce(0) { |sum, r| sum + r.event_count }
   end
 
-  # Filter retrieval_statuses by source
-  def retrieval_statuses_by_source(options={})
+  # Filter traces by source
+  def traces_by_source(options={})
     if options[:source]
       source_ids = Source.where("lower(name) in (?)", options[:source].split(",")).order("name").pluck(:id)
-      retrieval_statuses.by_source(source_ids)
+      traces.by_source(source_ids)
     else
-      retrieval_statuses
+      traces
     end
   end
 
@@ -313,14 +313,11 @@ class Article < ActiveRecord::Base
     self.title = ActionController::Base.helpers.sanitize(title)
   end
 
-  def create_retrievals
-    # Create an empty retrieval record for every installed source for the new article
+  def create_traces
+    # Create an empty trace record for every installed source for the new article
 
-    # Schedule retrieval immediately, rate-limiting will automatically limit the external API calls
-    # when we bulk-upload lots of articles.
-
-    Source.installed.each do |source|
-      RetrievalStatus.find_or_create_by_article_id_and_source_id(id, source.id, :scheduled_at => Time.zone.now)
+    Source.active.each do |source|
+      Trace.find_or_create_by_article_id_and_source_id(id, source.id)
     end
   end
 end

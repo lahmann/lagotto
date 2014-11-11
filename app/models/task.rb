@@ -1,4 +1,4 @@
-class RetrievalStatus < ActiveRecord::Base
+class Task < ActiveRecord::Base
   # include HTTP request helpers
   include Networkable
 

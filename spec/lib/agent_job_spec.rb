@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-describe SourceJob do
+describe AgentJob do
 
   let(:retrieval_status) { FactoryGirl.create(:retrieval_status) }
-  let(:source) { FactoryGirl.create(:source) }
-  let(:rs_id) { "#{retrieval_status.source.name}:#{retrieval_status.article.doi_escaped}" }
+  let(:agent) { FactoryGirl.create(:agent) }
+  let(:rs_id) { "#{retrieval_status.agent.name}:#{retrieval_status.article.doi_escaped}" }
   let(:job) { FactoryGirl.create(:delayed_job) }
 
-  subject { SourceJob.new([retrieval_status.id], source.id) }
+  subject { AgentJob.new([retrieval_status.id], agent.id) }
 
   before(:each) { subject.put_lagotto_database }
   after(:each) { subject.delete_lagotto_database }
@@ -20,17 +20,17 @@ describe SourceJob do
       Alert.count.should == 1
       alert = Alert.first
       alert.class_name.should eq("StandardError")
-      alert.source_id.should == source.id
+      alert.agent_id.should == agent.id
     end
 
-    it "should not create an alert if source is not in working state" do
+    it "should not create an alert if agent is not in working state" do
       exception = SourceInactiveError.new
       subject.error(job, exception)
 
       Alert.count.should == 0
     end
 
-    it "should not create an alert if not enough workers available for source" do
+    it "should not create an alert if not enough workers available for agent" do
       exception = NotEnoughWorkersError.new
       subject.error(job, exception)
 
@@ -45,7 +45,7 @@ describe SourceJob do
       job.last_error = error
       error = error.split("\n")
       # we are filtering the backtrace
-      trace = "/var/www/alm/releases/20140416153936/lib/source_job.rb:45:in `perform'\nscript/delayed_job:5:in `<main>'"
+      trace = "/var/www/alm/releases/20140416153936/lib/agent_job.rb:45:in `perform'\nscript/delayed_job:5:in `<main>'"
 
       subject.failure(job)
 
@@ -54,7 +54,7 @@ describe SourceJob do
       alert.class_name.should eq("DelayedJobError")
       alert.message.should eq("Failure in #{job.queue}: #{error.shift}")
       alert.trace.should eq(trace)
-      alert.source_id.should == source.id
+      alert.agent_id.should == agent.id
     end
   end
 
@@ -63,7 +63,7 @@ describe SourceJob do
     it "should clean up after the job" do
       subject.after(job)
 
-      source.should be_waiting
+      agent.should be_waiting
     end
   end
 

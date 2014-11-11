@@ -1,7 +1,7 @@
 class Alert < ActiveRecord::Base
   attr_accessor :exception, :request
 
-  belongs_to :source
+  belongs_to :agent
   belongs_to :article
 
   before_create :collect_env_info
@@ -76,6 +76,6 @@ class Alert < ActiveRecord::Base
       self.target_url   = target_url || request.original_url
     end
 
-    self.source_id      = source_id if source_id
+    self.agent_id       = agent_id if agent_id
   end
 end

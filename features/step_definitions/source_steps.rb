@@ -179,15 +179,6 @@ Then /^I should see that the source is "(.*?)"$/ do |status|
   page.should have_content status
 end
 
-Then /^I should not see the "(.*?)" link in the menu bar$/ do |link_text|
-  if link_text == "Home"
-    page.has_css?('a', :text => CONFIG[:useragent], :visible => true).should_not be_true
-  else
-    page.has_css?('div.collapse ul li a', :visible => true).should_not be_true
-    page.driver.render("tmp/capybara/#{link_text}_link.png") if @wip
-  end
-end
-
 Then /^I should see the image "(.+)"$/ do |image|
   page.has_css?("img[src='/assets/#{image}']").should be_true
 end

@@ -4,7 +4,8 @@ class AddAgentsTable < ActiveRecord::Migration
       t.string   "type",                                            :null => false
       t.string   "name",                                            :null => false
       t.string   "display_name",                                    :null => false
-      t.boolean  "queueable",    :default => true
+      t.string   "kind",         :default => "article"
+      t.string   "source",                                          :null => false
       t.integer  "state"
       t.string   "state_event"
       t.text     "config"
@@ -14,6 +15,7 @@ class AddAgentsTable < ActiveRecord::Migration
       t.datetime "updated_at",                                      :null => false
       t.datetime "cached_at",    :default => '1970-01-01 00:00:00', :null => false
     end
+
     remove_column :sources, :type
     remove_column :sources, :queueable
     remove_column :sources, :state_event
@@ -21,10 +23,14 @@ class AddAgentsTable < ActiveRecord::Migration
     remove_column :sources, :run_at
     rename_column :sources, :state, :active
     change_column :sources, :active, :boolean, default: false
+
+    rename_column :alerts, :source_id, :agent_id
+    rename_column :api_responses, :source_id, :agent_id
   end
 
   def down
-    #drop_table :agents
+    drop_table :agents
+
     add_column :sources, :type, :string, :null => false
     add_column :sources, :queueable, :boolean,    :default => true
     add_column :sources, :state_event, :string
@@ -32,5 +38,8 @@ class AddAgentsTable < ActiveRecord::Migration
     add_column :sources, :run_at, :datetime, :default => '1970-01-01 00:00:00', :null => false
     rename_column :sources, :active, :state
     change_column :sources, :state, :integer
+
+    rename_column :alerts, :agent_id, :source_id
+    rename_column :api_responses, :agent_id, :source_id
   end
 end

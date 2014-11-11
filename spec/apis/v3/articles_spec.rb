@@ -13,6 +13,9 @@ describe "/api/v3/articles" do
 
       it "JSON" do
         get uri, nil, 'HTTP_ACCEPT' => 'application/json'
+        Alert.count.should == 1
+        alert = Alert.first
+        alert.message.should eq("ActionController::UnpermittedParameters")
         last_response.status.should eql(200)
 
         response = JSON.parse(last_response.body)
@@ -102,8 +105,8 @@ describe "/api/v3/articles" do
         response_source = response["sources"][0]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eql(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        response_source["metrics"]["shares"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        response_source["metrics"]["shares"].should eq(article.traces.first.event_count)
         response_source["events"].should_not be_nil
       end
 
@@ -116,8 +119,8 @@ describe "/api/v3/articles" do
         response_source = response["sources"][0]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eql(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        response_source["metrics"]["shares"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        response_source["metrics"]["shares"].should eq(article.traces.first.event_count)
         response_source["events"].should_not be_nil
       end
 
@@ -130,7 +133,7 @@ describe "/api/v3/articles" do
         response_source = response["sources"]["source"]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eql(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].to_i.should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].to_i.should eq(article.traces.first.event_count)
       end
 
     end
@@ -147,8 +150,8 @@ describe "/api/v3/articles" do
         response_source = response["sources"][0]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eql(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        response_source["metrics"]["shares"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        response_source["metrics"]["shares"].should eq(article.traces.first.event_count)
         response_source["events"].should_not be_nil
       end
 
@@ -161,8 +164,8 @@ describe "/api/v3/articles" do
         response_source = response["sources"][0]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eql(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        response_source["metrics"]["shares"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        response_source["metrics"]["shares"].should eq(article.traces.first.event_count)
         response_source["events"].should_not be_nil
       end
 
@@ -175,7 +178,7 @@ describe "/api/v3/articles" do
         response_source = response["sources"]["source"]
         response["doi"].should eql(article.doi)
         response["publication_date"].should eql(article.published_on.to_time.utc.iso8601)
-        response_source["metrics"]["total"].to_i.should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].to_i.should eq(article.traces.first.event_count)
       end
     end
   end

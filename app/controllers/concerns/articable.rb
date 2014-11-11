@@ -7,7 +7,7 @@ module Articable
 
       # Load one article given query params
       id_hash = { :articles => Article.from_uri(params[:id]) }
-      @article = ArticleDecorator.includes(:retrieval_statuses).where(id_hash)
+      @article = ArticleDecorator.includes(:traces).where(id_hash)
         .decorate(context: { info: params[:info], source_id: source_id })
 
       # Return 404 HTTP status code and error message if article wasn't found
@@ -31,9 +31,9 @@ module Articable
       elsif params[:q]
         collection = Article.query(params[:q])
       elsif params[:source] && source = Source.find_by_name(params[:source])
-        collection = Article.includes(:retrieval_statuses)
-          .where("retrieval_statuses.source_id = ?", source.id)
-          .where("retrieval_statuses.event_count > 0")
+        collection = Article.includes(:traces)
+          .where("traces.source_id = ?", source.id)
+          .where("traces.event_count > 0")
       else
         collection = Article
       end
@@ -51,11 +51,11 @@ module Articable
       # sort by source event_count
       # we can't filter and sort by two different sources
       if params[:order] && source && params[:order] == params[:source]
-        collection = collection.order("retrieval_statuses.event_count DESC")
+        collection = collection.order("traces.event_count DESC")
       elsif params[:order] && !source && order = Source.find_by_name(params[:order])
-        collection = collection.includes(:retrieval_statuses)
-          .where("retrieval_statuses.source_id = ?", order.id)
-          .order("retrieval_statuses.event_count DESC")
+        collection = collection.includes(:traces)
+          .where("traces.source_id = ?", order.id)
+          .order("traces.event_count DESC")
       else
         collection = collection.order("published_on DESC")
       end

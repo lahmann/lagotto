@@ -24,7 +24,7 @@ describe "/api/v5/articles" do
         response_source = response[:sources][0]
         response[:doi].should eql(article.doi)
         response[:issued]["date-parts"][0].should eql([article.year, article.month, article.day])
-        response_source[:metrics][:total].to_i.should eql(article.retrieval_statuses.first.event_count)
+        response_source[:metrics][:total].to_i.should eql(article.traces.first.event_count)
         response_source[:events].should be_nil
       end
 
@@ -40,7 +40,7 @@ describe "/api/v5/articles" do
       #   response_source = response[:sources][0]
       #   response[:doi].should eql(article.doi)
       #   response[:issued]["date-parts"][0].should eql([article.year, article.month, article.day])
-      #   response_source[:metrics][:total].to_i.should eql(article.retrieval_statuses.first.event_count)
+      #   response_source[:metrics][:total].to_i.should eql(article.traces.first.event_count)
       #   response_source[:events].should be_nil
       # end
     end
@@ -91,7 +91,7 @@ describe "/api/v5/articles" do
 
         # wait a second so that the timestamp for cache_key is different
         sleep 1
-        article.retrieval_statuses.first.update_attributes!(event_count: event_count)
+        article.traces.first.update_attributes!(event_count: event_count)
         # TODO: make sure that touch works in production
         article.touch
 
@@ -143,8 +143,8 @@ describe "/api/v5/articles" do
         data["issued"]["date-parts"][0].should eql([article.year, article.month, article.day])
 
         response_source = data["sources"][0]
-        response_source["metrics"]["total"].should eq(article.retrieval_statuses.first.event_count)
-        response_source["metrics"]["readers"].should eq(article.retrieval_statuses.first.event_count)
+        response_source["metrics"]["total"].should eq(article.traces.first.event_count)
+        response_source["metrics"]["readers"].should eq(article.traces.first.event_count)
         response_source["events"].should_not be_nil
 
         summary_uri = "#{uri}&info=summary"
