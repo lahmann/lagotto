@@ -1,4 +1,4 @@
- require 'rails_helper'
+require 'rails_helper'
 
 describe Report, :type => :model do
   subject { Report }

@@ -9,7 +9,12 @@ describe History, :type => :model do
   let(:trace) { FactoryGirl.create(:trace) }
 
   context "error" do
-    let(:data) { { doi: trace.work.doi, source: trace.source.name, error: "the server responded with status 408 for http://www.citeulike.org/api/posts/for/doi/#{trace.work.doi_escaped}" } }
+    let(:data) do
+      { doi: trace.work.doi,
+        source: trace.source.name,
+        error: "the server responded with status 408 for http://www.citeulike.org/api/posts/for/doi/#{trace.work.doi_escaped}"
+      }
+    end
     let(:update_interval) { 30 }
     subject { History.new(data) }
 
@@ -57,7 +62,14 @@ describe History, :type => :model do
     before(:each) { subject.put_lagotto_database }
     after(:each) { subject.delete_lagotto_database }
 
-    let(:data) { { doi: trace.work.doi, source: trace.source.name, event_count: 25, events_by_day: nil, event_metrics: { html: 15, pdf: 5, total: 25 } } }
+    let(:data) do
+      { doi: trace.work.doi,
+        source: trace.source.name,
+        event_count: 25,
+        events_by_day: nil,
+        event_metrics: { html: 15, pdf: 5, total: 25 }
+      }
+    end
     let(:today) { Time.zone.now.to_date }
     let(:yesterday) { Time.zone.now.to_date - 1.day }
     subject { History.new(data) }
@@ -118,7 +130,14 @@ describe History, :type => :model do
     before(:each) { subject.put_lagotto_database }
     after(:each) { subject.delete_lagotto_database }
 
-    let(:data) { { doi: trace.work.doi, source: trace.source.name, event_count: 25, events_by_month: nil, event_metrics: { html: 15, pdf: 5, total: 25 } } }
+    let(:data) do
+      { doi: trace.work.doi,
+        source: trace.source.name,
+        event_count: 25,
+        events_by_month: nil,
+        event_metrics: { html: 15, pdf: 5, total: 25 }
+      }
+    end
     let(:today) { Time.zone.now.to_date }
     let(:last_month) { Time.zone.now.to_date - 1.month }
     subject { History.new(data) }
@@ -147,14 +166,12 @@ describe History, :type => :model do
 
       it "should add to events by month" do
         events_by_month = [{ 'year' => last_month.year, 'month' => last_month.month, 'total' => 3 }]
-        expect(subject.get_events_by_month(events_by_month)).to eq([events_by_month[0],
-                                                                { 'year' => today.year, 'month' => today.month, 'total' => data[:event_count] - 3 }])
+        expect(subject.get_events_by_month(events_by_month)).to eq([events_by_month[0], { 'year' => today.year, 'month' => today.month, 'total' => data[:event_count] - 3 }])
       end
 
       it "should update events by month" do
         events_by_month = [{ 'year' => last_month.year, 'month' => last_month.month, 'total' => 3 }, { 'year' => today.year, 'month' => today.month, 'total' => 10 }]
-        expect(subject.get_events_by_month(events_by_month)).to eq([events_by_month[0],
-                                                                { 'year' => today.year, 'month' => today.month, 'total' => data[:event_count] - 3 }])
+        expect(subject.get_events_by_month(events_by_month)).to eq([events_by_month[0], { 'year' => today.year, 'month' => today.month, 'total' => data[:event_count] - 3 }])
       end
 
       it "should update events by month without previous month" do

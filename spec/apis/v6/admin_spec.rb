@@ -1,8 +1,14 @@
 require "rails_helper"
 
 describe "/api/v6/works", :type => :api do
-  let(:headers) { { "HTTP_ACCEPT" => "application/json",
-                    "Authorization" => "Token token=#{user.api_key}" } }
+  let(:headers) do
+    { "HTTP_ACCEPT" => "application/json",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
+  let(:jsonp_headers) do
+    { "HTTP_ACCEPT" => "application/javascript",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
 
   context "create" do
     let(:uri) { "/api/v6/works" }
@@ -48,7 +54,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error" => "You are not authorized to access this page." })
+        expect(response).to eq("error" => "You are not authorized to access this page.")
       end
     end
 
@@ -61,7 +67,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error" => "You are not authorized to access this page." })
+        expect(response).to eq("error" => "You are not authorized to access this page.")
       end
     end
 
@@ -70,10 +76,10 @@ describe "/api/v6/works", :type => :api do
       let(:work) { FactoryGirl.create(:work) }
       let(:params) do
         { "work" => { "doi" => work.doi,
-                         "title" => "New Dromaeosaurids (Dinosauria: Theropoda) from the Lower Cretaceous of Utah, and the Evolution of the Dromaeosaurid Tail",
-                         "year" => 2012,
-                         "month" => 5,
-                         "day" => 15 } }
+                      "title" => "New Dromaeosaurids (Dinosauria: Theropoda) from the Lower Cretaceous of Utah, and the Evolution of the Dromaeosaurid Tail",
+                      "year" => 2012,
+                      "month" => 5,
+                      "day" => 15 } }
       end
 
       it "JSON" do
@@ -90,7 +96,7 @@ describe "/api/v6/works", :type => :api do
     context "with missing work param" do
       let(:user) { FactoryGirl.create(:admin_user) }
       let(:params) do
-        { "data" => { "doi" => "10.1371/journal.pone.0036790",
+        { "work" => { "doi" => "10.1371/journal.pone.0036790",
                       "title" => "New Dromaeosaurids (Dinosauria: Theropoda) from the Lower Cretaceous of Utah, and the Evolution of the Dromaeosaurid Tail",
                       "year" => 2012,
                       "month" => 5,
@@ -174,10 +180,10 @@ describe "/api/v6/works", :type => :api do
     let(:uri) { "/api/v6/works/info:doi/#{work.doi}" }
     let(:params) do
       { "work" => { "doi" => work.doi,
-                       "title" => "New Dromaeosaurids (Dinosauria: Theropoda) from the Lower Cretaceous of Utah, and the Evolution of the Dromaeosaurid Tail",
-                       "year" => 2012,
-                       "month" => 5,
-                       "day" => 15 } }
+                    "title" => "New Dromaeosaurids (Dinosauria: Theropoda) from the Lower Cretaceous of Utah, and the Evolution of the Dromaeosaurid Tail",
+                    "year" => 2012,
+                    "month" => 5,
+                    "day" => 15 } }
     end
 
     context "as admin user" do
@@ -201,7 +207,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error" => "You are not authorized to access this page." })
+        expect(response).to eq("error" => "You are not authorized to access this page.")
       end
     end
 
@@ -213,7 +219,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error" => "You are not authorized to access this page." })
+        expect(response).to eq("error" => "You are not authorized to access this page.")
       end
     end
 
@@ -226,7 +232,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error" => "You are not authorized to access this page." })
+        expect(response).to eq("error" => "You are not authorized to access this page.")
       end
     end
 
@@ -248,7 +254,7 @@ describe "/api/v6/works", :type => :api do
     context "with missing work param" do
       let(:user) { FactoryGirl.create(:admin_user) }
       let(:params) do
-        { "data" => { "doi" => "10.1371/journal.pone.0036790",
+        { "work" => { "doi" => "10.1371/journal.pone.0036790",
                       "title" => "New Dromaeosaurids (Dinosauria: Theropoda) from the Lower Cretaceous of Utah, and the Evolution of the Dromaeosaurid Tail",
                       "year" => 2012,
                       "month" => 5,
@@ -296,7 +302,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(422)
 
         response = JSON.parse(last_response.body)
-        expect(response["error"]).to eq({ "foo"=>["unpermitted parameter"], "baz"=>["unpermitted parameter"] })
+        expect(response["error"]).to eq("foo"=>["unpermitted parameter"], "baz"=>["unpermitted parameter"])
         expect(response["success"]).to be_nil
         expect(response["data"]).to be_empty
 
@@ -333,7 +339,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error" => "You are not authorized to access this page." })
+        expect(response).to eq("error" => "You are not authorized to access this page.")
       end
     end
 
@@ -345,7 +351,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error" => "You are not authorized to access this page." })
+        expect(response).to eq("error" => "You are not authorized to access this page.")
       end
     end
 
@@ -358,7 +364,7 @@ describe "/api/v6/works", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error" => "You are not authorized to access this page." })
+        expect(response).to eq("error" => "You are not authorized to access this page.")
       end
     end
 

@@ -1,8 +1,8 @@
 Lagotto::Application.routes.draw do
 
   # authentication
-  devise_for :users, path: 'api/v6/users', controllers: {
-             registrations: "api/v6/users/registrations" },
+  devise_for :users, path: 'api/v6/users',
+             controllers: { registrations: "api/v6/users/registrations" },
              :skip => :sessions
 
   # we only receive /api requests from nginx

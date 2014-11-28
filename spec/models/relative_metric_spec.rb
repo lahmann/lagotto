@@ -73,13 +73,13 @@ describe RelativeMetric, :type => :model do
         ]
       )
       expect(response[:event_metrics]).to eq(:pdf => nil,
-                                         :html => nil,
-                                         :shares => nil,
-                                         :groups => nil,
-                                         :comments => nil,
-                                         :likes => nil,
-                                         :citations => nil,
-                                         :total => 576895)
+                                             :html => nil,
+                                             :shares => nil,
+                                             :groups => nil,
+                                             :comments => nil,
+                                             :likes => nil,
+                                             :citations => nil,
+                                             :total => 576895)
     end
 
     it "should get empty relative metric average usage data" do
@@ -88,16 +88,16 @@ describe RelativeMetric, :type => :model do
       result = JSON.parse(body)
       response = subject.parse_data(result, work)
       expect(response[:events]).to eq(:start_date => "2009-01-01T00:00:00Z",
-                                  :end_date => "2009-12-31T00:00:00Z",
-                                  :subject_areas => [])
+                                      :end_date => "2009-12-31T00:00:00Z",
+                                      :subject_areas => [])
       expect(response[:event_metrics]).to eq(:pdf => nil,
-                                         :html => nil,
-                                         :shares => nil,
-                                         :groups => nil,
-                                         :comments => nil,
-                                         :likes => nil,
-                                         :citations => nil,
-                                         :total => 0)
+                                             :html => nil,
+                                             :shares => nil,
+                                             :groups => nil,
+                                             :comments => nil,
+                                             :likes => nil,
+                                             :citations => nil,
+                                             :total => 0)
     end
 
     it "should catch timeout errors with the relative metric API" do

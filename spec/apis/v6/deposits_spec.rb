@@ -3,8 +3,14 @@ require "rails_helper"
 describe "/api/v6/deposits", :type => :api do
   let(:user) { FactoryGirl.create(:admin_user) }
   let(:source) { FactoryGirl.create(:source) }
-  let(:headers) { { "HTTP_ACCEPT" => "application/json",
-                    "Authorization" => ActionController::HttpAuthentication::Token.encode_credentials(user.api_key) } }
+  let(:headers) do
+    { "HTTP_ACCEPT" => "application/json",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
+  let(:jsonp_headers) do
+    { "HTTP_ACCEPT" => "application/javascript",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
 
   context "create" do
     let(:uri) { "/api/v6/deposits" }
@@ -96,9 +102,11 @@ describe "/api/v6/deposits", :type => :api do
     end
 
     context "with unpermitted params" do
-      let(:params) { { "deposit" => { "data" => data,
-                                      "source_id" => source.name,
-                                      "foo" => "bar" } } }
+      let(:params) do
+        { "deposit" => { "data" => data,
+                         "source_id" => source.name,
+                         "foo" => "bar" } }
+      end
 
       it "JSON" do
         post uri, params, headers

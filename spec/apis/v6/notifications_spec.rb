@@ -2,8 +2,14 @@ require "rails_helper"
 
 describe "/api/v6/notifications", :type => :api do
   let(:user) { FactoryGirl.create(:admin_user) }
-  let(:headers) { { "HTTP_ACCEPT" => "application/json",
-                    "Authorization" => "Token token=#{user.api_key}" } }
+  let(:headers) do
+    { "HTTP_ACCEPT" => "application/json",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
+  let(:jsonp_headers) do
+    { "HTTP_ACCEPT" => "application/javascript",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
 
   context "index" do
     context "most recent articles" do
@@ -148,7 +154,7 @@ describe "/api/v6/notifications", :type => :api do
         expect(last_response.status).to eq(401)
 
         response = JSON.parse(last_response.body)
-        expect(response).to eq({ "error"=>"You are not authorized to access this page." })
+        expect(response).to eq("error"=>"You are not authorized to access this page.")
       end
     end
   end

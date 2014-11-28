@@ -2,10 +2,14 @@ require "rails_helper"
 
 describe "/api/v6/agents", :type => :api do
   let(:user) { FactoryGirl.create(:admin_user) }
-  let(:headers) { { "HTTP_ACCEPT" => "application/json",
-                    "Authorization" => "Token token=#{user.api_key}" } }
-  let(:jsonp_headers) { { "HTTP_ACCEPT" => "application/javascript",
-                          "Authorization" => "Token token=#{user.api_key}" } }
+  let(:headers) do
+    { "HTTP_ACCEPT" => "application/json",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
+  let(:jsonp_headers) do
+    { "HTTP_ACCEPT" => "application/javascript",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
 
   context "index" do
     let(:uri) { "/api/v6/agents" }

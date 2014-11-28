@@ -3,6 +3,15 @@ require "rails_helper"
 describe "/api/v6/works", :type => :api do
 
   context "private source" do
+    let(:headers) do
+      { "HTTP_ACCEPT" => "application/json",
+        "Authorization" => "Token token=#{user.api_key}" }
+    end
+    let(:jsonp_headers) do
+      { "HTTP_ACCEPT" => "application/javascript",
+        "Authorization" => "Token token=#{user.api_key}" }
+    end
+
     context "as admin user" do
       let(:user) { FactoryGirl.create(:admin_user) }
       let(:work) { FactoryGirl.create(:work_with_private_citations) }

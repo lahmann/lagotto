@@ -1,6 +1,14 @@
 require "rails_helper"
 
 describe "/api/v6/works", :type => :api do
+  let(:headers) do
+    { "HTTP_ACCEPT" => "application/json",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
+  let(:jsonp_headers) do
+    { "HTTP_ACCEPT" => "application/javascript",
+      "Authorization" => "Token token=#{user.api_key}" }
+  end
   let(:error) { { "error" => "Work not found."} }
 
   context "index" do

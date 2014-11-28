@@ -33,7 +33,6 @@ describe "/api/v5/articles", :type => :api do
 
     context "as staff user" do
       let(:user) { FactoryGirl.create(:user, :role => "staff") }
-      #let(:work) { FactoryGirl.create(:work_with_private_citations) }
       let(:uri) { "/api/v5/articles?ids=#{work.doi_escaped}&api_key=#{api_key}" }
 
       it "JSON" do
@@ -59,7 +58,6 @@ describe "/api/v5/articles", :type => :api do
 
     context "as regular user" do
       let(:user) { FactoryGirl.create(:user, :role => "user") }
-      #let(:work) { FactoryGirl.create(:work_with_private_citations) }
       let(:uri) { "/api/v5/articles?ids=#{work.doi_escaped}&api_key=#{api_key}" }
 
       it "JSON" do

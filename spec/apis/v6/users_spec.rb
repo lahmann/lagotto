@@ -1,10 +1,14 @@
 require "rails_helper"
 
 describe "/api/v6/users", :type => :api do
-  let(:headers) { { "HTTP_ACCEPT" => "application/json",
-                  "Authorization" => "Token token=#{api_user.api_key}" } }
-  let(:jsonp_headers) { { "HTTP_ACCEPT" => "application/javascript",
-                          "Authorization" => "Token token=#{api_user.api_key}" } }
+  let(:headers) do
+    { "HTTP_ACCEPT" => "application/json",
+      "Authorization" => "Token token=#{api_user.api_key}" }
+  end
+  let(:jsonp_headers) do
+    { "HTTP_ACCEPT" => "application/javascript",
+      "Authorization" => "Token token=#{api_user.api_key}" }
+  end
 
   context "index" do
     let(:uri) { "/api/v6/users" }
