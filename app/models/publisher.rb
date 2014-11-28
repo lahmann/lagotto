@@ -3,9 +3,9 @@ class Publisher < ActiveRecord::Base
   include Networkable
 
   has_many :users, primary_key: :crossref_id
-  has_many :articles, primary_key: :crossref_id
+  has_many :works, primary_key: :crossref_id
   has_many :publisher_options, primary_key: :crossref_id, :dependent => :destroy
-  has_many :sources, :through => :publisher_options
+  has_many :agents, :through => :publisher_options
 
   serialize :prefixes
   serialize :other_names
@@ -19,22 +19,30 @@ class Publisher < ActiveRecord::Base
     crossref_id
   end
 
-  def article_count
-    Rails.cache.read("publisher/#{crossref_id}/article_count/#{update_date}").to_i
+  def work_count
+    if ActionController::Base.perform_caching
+      Rails.cache.read("publisher/#{crossref_id}/work_count/#{update_date}").to_i
+    else
+      works.size
+    end
   end
 
-  def article_count=(timestamp)
-    Rails.cache.write("publisher/#{crossref_id}/article_count/#{timestamp}",
-                      articles.size)
+  def work_count=(timestamp)
+    Rails.cache.write("publisher/#{crossref_id}/work_count/#{timestamp}",
+                      works.size)
   end
 
-  def article_count_by_source(source_id)
-    Rails.cache.read("publisher/#{crossref_id}/#{source_id}/article_count/#{update_date}").to_i
+  def work_count_by_source(source_id)
+    if ActionController::Base.perform_caching
+      Rails.cache.read("publisher/#{crossref_id}/#{source_id}/work_count/#{update_date}").to_i
+    else
+      works.has_events.by_source(source_id).size
+    end
   end
 
-  def article_count_by_source=(source_id, timestamp)
-    Rails.cache.write("publisher/#{crossref_id}/#{source_id}/article_count/#{timestamp}",
-                      articles.is_cited_by_source(source_id).size)
+  def work_count_by_source=(source_id, timestamp)
+    Rails.cache.write("publisher/#{crossref_id}/#{source_id}/work_count/#{timestamp}",
+                      works.has_events.by_source(source_id).size)
   end
 
   def cache_key
@@ -46,8 +54,8 @@ class Publisher < ActiveRecord::Base
   end
 
   def update_cache
-    DelayedJob.delete_all(queue: "publisher-cache")
-    delay(priority: 1, queue: "publisher-cache").write_cache
+    DelayedJob.delete_all(queue: "publisher-#{crossref_id}-cache")
+    delay(priority: 1, queue: "publisher-#{crossref_id}-cache").write_cache
   end
 
   def write_cache
@@ -55,8 +63,8 @@ class Publisher < ActiveRecord::Base
     now = Time.zone.now
     timestamp = now.utc.iso8601
 
-    send("article_count=", timestamp)
-    Source.visible.each { |source| send("article_count_by_source=", source.id, timestamp) }
+    send("work_count=", timestamp)
+    Source.active.each { |source| send("work_count_by_source=", source.id, timestamp) }
 
     update_column(:cached_at, now)
   end

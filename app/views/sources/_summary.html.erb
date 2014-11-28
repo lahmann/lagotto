@@ -1,28 +1,25 @@
-<p>Sources used by this application.</p>
-
 <% unless Source.active.empty? %>
-  <table class="table" id="SummaryTable">
-    <thead>
-      <tr>
-        <th class="group">Group</th>
-        <th class="name">Source</th>
-        <th class="description">Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @groups.active.each do |group| %>
-        <% group.sources.active.each do |source| %>
+  <% @groups.active.each do |group| %>
+    <div class="panel panel-default">
+      <div class="panel-heading"><%= group.title %></div>
+      <table class="table" id="<%= group.title %>Table">
+        <thead>
           <tr>
-            <% if group.sources.active.first.name == source.name %>
-              <td <%= "rowspan=#{group.sources.active.count}" %>><h4><%= h(group.display_name) %></h4></td>
-            <% end %>
-            <td><%= link_to source.display_name, source_path(source) %></td>
-            <td><%= h(source.description) %></td>
+            <th class="name">Source</th>
+            <th class="description">Description</th>
           </tr>
-        <% end %>
-      <% end %>
-    </tbody>
-  </table>
+        </thead>
+        <tbody>
+          <% group.sources.active.each do |source| %>
+            <tr>
+              <td><%= link_to source.title, source_path(source) %></td>
+              <td><%= source.description %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
 <% else %>
   <div class="alert alert-info">No active sources found</div>
 <% end %>

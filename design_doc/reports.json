@@ -2,9 +2,6 @@
   "_id": "_design/reports",
   "language": "javascript",
   "views": {
-    "mendeley": {
-      "map": "function(doc) {\n  if (doc.doc_type === \"current\" && doc.source === \"mendeley\") {\n    emit(doc.doi, {readers: doc.event_metrics.shares, groups: doc.event_metrics.groups, total: doc.event_metrics.total});\n  }\n  }"
-    },
     "counter": {
       "map": "function(doc) {\n  if (doc.doc_type === \"current\" && doc.source === \"counter\") {\n    emit(doc.doi, {html: doc.event_metrics.html, pdf: doc.event_metrics.pdf, total: doc.event_metrics.total});\n  }\n  }"
     },

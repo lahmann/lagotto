@@ -1,0 +1,21 @@
+<div class="content">
+  <div id="show">
+    {{partial "sources/show"}}
+  </div>
+
+  <ul class="nav nav-pills">
+    <li class="active"><a href="#events" data-toggle="tab" title="Events">Events</a></li>
+    <li><a href="#work" data-toggle="tab">Most-Cited</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane active" id="events">
+      <div id="summary-show">
+        {{partial "sources/summary-show"}}
+      </div>
+    </div>
+    <div class="tab-pane" id="work">
+      {{partial "sources/work"}}
+    </div>
+  </div>
+</div>

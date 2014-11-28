@@ -2,10 +2,10 @@
 
 <% unless @sources.empty? -%>
 <p><% @sources.each do |source| -%>
-<%= source.display_name %><br/>
+<%= source.title %><br/>
 <% end -%></p>
 <% else -%>
 <p>No stale source found.</p>
 <% end -%>
 
-<p><%= link_to "Go to admin dashboard", alerts_url(host: CONFIG[:public_server], :class => "SourceNotUpdatedError") %></p>
+<p><%= link_to "Go to admin dashboard", "http://#{ENV['SERVERNAME']}/notifications?class=SourceNotUpdatedError" %></p>

@@ -5,7 +5,7 @@ class Scopus < Agent
     { :headers => { "X-ELS-APIKEY" => api_key, "X-ELS-INSTTOKEN" => insttoken } }
   end
 
-  def parse_data(result, article, options={})
+  def parse_data(result, work, options={})
     return result if result[:error]
 
     events = result.deep_fetch('search-results', 'entry', 0) { {} }
@@ -19,7 +19,9 @@ class Scopus < Agent
       events_url = nil
     end
 
-    { events: events,
+    { doi: work.doi,
+      source: source,
+      events: events,
       events_by_day: [],
       events_by_month: [],
       events_url: events_url,

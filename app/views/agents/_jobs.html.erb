@@ -1,36 +1,33 @@
-<p>Number of background jobs and stale articles.</p>
-
 <% unless Agent.visible.empty? %>
-  <table class="table" id="JobsTable">
-    <thead>
-      <tr>
-        <th class="group">Group</th>
-        <th class="name">Agent</th>
-        <th>Status</th>
-        <th class="number">Pending</th>
-        <th class="number">Working</th>
-        <th class="number">Queued&nbsp;Articles</th>
-        <th class="number">Stale&nbsp;Articles</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @groups.visible.each do |group| %>
-        <% group.agents.visible.each do |agent| %>
+  <% @groups.visible.each do |group| %>
+    <div class="panel panel-default">
+      <div class="panel-heading"><%= group.title %></div>
+      <table class="table" id="<%= group.title %>Table">
+        <thead>
           <tr>
-            <% if group.agents.visible.first.name == agent.name %>
-              <td <%= "rowspan=#{group.agents.visible.count}" %>><h4><%= h(group.display_name) %></h4></td>
-            <% end %>
-            <td><%= link_to agent.display_name, agent_path(agent) %></td>
-            <td><%= state_label(agent.human_state_name).html_safe %></td>
-            <td class="number" id="pending_count_<%= agent.name %>"><%= number_hiding_zero(agent.pending_count) %></td>
-            <td class="number" id="working_count_<%= agent.name %>"><%= number_hiding_zero(agent.working_count) %></td>
-            <td class="number" id="queued_count_<%= agent.name %>"><%= number_hiding_zero(agent.queued_count) %></td>
-            <td class="number" id="stale_count_<%= agent.name %>"><%= number_hiding_zero(agent.stale_count) %></td>
+            <th class="name">Agent</th>
+            <th>Status</th>
+            <th class="number">Pending</th>
+            <th class="number">Working</th>
+            <th class="number">Queued&nbsp;Articles</th>
+            <th class="number">Stale&nbsp;Articles</th>
           </tr>
-        <% end %>
-      <% end %>
-    </tbody>
-  </table>
+        </thead>
+        <tbody>
+          <% group.agents.visible.each do |agent| %>
+            <tr>
+              <td><%= link_to agent.title, agent_path(agent) %></td>
+              <td><%= state_label(agent.human_state_name).html_safe %></td>
+              <td class="number" id="pending_count_<%= agent.name %>"><%= number_hiding_zero(agent.pending_count) %></td>
+              <td class="number" id="working_count_<%= agent.name %>"><%= number_hiding_zero(agent.working_count) %></td>
+              <td class="number" id="queued_count_<%= agent.name %>"><%= number_hiding_zero(agent.queued_count) %></td>
+              <td class="number" id="stale_count_<%= agent.name %>"><%= number_hiding_zero(agent.stale_count) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
 <% else %>
-  <div class="alert alert-info">No agents found</div>
+  <div class="alert alert-info">No active agents found</div>
 <% end %>

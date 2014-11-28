@@ -1,0 +1,36 @@
+<div class="content">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="panel panel-source <%= @agent.human_state_name == 'working' ? 'panel-success' : 'panel-default' %>">
+        <div class="panel-heading">Jobs</div>
+        <div class="panel-body">
+          <p><%= @agent.pending_count %> pending, <%= @agent.working_count %> working</p>
+          <p>&nbsp;</br>&nbsp;</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="panel panel-agent <%= @agent.response_count > 0 ? 'panel-default' : 'panel-warning' %>">
+        <div class="panel-heading">Responses <small class="pull-right">last 24 hours</small></div>
+        <div class="panel-body">
+          <p><%= pluralize(number_with_delimiter(@agent.response_count), "response") %> with
+          <%= link_to_if(@agent.error_count > 0 && can?(:manage, @agent), pluralize(number_with_delimiter(@agent.error_count), "error"), alerts_path(:agent => @agent.name)) %></p>
+          <p>Average <%= number_with_delimiter(@agent.average_count) %> ms</br>
+          Maximum <%= number_with_delimiter(@agent.maximum_count) %> ms</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% if Work.first %>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="panel panel-agent panel-default">
+          <div class="panel-heading">Status</div>
+          <div class="panel-body" id="chart_status">
+            <div class="text-muted" id="chart_status-loading">Loading … <%= image_tag "spinner.gif" %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

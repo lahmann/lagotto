@@ -1,10 +1,10 @@
 # encoding: UTF-8
 
 class Twitter < Agent
-  def get_query_url(article)
-    return nil unless article.doi =~ /^10.1371/
+  def get_query_url(work)
+    return nil unless work.doi =~ /^10.1371/
 
-    url % { :doi => article.doi_escaped }
+    url % { :doi => work.doi_escaped }
   end
 
   def response_options
@@ -25,7 +25,7 @@ class Twitter < Agent
       end
 
       event_time = get_iso8601_from_time(data['created_at'])
-      url = "http://twitter.com/#{user}/status/#{data["id_str"]}"
+      url = "http://twitter.com/#{user}/status/#{data['id_str']}"
 
       { event: { id: data["id_str"],
                  text: data["text"],

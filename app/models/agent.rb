@@ -1,3 +1,6 @@
+require 'cgi'
+require "addressable/uri"
+
 class Agent < ActiveRecord::Base
   # include state machine
   include Statable
@@ -23,11 +26,11 @@ class Agent < ActiveRecord::Base
   # include hash helper
   include Hashie::Extensions::DeepFetch
 
-  has_many :retrieval_statuses, :dependent => :destroy
-  has_many :articles, :through => :retrieval_statuses
-  has_many :publishers, :through => :publisher_options
+  has_many :tasks, :dependent => :destroy
+  has_many :works, :through => :tasks
   has_many :publisher_options
-  has_many :alerts
+  has_many :publishers, :through => :publisher_options
+  has_many :notifications
   has_many :api_responses
   has_many :delayed_jobs, primary_key: "name", foreign_key: "queue", :dependent => :destroy
   belongs_to :group
@@ -35,7 +38,7 @@ class Agent < ActiveRecord::Base
   serialize :config, OpenStruct
 
   validates :name, :presence => true, :uniqueness => true
-  validates :display_name, :presence => true
+  validates :title, :presence => true
   validates :priority, :numericality => { :only_integer => true, :greater_than => 0 }
   validates :workers, :numericality => { :only_integer => true, :greater_than => 0 }
   validates :timeout, :numericality => { :only_integer => true, :greater_than => 0 }
@@ -50,18 +53,25 @@ class Agent < ActiveRecord::Base
   validates :staleness_all, :numericality => { :only_integer => true, :greater_than => 0 }
   validate :validate_cron_line_format, :allow_blank => true
 
-  scope :available, where("state = ?", 0).order("group_id, sources.display_name")
-  scope :installed, where("state > ?", 0).order("group_id, sources.display_name")
-  scope :retired, where("state = ?", 1).order("group_id, sources.display_name")
-  scope :visible, where("state > ?", 1).order("group_id, sources.display_name")
-  scope :inactive, where("state = ?", 2).order("group_id, sources.display_name")
-  scope :active, where("state > ?", 2).order("group_id, sources.display_name")
-  scope :for_events, where("state > ?", 2).where("name != ?", 'relativemetric').order("group_id, sources.display_name")
-  scope :queueable, where("state > ?", 2).where("queueable = ?", true).order("group_id, sources.display_name")
+  # filter agents by state
+  scope :by_state, ->(state) { where("state = ?", state) }
+  scope :by_states, ->(state) { where("state > ?", state) }
+  scope :order_by_name, -> { order("group_id, agents.title") }
 
-  # some sources cannot be redistributed
-  scope :public_sources, lambda { where("private = ?", false) }
-  scope :private_sources, lambda { where("private = ?", true) }
+  scope :available, -> { by_state(0).order_by_name }
+  scope :retired, -> { by_state(1).order_by_name }
+  scope :inactive, -> { by_state(2).order_by_name }
+  scope :disabled, -> { by_state(3).order_by_name }
+  scope :waiting, -> { by_state(5).order_by_name }
+  scope :working, -> { by_state(6).order_by_name }
+
+  scope :installed, -> { by_states(0).order_by_name }
+  scope :visible, -> { by_states(1).order_by_name }
+  scope :active, -> { by_states(2).order_by_name }
+
+  scope :for_events, -> { active.where("name != ?", 'relativemetric') }
+  scope :queueable, -> { active.where("queueable = ?", true) }
+
 
   def to_param  # overridden, use name instead of id
     name
@@ -69,40 +79,40 @@ class Agent < ActiveRecord::Base
 
   def remove_queues
     delayed_jobs.delete_all
-    retrieval_statuses.update_all(["queued_at = ?", nil])
+    tasks.update_all(["queued_at = ?", "1970-01-01"])
   end
 
-  def queue_all_articles(options = {})
+  def queue_all_works(options = {})
     return 0 unless active?
 
-    # find articles that need to be updated. Not queued currently, scheduled_at doesn't matter
-    rs = retrieval_statuses
+    # find works that need to be updated. Not queued currently, scheduled_at doesn't matter
+    t = tasks
 
-    # optionally limit to articles scheduled_at in the past
-    rs = rs.stale unless options[:all]
+    # optionally limit to works scheduled_at in the past
+    t = t.stale unless options[:all]
 
     # optionally limit by publication date
     if options[:start_date] && options[:end_date]
-      rs = rs.joins(:article).where("articles.published_on" => options[:start_date]..options[:end_date])
+      t = t.joins(:work).where("works.published_on" => options[:start_date]..options[:end_date])
     end
 
-    rs = rs.order("retrieval_statuses.id").pluck("retrieval_statuses.id")
-    count = queue_article_jobs(rs, priority: priority)
+    t = t.order("tasks.id").pluck(:id)
+    count = queue_work_jobs(t, priority: priority)
   end
 
-  def queue_article_jobs(rs, options = {})
+  def queue_work_jobs(t, options = {})
     return 0 unless active?
 
-    if rs.length == 0
+    if t.length == 0
       wait
       return 0
     end
 
-    rs.each_slice(job_batch_size) do |rs_ids|
-      Delayed::Job.enqueue SourceJob.new(rs_ids, id), queue: name, run_at: schedule_at, priority: priority
+    t.each_slice(job_batch_size) do |task_ids|
+      Delayed::Job.enqueue AgentJob.new(task_ids, id), queue: name, run_at: schedule_at, priority: priority
     end
 
-    rs.length
+    t.length
   end
 
   def schedule_at
@@ -112,13 +122,13 @@ class Agent < ActiveRecord::Base
     last_job + batch_interval
   end
 
-  # condition for not adding more jobs and disabling the source
+  # condition for not adding more jobs and disabling the agent
   def check_for_failures
-    failed_queries = Alert.where("source_id = ? AND level > 1 AND updated_at > ?", id, Time.zone.now - max_failed_query_time_interval).count
+    failed_queries = Notification.where("agent_id = ? AND level > 1 AND updated_at > ?", id, Time.zone.now - max_failed_query_time_interval).count
     failed_queries > max_failed_queries
   end
 
-  # limit the number of workers per source
+  # limit the number of workers per agent
   def check_for_available_workers
     workers >= working_count
   end
@@ -127,8 +137,8 @@ class Agent < ActiveRecord::Base
     working_count > 1
   end
 
-  def get_data(article, options={})
-    query_url = get_query_url(article)
+  def get_data(work, options={})
+    query_url = get_query_url(work)
     if query_url.nil?
       result = {}
     else
@@ -142,7 +152,7 @@ class Agent < ActiveRecord::Base
     result.extend Hashie::Extensions::DeepFetch
   end
 
-  def parse_data(result, article, options = {})
+  def parse_data(result, work, options = {})
     # turn result into a hash for easier parsing later
     result = { 'data' => result } unless result.is_a?(Hash)
 
@@ -157,16 +167,18 @@ class Agent < ActiveRecord::Base
 
     events = get_events(result)
 
-    { events: events,
-      events_by_day: get_events_by_day(events, article),
+    { doi: work.doi,
+      source: source,
+      events: events,
+      events_by_day: get_events_by_day(events, work),
       events_by_month: get_events_by_month(events),
-      events_url: get_events_url(article),
+      events_url: get_events_url(work),
       event_count: events.length,
       event_metrics: get_event_metrics(metrics => events.length) }
   end
 
-  def get_events_by_day(events, article)
-    events = events.reject { |event| event[:event_time].nil? || Date.iso8601(event[:event_time]) - article.published_on > 30 }
+  def get_events_by_day(events, work)
+    events = events.reject { |event| event[:event_time].nil? || Date.iso8601(event[:event_time]) - work.published_on > 30 }
 
     events.group_by { |event| event[:event_time][0..9] }.sort.map do |k, v|
       { year: k[0..3].to_i,
@@ -194,15 +206,15 @@ class Agent < ActiveRecord::Base
     {}
   end
 
-  def get_query_url(article)
-    if url.present? && article.doi.present?
-      url % { :doi => article.doi_escaped }
+  def get_query_url(work)
+    if url.present? && work.doi.present?
+      url % { :doi => work.doi_escaped }
     end
   end
 
-  def get_events_url(article)
-    if events_url.present? && article.doi.present?
-      events_url % { :doi => article.doi_escaped }
+  def get_events_url(work)
+    if events_url.present? && work.doi.present?
+      events_url % { :doi => work.doi_escaped }
     end
   end
 
@@ -227,12 +239,12 @@ class Agent < ActiveRecord::Base
   def publisher_configs
     return [] unless by_publisher?
 
-    publisher_options.pluck_all(:publisher_id, :config)
+    publisher_options.pluck(:publisher_id, :config)
   end
 
   def publisher_config(publisher_id)
-    conf = publisher_configs.find { |conf| conf["publisher_id"] == publisher_id }
-    conf.nil? ? OpenStruct.new : conf["config"]
+    conf = publisher_configs.find { |conf| conf[0] == publisher_id }
+    conf.nil? ? OpenStruct.new : conf[1]
   end
 
   # all other fields
@@ -282,41 +294,35 @@ class Agent < ActiveRecord::Base
     timestamp = now.utc.iso8601
 
     # loop through cached attributes we want to update
-    [:event_count,
-     :article_count,
-     :queued_count,
+    [:queued_count,
      :stale_count,
      :response_count,
      :average_count,
-     :maximum_count,
-     :with_events_by_day_count,
-     :without_events_by_day_count,
-     :with_events_by_month_count,
-     :without_events_by_month_count].each { |cached_attr| send("#{cached_attr}=", timestamp) }
+     :maximum_count].each { |cached_attr| send("#{cached_attr}=", timestamp) }
 
     update_column(:cached_at, now)
   end
 
-  # Remove all retrieval records for this source that have never been updated,
+  # Remove all tasks for this agent that have never been updated,
   # return true if all records are removed
-  def remove_all_retrievals
-    rs = retrieval_statuses.where(:retrieved_at == '1970-01-01').delete_all
-    retrieval_statuses.count == 0
+  def remove_all_tasks
+    t = tasks.where(:retrieved_at == '1970-01-01').delete_all
+    tasks.count == 0
   end
 
-  # Create an empty retrieval record for every article for the new source
-  def create_retrievals
-    article_ids = RetrievalStatus.where(:source_id => id).pluck(:article_id)
+  # Create an empty task for every work for the new agent
+  def create_tasks
+    work_ids = Task.where(:agent_id => id).pluck(:work_id)
 
-    (0...article_ids.length).step(1000) do |offset|
-      ids = article_ids[offset...(offset + 1000)]
-      delay(priority: 2, queue: "retrieval-status").insert_retrievals(ids)
+    (0...work_ids.length).step(1000) do |offset|
+      ids = work_ids[offset...(offset + 1000)]
+      delay(priority: 2, queue: "task").insert_tasks(ids)
     end
   end
 
-  def insert_retrievals(ids)
-    sql = "insert into retrieval_statuses (article_id, source_id, created_at, updated_at, scheduled_at) select id, #{id}, now(), now(), now() from articles"
-    sql += " where articles.id not in (#{article_ids.join(",")})" if ids.any?
+  def insert_tasks(ids)
+    sql = "insert into tasks (work_id, agent_id, created_at, updated_at, scheduled_at) select id, #{id}, now(), now(), now() from works"
+    sql += " where works.id not in (#{work_ids.join(",")})" if ids.any?
 
     ActiveRecord::Base.connection.execute sql
   end

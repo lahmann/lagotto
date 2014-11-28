@@ -7,11 +7,11 @@ class RetrievalHistory < ActiveRecord::Base
   # include CouchDB helpers
   include Couchable
 
-  belongs_to :retrieval_status
-  belongs_to :article
+  belongs_to :trace
+  belongs_to :work
   belongs_to :source
 
-  default_scope order("retrieved_at DESC")
+  default_scope { order("retrieved_at DESC") }
 
   def self.delete_many_documents(options = {})
     number = 0

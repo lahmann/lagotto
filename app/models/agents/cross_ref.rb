@@ -1,19 +1,17 @@
-# encoding: UTF-8
-
 class CrossRef < Agent
-  def get_query_url(article)
-    return nil if article.doi.nil? || Time.zone.now - article.published_on.to_time < 1.day
+  def get_query_url(work)
+    return nil if work.doi.nil? || Time.zone.now - work.published_on.to_time < 1.day
 
-    if article.publisher
+    if work.publisher_id.present?
       # check that we have publisher-specific configuration
-      pc = publisher_config(article.publisher_id)
+      pc = publisher_config(work.publisher_id)
       return nil if pc.username.nil? || pc.password.nil?
 
-      url % { :username => pc.username, :password => pc.password, :doi => article.doi_escaped }
+      url % { :username => pc.username, :password => pc.password, :doi => work.doi_escaped }
     else
       return nil if openurl_username.nil?
 
-      openurl % { :openurl_username => openurl_username, :doi => article.doi_escaped }
+      openurl % { :openurl_username => openurl_username, :doi => work.doi_escaped }
     end
   end
 
@@ -21,18 +19,20 @@ class CrossRef < Agent
     { content_type: 'xml' }
   end
 
-  def parse_data(result, article, options={})
+  def parse_data(result, work, options={})
     return result if result[:error]
 
     events = get_events(result)
 
-    if article.publisher
+    if work.publisher
       event_count = events.length
     else
       event_count = result.deep_fetch('crossref_result', 'query_result', 'body', 'query', 'fl_count') { 0 }
     end
 
-    { events: events,
+    { doi: work.doi,
+      source: source,
+      events: events,
       events_by_day: [],
       events_by_month: [],
       events_url: nil,
@@ -53,7 +53,7 @@ class CrossRef < Agent
       if item.empty?
         nil
       else
-        url = Article.to_url(item['doi'])
+        url = Work.to_url(item['doi'])
 
         { event: item,
           event_url: url,

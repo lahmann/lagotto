@@ -1,7 +1,5 @@
-# encoding: UTF-8
-
 class F1000 < Agent
-  def parse_data(result, article, options={})
+  def parse_data(result, work, options={})
     # properly handle not found errors
     result = { 'data' => [] } if result[:status] == 404
 
@@ -18,7 +16,9 @@ class F1000 < Agent
       events_url = event['url']
     end
 
-    { events: events,
+    { doi: work.doi,
+      source: source,
+      events: events,
       events_by_day: [],
       events_by_month: get_events_by_month(events),
       events_url: events_url,
@@ -73,7 +73,7 @@ class F1000 < Agent
                          'classifications' => classifications,
                          'updated_at' => Time.now.utc.iso8601 }
 
-      # try to get the existing information about the given article
+      # try to get the existing information about the given work
       data = get_result(db_url + CGI.escape(doi))
 
       if data['recommendations'].nil?

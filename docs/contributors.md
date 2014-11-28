@@ -1,9 +1,9 @@
 ---
-layout: page
+layout: card
 title: "Contributors"
 ---
 
-The following people contributed to the development effort of Article-Level Metrics:
+The following people contributed to the development of the Lagotto software:
 
 * [Bryan Stearns](http://www.linkedin.com/in/bryanstearns) - Original developer of the Article-Level Metrics application
 * [Russell Uman](http://www.linkedin.com/in/firebus)

@@ -1,0 +1,31 @@
+<div class="content">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="panel panel-source <%= @source.work_count > 0 ? 'panel-default' : 'panel-warning' %>">
+        <div class="panel-heading">Events <small class="pull-right">total</small></div>
+        <div class="panel-body">
+          <p><%= pluralize(number_with_delimiter(@source.work_count), "work") %> or <%= number_to_percentage(@source.relative_work_count, precision: 0) %> with events</p>
+          <p><%= pluralize(number_with_delimiter(@source.event_count), "events") %> for these works</br>&nbsp;</p>
+        </div>
+      </div>
+    </div>
+    <% if Work.first %>
+      <div class="col-md-4">
+        <div class="panel panel-source panel-default">
+          <div class="panel-heading">Events <small class="pull-right">last 24 hours</small></div>
+          <div class="panel-body" id="chart_day">
+            <div class="text-muted" id="chart_day-loading">Loading … <%= image_tag "spinner.gif" %></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-source panel-default">
+          <div class="panel-heading">Events <small class="pull-right">last 31 days</small></div>
+          <div class="panel-body" id="chart_month">
+            <div class="text-muted" id="chart_month-loading">Loading … <%= image_tag "spinner.gif" %></div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

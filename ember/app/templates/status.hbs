@@ -1,0 +1,152 @@
+<div class="content">
+  {{#each status in controller}}
+    <div class="page-header">
+      <h1>Status <small id="update_date">{{format-time status.updateDate}}</small></h1>
+    </div>
+
+    <div class="content">
+      <div class="row">
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.worksCount:panel-default:panel-warning"}}>
+            <div class="panel-heading">Works</div>
+            <div class="panel-body text-center">
+              <h2 id="works_count">{{#link-to 'works'}}{{format-number status.worksCount keepZero=true}}{{/link-to}}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.worksLast30Count:panel-default:panel-warning"}}>
+            <div class="panel-heading">Works <small class="pull-right">last 30 days</small></div>
+            <div class="panel-body text-center">
+              <h2 id="works_last30_count">{{#link-to 'works'}}{{format-number status.worksLast30Count keepZero=true}}{{/link-to}}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.eventsCount:panel-default:panel-warning"}}>
+            <div class="panel-heading">Events</div>
+            <div class="panel-body text-center">
+              <h2 id="events_count">{{format-number status.eventsCount keepZero=true}}</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.responsesCount:panel-default:panel-warning"}}>
+            <div class="panel-heading">API responses <small class="pull-right">last 24 hours</small></div>
+            <div class="panel-body text-center">
+              <h2 id="responses_count">{{#link-to 'agents'}}{{format-number status.responsesCount keepZero=true}}{{/link-to}}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.requestsCount:panel-default:panel-warning"}}>
+            <div class="panel-heading">API requests <small class="pull-right">last 24 hours</small></div>
+            <div class="panel-body text-center">
+              <h2 id="requests_count">{{#link-to 'apiRequests'}}{{format-number status.requestsCount keepZero=true}}{{/link-to}}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.outdatedVersion:panel-warning:panel-default"}}>
+            <div class="panel-heading">Lagotto version</div>
+            <div class="panel-body text-center">
+              <h2 id="version">{{status.version}}</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.alertsCount:panel-default:panel-success"}}>
+            <div class="panel-heading">Unresolved alerts</div>
+            <div class="panel-body text-center">
+              <h2 id="alerts_count">{{#link-to 'alerts'}}{{format-number status.alertsCount keepZero=true}}{{/link-to}}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">Users</div>
+            <div class="panel-body text-center">
+              <h2 id="users_count">{{#link-to 'users'}}{{format-number status.usersCount keepZero=true}}{{/link-to}}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.couchdbSize:panel-default:panel-warning"}}>
+            <div class="panel-heading">CouchDB database size</div>
+            <div class="panel-body text-center">
+              <h2 id="couchdb_size">{{format-bytes status.couchdbSize}}</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <div {{bind-attr class=":panel status.workers:panel-default:panel-warning"}}>
+            <div class="panel-heading">Workers</div>
+            {{#if status.workers}}
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Identifier</th>
+                    <th>PID</th>
+                    <th>Memory</th>
+                    <th>Start Worker</th>
+                    <th>State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {{#each worker in status.workers}}
+                  <tr>
+                    <td>{{worker.id}}</td>
+                    <td>{{worker.pid}}</td>
+                    <td>{{worker.memory}}</td>
+                    <td>{{worker.createDate}}</td>
+                    <td>{{worker.state}}</td>
+                  </tr>
+                {{/each}}
+                </tbody>
+              </table>
+            {{else}}
+              <div class="panel-body">
+                No <strong>delayed_job</strong> workers found
+              </div>
+            {{/if}}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div {{bind-attr class=":panel status.delayedJobsActiveCount:panel-default:panel-warning"}}>
+            <div class="panel-heading">Pending and working jobs</div>
+            <div class="panel-body text-center">
+              <h2 id="delayed_jobs_active_count">{{format-number status.delayedJobsActiveCount keepZero=true}}</h2>
+            </div>
+          </div>
+          <div {{bind-attr class=":panel status.agents.disabled:panel-warning:panel-default"}}>
+            <div class="panel-heading">Agents</div>
+            <div class="panel-body text-center">
+              <p>
+                {{#if status.agents.working}}
+                  <span class="label label-success">{{status.agents.working}} working</span>
+                {{/if}}
+                {{#if status.agents.waiting}}
+                  <span class="label label-default">{{status.agents.waiting}} waiting</span>
+                {{/if}}
+                {{#if status.agents.disabled}}
+                  <span class="label label-warning">{{status.agents.disabled}} disabled</span>
+                {{/if}}
+                {{#if status.agents.inactive}}
+                  <span class="label label-info">{{status.agents.inactive}} inactive</span>
+                {{/if}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>

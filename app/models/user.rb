@@ -3,30 +3,27 @@ class User < ActiveRecord::Base
   include Networkable
 
   belongs_to :publisher, primary_key: :crossref_id
+  has_many :deposits, :dependent => :destroy
   has_and_belongs_to_many :reports
 
   before_save :ensure_authentication_token
   after_create :set_first_user
 
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable,
-         :omniauthable, :omniauth_providers => [:persona, :cas]
-
-  # Setup accessible (or protected) attributes for your model
-  attr_accessible :username, :email, :password, :password_confirmation, :remember_me, :provider, :uid, :name, :role, :authentication_token, :publisher_id
+         :recoverable, :rememberable, :trackable, :validatable
 
   validates :username, :presence => true, :uniqueness => true
   validates :name, :presence => true
   validates :email, :uniqueness => true, :allow_blank => true
 
-  scope :query, lambda { |query| where("name like ? OR username like ? OR authentication_token like ?", "%#{query}%", "%#{query}%", "%#{query}%") }
-  scope :ordered, order("sign_in_count DESC, updated_at DESC")
+  scope :query, ->(query) { where("name like ? OR username like ? OR authentication_token like ?", "%#{query}%", "%#{query}%", "%#{query}%") }
+  scope :ordered, -> { order("current_sign_in_at DESC") }
 
   def self.find_for_cas_oauth(auth, signed_in_resource=nil)
     user = User.where(:provider => auth.provider, :uid => auth.uid).first
     unless user
       # We obtain the email address from a second call to the CAS server
-      url = "#{CONFIG[:cas_url]}/cas/email?guid=#{auth.uid}"
+      url = "#{ENV['CAS_URL']}/cas/email?guid=#{auth.uid}"
       result = User.new.get_result(url, content_type: 'html')
       email = result.blank? ? "" : result
       name = email.present? ? email : auth.uid
@@ -61,8 +58,6 @@ class User < ActiveRecord::Base
   # This is in addition to a real persisted field like 'username'
   attr_accessor :login
 
-  attr_accessible :login
-
   def self.find_for_database_authentication(warden_conditions)
     conditions = warden_conditions.dup
     login = conditions.delete(:login)
@@ -79,13 +74,8 @@ class User < ActiveRecord::Base
   end
 
   # Helper method to check for admin or staff user
-  def is_admin_or_staff?
+  def is_staff?
     ["admin", "staff"].include?(role)
-  end
-
-  # Use different cache key for admin or staff user
-  def cache_key
-    is_admin_or_staff? ? "1" : "2"
   end
 
   def api_key
@@ -100,13 +90,21 @@ class User < ActiveRecord::Base
     end
   end
 
+  def create_date
+    created_at.utc.iso8601
+  end
+
+  def update_date
+    updated_at.utc.iso8601
+  end
+
   protected
 
   def set_first_user
     # The first user we create has an admin role and uses the configuration
     # API key, unless it is in the test environment
     if User.count == 1 && !Rails.env.test?
-      update_attributes(role: "admin", authentication_token: CONFIG[:api_key])
+      update_attributes(role: "admin", authentication_token: ENV['API_KEY'])
     end
   end
 

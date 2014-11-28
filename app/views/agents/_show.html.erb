@@ -1,49 +1,13 @@
-<table class="table table-striped" id="SummaryTable">
-  <thead>
-    <tr>
-      <th/>
-      <th class="number">Articles&nbsp;with&nbsp;Events</th>
-      <th class="number">All Events</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Events</th>
-      <td class="number" id="article_count"><%= number_hiding_zero(@source.article_count) %></td>
-      <td class="number" id="event_count"><%= number_hiding_zero(@source.event_count) %></td>
-    </tr>
-
-    <% if can?(:read, Alert) %>
-      <tr>
-        <th/>
-        <th class="number">Pending</th>
-        <th class="number">Working</th>
-      </tr>
-      <tr>
-        <th>Jobs</th>
-        <td class="number" id="pending_count"><%= number_hiding_zero(@source.pending_count) %></td>
-        <td class="number" id="working_count"><%= number_hiding_zero(@source.working_count) %></td>
-      </tr>
-      <tr>
-        <th/>
-        <th class="number">Responses</th>
-        <th class="number">Errors</th>
-      </tr>
-      <tr>
-        <th>Responses in the last 24 Hours</th>
-        <td class="number" id="response_count"><%= number_hiding_zero(@source.response_count) %></td>
-        <td class="number" id="error_count"><%= link_to_if(@source.error_count > 0, number_hiding_zero(@source.error_count), alerts_path(:source => @source.name)) %></td>
-      </tr>
-      <tr>
-        <th/>
-        <th class="number">Average</th>
-        <th class="number">Maximum</th>
-      </tr>
-      <tr>
-        <th>Response duration in the last 24 Hours (ms)</th>
-        <td class="number" id="average_count"><%= number_hiding_zero(@source.average_count) %></td>
-        <td class="number" id="maximum_count"><%= number_hiding_zero(@source.maximum_count) %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<div class="panel panel-default">
+  <div class="panel-heading panel-title" id="api_key" data-name="<%= @agent.name %>" data-api_key="<%= ENV['API_KEY'] %>" data-uid_type="<%= ENV['UID'] %>" data-page="" data-per_page="15" data-q="" data-publisher="" data-agent="<%= @agent.name %>" data-class_name="" data-order="<%= @agent.name %>">
+    <%= @agent.title %> <small class="pull-right" id="update_date"><%= date_from_iso8601(@agent.update_date) + ' UTC' %> <%= state_label(@agent.human_state_name).html_safe %></small>
+  </div>
+  <div class="panel-body">
+    <dl class="dl-horizontal">
+      <% unless @agent.group.blank? %>
+        <dt>Group</dt>
+        <dd><%= h(@agent.group.title) %></dd>
+      <% end %>
+    </dl>
+  </div>
+</div>

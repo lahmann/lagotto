@@ -1,10 +1,7 @@
-# encoding: UTF-8
-
 module Measurable
   extend ActiveSupport::Concern
 
   included do
-
     # create a hash with the different metrics categories
     # total is sum of all categories if no total value is provided
     # make sure all values are either integers or nil

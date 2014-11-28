@@ -1,10 +1,7 @@
-# encoding: UTF-8
-
 module Resolvable
   extend ActiveSupport::Concern
 
   included do
-
     def get_canonical_url(url, options = { timeout: 120 })
       conn = faraday_conn('html')
 
@@ -58,12 +55,12 @@ module Resolvable
       if body_url.present? && ![url, path].include?(body_url)
         options[:doi_mismatch] = true
         response.env[:message] = "Canonical URL mismatch: #{body_url} for #{url}"
-        fail Faraday::Error::ResourceNotFound, response.env
+        fail Faraday::ResourceNotFound, response.env
       end
 
       # URL must be a string that contains at least one number
       # we don't want to store publisher landing or error pages
-      fail Faraday::Error::ResourceNotFound, response.env unless url =~ /\d/
+      fail Faraday::ResourceNotFound, response.env unless url =~ /\d/
 
       url
     rescue *NETWORKABLE_EXCEPTIONS => e
@@ -73,7 +70,7 @@ module Resolvable
     def get_persistent_identifiers(uid, options = { timeout: 120 })
       conn = faraday_conn('json')
       params = { 'ids' => uid,
-                 'idtype' => CONFIG[:uid],
+                 'idtype' => ENV['UID'],
                  'format' => 'json' }
       url = "http://www.pubmedcentral.nih.gov/utils/idconv/v1.0/?" + params.to_query
 

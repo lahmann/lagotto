@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 class Nature < Agent
   def get_events(result)
     Array(result['data']).map do |item|

@@ -19,25 +19,82 @@ class Report < ActiveRecord::Base
     end
   end
 
-  # Generate CSV with event counts for all articles and installed sources
+  # Array of hashes in format [{ month: 12, year: 2013 },{ month: 1, year: 2014 }]
+  # Provide starting month and year as input, otherwise defaults to this month
+  # PMC is only providing stats until the previous month
+  def self.date_range(options = {})
+    end_date = Date.today
+    end_date -= 1.month if options[:source] == 'pmc'
+
+    return [{ month: end_date.month, year: end_date.year }] unless options[:month] && options[:year]
+
+    start_date = Date.new(options[:year].to_i, options[:month].to_i, 1)
+    start_date = end_date if start_date > end_date
+    (start_date..end_date).map { |date| { month: date.month, year: date.year } }.uniq
+  rescue ArgumentError
+    [{ month: end_date.month, year: end_date.year }]
+  end
+
+  # Generate CSV with event counts for all works and active sources
   def self.to_csv(options = {})
     if options[:include_private_sources]
-      sources = Source.installed
+      sources = Source.active
     else
-      sources = Source.installed.where(:private => false)
+      sources = Source.active.where(:private => false)
     end
 
-    sql = "SELECT a.#{CONFIG[:uid]}, a.published_on, a.title"
+    sql = "SELECT a.#{ENV['UID']}, a.published_on, a.title"
     sources.each do |source|
       sql += ", MAX(CASE WHEN rs.source_id = #{source.id} THEN rs.event_count END) AS #{source.name}"
     end
-    sql += " FROM articles a LEFT JOIN retrieval_statuses rs ON a.id = rs.article_id GROUP BY a.id"
+    sql += " FROM works a LEFT JOIN traces rs ON a.id = rs.work_id GROUP BY a.id"
     sanitized_sql = sanitize_sql_for_conditions(sql)
     results = ActiveRecord::Base.connection.exec_query(sanitized_sql)
 
     CSV.generate do |csv|
-      csv << [CONFIG[:uid], "publication_date", "title"] + sources.map(&:name)
+      csv << [ENV['UID'], "publication_date", "title"] + sources.map(&:name)
       results.each { |row| csv << row.values }
+    end
+  end
+
+  # Format usage stats stored in CouchDB for all works as csv
+  # options[:source] can be "counter" or "pmc"
+  # Show historical data if options[:format] is used
+  # options[:format] can be "html", "pdf" or "combined"
+  # options[:month] and options[:year] are the starting month and year, default to last month
+  def self.usage_csv(options = {})
+    source = options[:source]
+    return nil unless ["counter", "pmc"].include?(source)
+
+    if ["html", "pdf", "xml", "combined"].include? options[:format]
+      view = "#{source}_#{options[:format]}_views"
+    else
+      view = source
+    end
+
+    service_url = "#{ENV['COUCHDB_URL']}/_design/reports/_view/#{view}"
+
+    result = get_result(service_url, options.merge(timeout: 1800))
+    if result.blank? || result["rows"].blank?
+      Notification.create(exception: "", class_name: "Faraday::ResourceNotFound",
+                          message: "CouchDB report for #{source} could not be retrieved.",
+                          status: 404,
+                          level: Notification::FATAL)
+      return nil
+    end
+
+    if view == source
+      CSV.generate do |csv|
+        csv << [ENV['UID'], "html", "pdf", "total"]
+        result["rows"].each { |row| csv << [row["key"], row["value"]["html"], row["value"]["pdf"], row["value"]["total"]] }
+      end
+    else
+      dates = date_range(options).map { |date| "#{date[:year]}-#{date[:month]}" }
+
+      CSV.generate do |csv|
+        csv << [ENV['UID']] + dates
+        result["rows"].each { |row| csv << [row["key"]] + dates.map { |date| row["value"][date] || 0 } }
+      end
     end
   end
 
@@ -75,9 +132,9 @@ class Report < ActiveRecord::Base
     end
     return nil if alm_stats.blank?
 
-    stats = [{ name: "mendeley_stats", headers: [CONFIG[:uid], "mendeley_readers", "mendeley_groups", "mendeley"] },
-             { name: "pmc_stats", headers: [CONFIG[:uid], "pmc_html", "pmc_pdf", "pmc"] },
-             { name: "counter_stats", headers: [CONFIG[:uid], "counter_html", "counter_pdf", "counter"] }]
+    stats = [{ name: "mendeley_stats", headers: [ENV['UID'], "mendeley_readers", "mendeley_groups", "mendeley"] },
+             { name: "pmc_stats", headers: [ENV['UID'], "pmc_html", "pmc_pdf", "pmc"] },
+             { name: "counter_stats", headers: [ENV['UID'], "counter_html", "counter_pdf", "counter"] }]
     stats.each do |stat|
       stat[:csv] = read_stats(stat, options).to_a
     end
@@ -90,7 +147,7 @@ class Report < ActiveRecord::Base
       alm_stats.each do |row|
         stats.each do |stat|
           # find row based on uid, and discard the first and last item (uid and total). Otherwise pad with zeros
-          match = stat[:csv].assoc(row.field(CONFIG[:uid]))
+          match = stat[:csv].assoc(row.field(ENV['UID']))
           match = match.present? ? match[1..-2] : [0, 0]
           row.push(*match)
         end
@@ -146,8 +203,8 @@ class Report < ActiveRecord::Base
     ReportMailer.delay(queue: 'mailer', priority: 6).send_status_report(self)
   end
 
-  def send_article_statistics_report
-    ReportMailer.delay(queue: 'mailer', priority: 6).send_article_statistics_report(self)
+  def send_work_statistics_report
+    ReportMailer.delay(queue: 'mailer', priority: 6).send_work_statistics_report(self)
   end
 
   def send_fatal_error_report(message)

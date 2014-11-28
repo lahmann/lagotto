@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe "workers:start" do
   include_context "rake"
@@ -7,12 +7,14 @@ describe "workers:start" do
     Worker.stop
   end
 
-  let(:output) { "All #{CONFIG[:workers]} workers started.\n" }
+  let(:output) { "All #{ENV['WORKERS']} workers started.\n" }
 
-  its(:prerequisites) { should include("environment") }
+  it "prerequisites should include environment" do
+    expect(subject.prerequisites).to include("environment")
+  end
 
   it "should run the rake task" do
-    capture_stdout { subject.invoke }.should eq(output)
+    expect(capture_stdout { subject.invoke }).to eq(output)
   end
 end
 
@@ -26,7 +28,7 @@ describe "workers:stop" do
   let(:output) { "All workers stopped.\n" }
 
   it "should run" do
-    capture_stdout { subject.invoke }.should eq(output)
+    expect(capture_stdout { subject.invoke }).to eq(output)
   end
 end
 
@@ -42,15 +44,15 @@ describe "workers:monitor" do
     Worker.stop
   end
 
-  let(:message) { "Error monitoring workers, only 0 of #{CONFIG[:workers]} workers running. Workers restarted." }
-  let(:output) { "#{message}\n#{CONFIG[:workers]} workers expected, #{CONFIG[:workers]} workers running.\n" }
+  let(:message) { "Error monitoring workers, only 0 of #{ENV['WORKERS']} workers running. Workers restarted." }
+  let(:output) { "#{message}\n#{ENV['WORKERS']} workers expected, #{ENV['WORKERS']} workers running.\n" }
 
   it "should run" do
-    capture_stdout { subject.invoke }.should eq(output)
+    expect(capture_stdout { subject.invoke }).to eq(output)
 
-    Alert.count.should == 1
-    alert = Alert.first
-    alert.class_name.should eq("StandardError")
-    alert.message.should eq(message)
+    expect(Notification.count).to eq(1)
+    alert = Notification.first
+    expect(alert.class_name).to eq("StandardError")
+    expect(alert.message).to eq(message)
   end
 end

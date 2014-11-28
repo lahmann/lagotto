@@ -1,0 +1,34 @@
+<div class="content">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="panel panel-source panel-default">
+        <div class="panel-heading">Jobs</div>
+        <div class="panel-body">
+          <p>{{jobs.pending}} pending, {{jobs.working}} working</p>
+          <p>&nbsp;</br>&nbsp;</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="panel panel-agent panel-default">
+        <div class="panel-heading">Responses <small class="pull-right">last 24 hours</small></div>
+        <div class="panel-body">
+          <p>{{responses.count}} responses with
+          {{errorCount}} errors</p>
+          <p>Average {{responses.average}} ms</br>
+          Maximum {{responses.maximum}} ms</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="panel panel-agent panel-default">
+        <div class="panel-heading">Articles</div>
+        <div class="panel-body" id="chart_articles">
+          <div class="text-muted" id="chart_articles-loading">Loading … </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

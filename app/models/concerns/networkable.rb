@@ -1,8 +1,5 @@
-# encoding: UTF-8
-
 require 'faraday'
 require 'faraday_middleware'
-require 'faraday-cookie_jar'
 require 'typhoeus'
 require 'typhoeus/adapters/faraday'
 require 'net/http'
@@ -12,7 +9,6 @@ module Networkable
   extend ActiveSupport::Concern
 
   included do
-
     def get_result(url, options = { content_type: 'json' })
       conn = faraday_conn(options[:content_type])
       conn.basic_auth(options[:username], options[:password]) if options[:username]
@@ -48,12 +44,12 @@ module Networkable
     rescue *NETWORKABLE_EXCEPTIONS => e
       rescue_faraday_error(url, e, options)
     rescue => exception
-      Alert.create(:exception => exception,
-                   :class_name => exception.class.to_s,
-                   :message => exception.message,
-                   :status => 500,
-                   :level => Alert::FATAL,
-                   :source_id => options[:source_id])
+      Notification.create(:exception => exception,
+                          :class_name => exception.class.to_s,
+                          :message => exception.message,
+                          :status => 500,
+                          :level => Notification::FATAL,
+                          :agent_id => options[:agent_id])
       nil
     end
 
@@ -63,28 +59,27 @@ module Networkable
     rescue *NETWORKABLE_EXCEPTIONS => e
       rescue_faraday_error(url, e, options)
     rescue => exception
-      Alert.create(:exception => exception,
-                   :class_name => exception.class.to_s,
-                   :message => exception.message,
-                   :status => 500,
-                   :level => Alert::FATAL,
-                   :source_id => options[:source_id])
+      Notification.create(:exception => exception,
+                          :class_name => exception.class.to_s,
+                          :message => exception.message,
+                          :status => 500,
+                          :level => Notification::FATAL,
+                          :agent_id => options[:agent_id])
       nil
     end
 
     def faraday_conn(content_type = 'json')
       accept_header =
         case content_type
-        when 'html' then 'text/html'
+        when 'html' then 'text/html; charset=UTF-8'
         when 'xml' then 'application/xml'
         else 'application/json'
         end
 
       Faraday.new do |c|
         c.headers['Accept'] = accept_header
-        c.headers['User-Agent'] = "#{CONFIG[:useragent]} #{Rails.application.config.version} - http://#{CONFIG[:public_server]}"
+        c.headers['User-Agent'] = "Lagotto #{Rails.application.config.version} - http://#{ENV['SERVERNAME']}"
         c.use      FaradayMiddleware::FollowRedirects, :limit => 10, :cookie => :all
-        c.use      :cookie_jar
         c.request  :multipart
         c.request  :json if accept_header == 'application/json'
         c.use      Faraday::Response::RaiseError
@@ -93,33 +88,32 @@ module Networkable
     end
 
     def rescue_faraday_error(url, error, options={})
-      if error.kind_of?(Faraday::Error::ResourceNotFound)
+      if error.is_a?(Faraday::ResourceNotFound)
         status = 404
         if error.response.blank? && error.response[:body].blank?
           { error: "resource not found", status: status }
         # we raise an error if we find a canonical URL mismatch
         elsif options[:doi_mismatch]
-          article = Article.where(id: options[:article_id]).first
-          Alert.create(exception: error.exception,
-                       class_name: error.class.to_s,
-                       message: error.response[:message],
-                       details: error.response[:body],
-                       status: status,
-                       article_id: article.id,
-                       target_url: url)
+          work = Work.where(id: options[:work_id]).first
+          Notification.create(exception: error.exception,
+                              class_name: "Net::HTTPNotFound",
+                              message: error.response[:message],
+                              details: error.response[:body],
+                              status: status,
+                              work_id: work.id,
+                              target_url: url)
           { error: error.response[:message], status: status }
         # we raise an error if a DOI can't be resolved
         elsif options[:doi_lookup]
-          article = Article.where(id: options[:article_id]).first
-          Alert.create(exception: error.exception,
-                       class_name: error.class.to_s,
-                       message: "DOI #{article.doi} could not be resolved",
-                       details: error.response[:body],
-                       status: status,
-                       level: Alert::FATAL,
-                       article_id: article.id,
-                       target_url: url)
-          { error: "DOI #{article.doi} could not be resolved", status: status }
+          work = Work.where(id: options[:work_id]).first
+          Notification.create(exception: error.exception,
+                              class_name: "Net::HTTPNotFound",
+                              message: "DOI #{work.doi} could not be resolved",
+                              details: error.response[:body],
+                              status: status,
+                              work_id: work.id,
+                              target_url: url)
+          { error: "DOI #{work.doi} could not be resolved", status: status }
         else
           error = parse_error_response(error.response[:body])
           { error: error, status: status }
@@ -127,7 +121,7 @@ module Networkable
       else
         details = nil
 
-        if error.kind_of?(Faraday::Error::TimeoutError)
+        if error.is_a?(Faraday::Error::TimeoutError)
           status = 408
         elsif error.respond_to?('status')
           status = error[:status]
@@ -151,15 +145,15 @@ module Networkable
         message = "#{message} for #{url}"
         message = "#{message} with rev #{options[:data][:rev]}" if class_name == Net::HTTPConflict
 
-        Alert.create(exception: exception,
-                     class_name: class_name.to_s,
-                     message: message,
-                     details: details,
-                     status: status,
-                     target_url: url,
-                     level: level,
-                     article_id: options[:article_id],
-                     source_id: options[:source_id])
+        Notification.create(exception: exception,
+                            class_name: class_name.to_s,
+                            message: message,
+                            details: details,
+                            status: status,
+                            target_url: url,
+                            level: level,
+                            work_id: options[:work_id],
+                            agent_id: options[:agent_id])
         { error: message, status: status }
       end
     end
@@ -175,10 +169,11 @@ module Networkable
         when 408 then Net::HTTPRequestTimeOut
         when 409 then Net::HTTPConflict
         when 417 then Net::HTTPExpectationFailed
-        when 429 then Net::HTTPClientError
+        when 429 then Net::HTTPTooManyRequests
         when 500 then Net::HTTPInternalServerError
         when 502 then Net::HTTPBadGateway
         when 503 then Net::HTTPServiceUnavailable
+        when 504 then Net::HTTPGatewayTimeOut
         else nil
         end
     end

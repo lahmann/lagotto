@@ -22,13 +22,22 @@ end
 
 ActiveSupport::Notifications.subscribe "api_response.get" do |name, start, finish, id, payload|
   ApiResponse.create! do |api_response|
-    api_response.article_id = payload[:article_id]
-    api_response.source_id = payload[:source_id]
-    api_response.retrieval_status_id = payload[:retrieval_status_id]
-    api_response.skipped = payload[:skipped]
-    api_response.event_count = payload[:event_count]
-    api_response.previous_count = payload[:previous_count]
-    api_response.update_interval = payload[:update_interval]
+    api_response.work_id = payload[:work_id]
+    api_response.agent_id = payload[:agent_id]
+    api_response.task_id = payload[:task_id]
     api_response.duration = (finish - start) * 1000
+    api_response.status = payload[:status]
+  end
+end
+
+ActiveSupport::Notifications.subscribe "change.get" do |name, start, finish, id, payload|
+  Change.create! do |change|
+    change.work_id = payload[:work_id]
+    change.source_id = payload[:source_id]
+    change.trace_id = payload[:trace_id]
+    change.skipped = payload[:skipped]
+    change.event_count = payload[:event_count]
+    change.previous_count = payload[:previous_count]
+    change.update_interval = payload[:update_interval]
   end
 end

@@ -1,8 +1,6 @@
-# encoding: UTF-8
-
 FactoryGirl.define do
 
-  factory :article do
+  factory :work do
     sequence(:doi) { |n| "10.1371/journal.pone.00000#{n}" }
     sequence(:pmid) { |n| "1897483#{n}" }
     pmcid 2568856
@@ -18,82 +16,120 @@ FactoryGirl.define do
     trait(:not_publisher) { doi '10.1007/s00248-010-9734-2' }
     trait(:missing_mendeley) { mendeley_uuid nil }
 
-    factory :article_with_events do
-      retrieval_statuses { |article| [article.association(:retrieval_status)] }
+    factory :work_with_tasks do
+      after :create do |work|
+        FactoryGirl.create(:task, work: work)
+      end
     end
 
-    factory :article_with_events_and_alerts do
-      retrieval_statuses { |article| [article.association(:retrieval_status)] }
-      alerts { |article| [article.association(:alert)] }
+    factory :work_with_events do
+      after :create do |work|
+        FactoryGirl.create(:trace, work: work)
+      end
     end
 
-    factory :stale_articles do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :stale)] }
+    factory :work_with_events_and_notifications do
+      after :create do |work|
+        FactoryGirl.create(:trace, work: work)
+        FactoryGirl.create(:notification, :work => work)
+      end
     end
 
-    factory :queued_articles do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :queued)] }
+    factory :stale_works do
+      after :create do |work|
+        FactoryGirl.create(:task, :stale, work: work)
+      end
     end
 
-    factory :refreshed_articles do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :refreshed)] }
+    factory :queued_works do
+      after :create do |work|
+        FactoryGirl.create(:task, :queued, work: work)
+      end
     end
 
-    factory :article_for_feed do
-      date = Date.today - 1.day
+    factory :refreshed_works do
+      after :create do |work|
+        FactoryGirl.create(:task, :refreshed, work: work)
+      end
+    end
+
+    factory :work_for_feed do
+      date = Time.now.to_date - 1.day
       year { date.year }
       month { date.month }
       day { date.day }
-      retrieval_statuses { |article| [article.association(:retrieval_status, retrieved_at: date)] }
+      after :create do |work|
+        FactoryGirl.create(:trace, retrieved_at: date, work: work)
+      end
     end
 
-    factory :article_published_today do
-      year { Time.zone.now.year }
-      retrieval_statuses { |article| [article.association(:retrieval_status, retrieved_at: Time.zone.today)] }
+    factory :work_published_today do
+      year { Time.now.year }
+      traces { |work| [work.association(:trace, retrieved_at: Time.now.to_date)] }
     end
 
-    factory :article_with_errors do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_errors)] }
+    factory :work_with_errors do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_errors, work: work)
+      end
     end
 
-    factory :article_with_private_citations do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_private)] }
+    factory :work_with_private_citations do
+      after :create do |work|
+        FactoryGirl.create(:trace, :with_private, work: work)
+      end
     end
 
-    factory :article_with_crossref_citations do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_crossref)] }
+    factory :work_with_crossref_citations do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_crossref, work: work)
+      end
     end
 
-    factory :article_with_pubmed_citations do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_pubmed)] }
+    factory :work_with_pubmed_citations do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_pubmed, work: work)
+      end
     end
 
-    factory :article_with_mendeley_events do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_mendeley)] }
+    factory :work_with_mendeley_events do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_mendeley, work: work)
+      end
     end
 
-    factory :article_with_nature_citations do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_pubmed)] }
+    factory :work_with_nature_citations do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_nature, work: work)
+      end
     end
 
-    factory :article_with_researchblogging_citations do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_researchblogging)] }
+    factory :work_with_researchblogging_citations do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_researchblogging, work: work)
+      end
     end
 
-    factory :article_with_wos_citations do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_wos)] }
+    factory :work_with_wos_citations do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_wos, work: work)
+      end
     end
 
-    factory :article_with_counter_citations do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_counter)] }
+    factory :work_with_counter_citations do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_counter, work: work)
+      end
     end
 
-    factory :article_with_tweets do
-      retrieval_statuses { |article| [article.association(:retrieval_status, :with_twitter_search)] }
+    factory :work_with_tweets do
+      after :create do |work|
+        FactoryGirl.create(:task, :with_twitter_search, work: work)
+      end
     end
   end
 
-  factory :retrieval_status do
+  factory :trace do
     event_count 50
     event_metrics do
       { :pdf => nil,
@@ -105,62 +141,82 @@ FactoryGirl.define do
         :citations => nil,
         :total => 50 }
     end
-    retrieved_at { Date.today - 1.month }
-    sequence(:scheduled_at) { |n| Time.zone.now - 1.day + n.minutes }
+    retrieved_at { Time.zone.now.to_date - 1.month }
 
-    association :article
-    association :source, factory: :citeulike
+    association :work
+    association :source
+
+    trait(:with_private) { association :source, private: true }
+    trait(:with_crossref) { association :source, name: "crossref" }
+    trait(:with_crossref_and_work_published_today) do
+      association :work, factory: :work_published_today
+      association :source, name: "crossref"
+    end
+    trait(:with_counter_and_work_published_today) do
+      association :work, factory: :work_published_today
+      association :source, name: "counter"
+    end
+
+    trait(:with_crossref_histories) do
+      before(:create) do |trace|
+        FactoryGirl.create_list(:retrieval_history, 20, trace: trace,
+                                                        work: trace.work,
+                                                        source: trace.source)
+      end
+    end
+
+    initialize_with { Trace.where(work_id: work.id, source_id: source.id).first_or_initialize }
+  end
+
+  factory :task do
+    sequence(:scheduled_at) { |n| Time.now - 1.day + n.minutes }
+
+    association :work
+    association :agent
 
     trait(:missing_mendeley) do
-      association :article, :missing_mendeley, factory: :article
-      association :source, factory: :mendeley
+      association :work, :missing_mendeley, factory: :work
+      association :agent, factory: :mendeley
     end
     trait(:stale) { scheduled_at 1.month.ago }
     trait(:queued) { queued_at 1.hour.ago }
     trait(:refreshed) { scheduled_at 1.month.from_now }
-    trait(:staleness) { association :source, factory: :citeulike }
+    trait(:staleness) { association :agent, factory: :citeulike }
     trait(:with_errors) { event_count 0 }
-    trait(:with_private) { association :source, private: true }
-    trait(:with_crossref) { association :source, factory: :crossref }
-    trait(:with_mendeley) { association :source, factory: :mendeley }
-    trait(:with_pubmed) { association :source, factory: :pub_med }
-    trait(:with_nature) { association :source, factory: :nature }
-    trait(:with_wos) { association :source, factory: :wos }
-    trait(:with_researchblogging) { association :source, factory: :researchblogging }
-    trait(:with_scienceseeker) { association :source, factory: :scienceseeker }
-    trait(:with_wikipedia) { association :source, factory: :wikipedia }
-    trait(:with_counter) { association :source, factory: :counter }
-    trait(:with_twitter_search) { association :source, factory: :twitter_search }
-    trait(:with_article_published_today) { association :article, factory: :article_published_today }
-    trait(:with_counter_and_article_published_today) do
-      association :article, factory: :article_published_today
-      association :source, factory: :counter
-    end
-    trait(:with_crossref_and_article_published_today) do
-      association :article, factory: :article_published_today
-      association :source, factory: :crossref
-    end
 
-    trait(:with_crossref_histories) do
-      before(:create) do |retrieval_status|
-        FactoryGirl.create_list(:retrieval_history, 20, retrieval_status: retrieval_status,
-                                                        article: retrieval_status.article,
-                                                        source: retrieval_status.source)
-      end
-    end
+    trait(:with_crossref) { association :agent, factory: :crossref }
+    trait(:with_mendeley) { association :agent, factory: :mendeley }
+    trait(:with_pubmed) { association :agent, factory: :pub_med }
+    trait(:with_nature) { association :agent, factory: :nature }
+    trait(:with_wos) { association :agent, factory: :wos }
+    trait(:with_researchblogging) { association :agent, factory: :researchblogging }
+    trait(:with_scienceseeker) { association :agent, factory: :scienceseeker }
+    trait(:with_wikipedia) { association :agent, factory: :wikipedia }
+    trait(:with_counter) { association :agent, factory: :counter }
+    trait(:with_twitter_search) { association :agent, factory: :twitter_search }
 
-    initialize_with { RetrievalStatus.find_or_create_by_article_id_and_source_id(article.id, source.id) }
+    trait(:with_work_published_today) { association :work, factory: :work_published_today }
+
+    initialize_with { Task.where(work_id: work.id, agent_id: agent.id).first_or_create }
+  end
+
+  factory :deposit do
+    sequence(:uuid) { |n| "46cb51a0-6d08-11df-afb8-0026b95d30b#{n}" }
+    data [{ "event_count" => 6 }]
+
+    association :source
+    association :user
   end
 
   factory :delayed_job do
     queue 'citeulike-queue'
 
-    initialize_with { DelayedJob.find_or_create_by_queue(queue) }
+    initialize_with { DelayedJob.where(queue: queue).first_or_initialize }
   end
 
   factory :report do
     name 'error_report'
-    display_name 'Error Report'
+    title 'Error Report'
     description 'Reports error summary'
 
     factory :error_report_with_admin_user do
@@ -169,35 +225,35 @@ FactoryGirl.define do
 
     factory :status_report_with_admin_user do
       name 'status_report'
-      display_name 'Status Report'
+      title 'Status Report'
       description 'Reports application status'
       users { [FactoryGirl.create(:user, role: "admin")] }
     end
 
-    factory :article_statistics_report_with_admin_user do
-      name 'article_statistics_report'
-      display_name 'Article Statistics Report'
-      description 'Generates CSV file with ALM for all articles'
+    factory :work_statistics_report_with_admin_user do
+      name 'work_statistics_report'
+      title 'Work Statistics Report'
+      description 'Generates CSV file with ALM for all works'
       users { [FactoryGirl.create(:user, role: "admin")] }
     end
 
     factory :fatal_error_report_with_admin_user do
       name 'fatal_error_report'
-      display_name 'Fatal Error Report'
+      title 'Fatal Error Report'
       description 'Reports when a fatal error has occured'
       users { [FactoryGirl.create(:user, role: "admin")] }
     end
 
     factory :stale_source_report_with_admin_user do
       name 'stale_source_report'
-      display_name 'Stale Source Report'
+      title 'Stale Source Report'
       description 'Reports when a source has not been updated'
       users { [FactoryGirl.create(:user, role: "admin")] }
     end
 
     factory :missing_workers_report_with_admin_user do
       name 'missing_workers_report'
-      display_name 'Missing Workers Report'
+      title 'Missing Workers Report'
       description 'Reports when workers are not running'
       users { [FactoryGirl.create(:user, role: "admin")] }
     end
@@ -210,7 +266,7 @@ FactoryGirl.define do
     sequence(:event_count) { |n| 1000 - 10 * n }
   end
 
-  factory :alert do
+  factory :notification do
     exception "An exception"
     class_name "Net::HTTPRequestTimeOut"
     message "The request timed out."
@@ -223,8 +279,8 @@ FactoryGirl.define do
     status 408
     content_type "text/html"
 
-    factory :alert_with_source do
-      source
+    factory :notification_with_agent do
+      agent
     end
   end
 
@@ -241,6 +297,9 @@ FactoryGirl.define do
 
   factory :api_response do
     duration 200
+  end
+
+  factory :change do
     event_count 10
     previous_count 5
     update_interval 7
@@ -249,8 +308,8 @@ FactoryGirl.define do
   end
 
   factory :review do
-    name "ArticleNotUpdatedError"
-    message "Found 0 article not updated errors in 29,899 API responses, taking 29.899 ms"
+    name "WorkNotUpdatedError"
+    message "Found 0 work not updated errors in 29,899 API responses, taking 29.899 ms"
     input 10
     created_at { Time.zone.now }
   end
@@ -277,19 +336,19 @@ FactoryGirl.define do
     other_names ["Public Library of Science", "Public Library of Science (PLoS)"]
     prefixes ["10.1371"]
 
-    initialize_with { Publisher.find_or_create_by_crossref_id(crossref_id) }
+    initialize_with { Publisher.where(crossref_id: crossref_id).first_or_initialize }
   end
 
   factory :publisher_option do
     id 1
-    source_id 1
+    agent_id 1
     publisher_id 340
     username "username"
     password "password"
 
     publisher
 
-    initialize_with { PublisherOption.find_or_create_by_id(id) }
+    initialize_with { PublisherOption.where(id: id).first_or_initialize }
 
     factory :publisher_option_for_pmc do
       journals "ajrccm"
@@ -299,56 +358,47 @@ FactoryGirl.define do
   factory :html_ratio_too_high_error, class: HtmlRatioTooHighError do
     type "HtmlRatioTooHighError"
     name "HtmlRatioTooHighError"
-    display_name "html ratio too high error"
+    title "html ratio too high error"
     active true
 
-    initialize_with { HtmlRatioTooHighError.find_or_create_by_name(name) }
+    initialize_with { HtmlRatioTooHighError.where(name: name).first_or_initialize }
   end
 
-  factory :article_not_updated_error, aliases: [:filter], class: ArticleNotUpdatedError do
-    type "ArticleNotUpdatedError"
-    name "ArticleNotUpdatedError"
-    display_name "article not updated error"
+  factory :work_not_updated_error, aliases: [:filter], class: WorkNotUpdatedError do
+    type "WorkNotUpdatedError"
+    name "WorkNotUpdatedError"
+    title "work not updated error"
     active true
 
-    initialize_with { ArticleNotUpdatedError.find_or_create_by_name(name) }
+    initialize_with { WorkNotUpdatedError.where(name: name).first_or_initialize }
   end
 
   factory :decreasing_event_count_error, class: EventCountDecreasingError do
     type "EventCountDecreasingError"
     name "EventCountDecreasingError"
-    display_name "decreasing event count error"
+    title "decreasing event count error"
     source_ids [1]
     active true
 
-    initialize_with { EventCountDecreasingError.find_or_create_by_name(name) }
+    initialize_with { EventCountDecreasingError.where(name: name).first_or_initialize }
   end
 
   factory :increasing_event_count_error, class: EventCountIncreasingTooFastError do
     type "EventCountIncreasingTooFastError"
     name "EventCountIncreasingTooFastError"
-    display_name "increasing event count error"
+    title "increasing event count error"
     source_ids [1]
     active true
 
-    initialize_with { EventCountIncreasingTooFastError.find_or_create_by_name(name) }
-  end
-
-  factory :api_too_slow_error, class: ApiResponseTooSlowError do
-    type "ApiResponseTooSlowError"
-    name "ApiResponseTooSlowError"
-    display_name "API too slow error"
-    active true
-
-    initialize_with { ApiResponseTooSlowError.find_or_create_by_name(name) }
+    initialize_with { EventCountIncreasingTooFastError.where(name: name).first_or_initialize }
   end
 
   factory :source_not_updated_error, class: SourceNotUpdatedError do
     type "SourceNotUpdatedError"
     name "SourceNotUpdatedError"
-    display_name "source not updated error"
+    title "source not updated error"
     active true
 
-    initialize_with { SourceNotUpdatedError.find_or_create_by_name(name) }
+    initialize_with { SourceNotUpdatedError.where(name: name).first_or_initialize }
   end
 end

@@ -1,9 +1,3 @@
-class Api::V3::BaseController < ActionController::Base
-  # include base controller methods
-  include Authenticable
-
-  respond_to :json, :xml
-
-  before_filter :default_format_json, :authenticate_user_from_token!, :cors_preflight_check
-  after_filter :cors_set_access_control_headers, :set_jsonp_format
+class Api::V3::BaseController < ApplicationController
+  before_filter :authenticate_user_from_api_key!
 end

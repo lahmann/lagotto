@@ -1,0 +1,16 @@
+<div class="content">
+  <form {{action 'authenticate' on='submit' classNames="form-horizontal"}}>
+    <fieldset>
+      <legend>Sign Up</legend>
+
+        <label for="login">Login</label>
+        {{input value=login placeholder='Enter Login'}}
+        <label for="password">Password</label>
+        {{input value=password placeholder='Enter Password' type='password'}}
+
+      <div class="form-actions">
+        <button type="submit">Login</button>
+      </div>
+    </fieldset>
+  </form>
+</div>

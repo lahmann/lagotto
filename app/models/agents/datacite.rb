@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 class Datacite < Agent
   def get_events(result)
     result["response"] ||= {}

@@ -15,11 +15,11 @@ class Filter < ActiveRecord::Base
   serialize :config, OpenStruct
 
   validates :name, :presence => true, :uniqueness => true
-  validates :display_name, :presence => true
+  validates :title, :presence => true
   validate :validate_config_fields
 
-  default_scope order("name")
-  scope :active, where(:active => true)
+  default_scope { order("name") }
+  scope :active, -> { where(:active => true) }
 
   class << self
     def validates_not_blank(*attrs)
@@ -28,14 +28,14 @@ class Filter < ActiveRecord::Base
       end
     end
 
-    def all
+    def run
       # To sync filters
       # Only run filter if we have unresolved API responses
-      options = { id: ApiResponse.unresolved.maximum(:id),
-                  input: ApiResponse.unresolved.count(:id),
+      options = { id: Change.unresolved.maximum(:id),
+                  input: Change.unresolved.count(:id),
                   output: 0,
-                  started_at: ApiResponse.unresolved.minimum(:created_at),
-                  ended_at: ApiResponse.unresolved.maximum(:created_at),
+                  started_at: Change.unresolved.minimum(:created_at),
+                  ended_at: Change.unresolved.maximum(:created_at),
                   review_messages: [] }
 
       return nil unless options[:id]
@@ -43,25 +43,25 @@ class Filter < ActiveRecord::Base
       Filter.active.each do |filter|
 
         options[:name] = filter.name
-        options[:display_name] = filter.display_name
+        options[:title] = filter.title
         options[:time] = Benchmark.realtime { options[:output] = filter.run_filter(options) }
         options[:message] = formatted_message(options)
         options[:review_messages] << create_review(options)
       end
 
-      resolve(options.except(:name, :display_name))
+      resolve(options.except(:name, :title))
     end
 
     def formatted_message(options)
-      formatted_input = pluralize(number_with_delimiter(options[:input]), 'API response')
-      formatted_output = pluralize(number_with_delimiter(options[:output]), options[:display_name])
+      formatted_input = pluralize(number_with_delimiter(options[:input]), 'change')
+      formatted_output = pluralize(number_with_delimiter(options[:output]), options[:title])
       formatted_time = number_with_precision(options[:time] * 1000)
 
       "Found #{formatted_output} in #{formatted_input}, taking #{formatted_time} ms"
     end
 
     def create_review(options)
-      review = Review.find_or_initialize_by_name_and_state_id(name: options[:name], state_id: options[:id])
+      review = Review.where(name: options[:name], state_id: options[:id]).first_or_initialize
       review.update_attributes(message: options[:message],
                                input: options[:input],
                                output: options[:output],
@@ -71,15 +71,15 @@ class Filter < ActiveRecord::Base
     end
 
     def resolve(options)
-      options[:time] = Benchmark.realtime { options[:output] = ApiResponse.filter(options[:id]).update_all(unresolved: false) }
-      options[:message] = "Resolved #{pluralize(number_with_delimiter(options[:output]), 'API response')} in #{number_with_precision(options[:time] * 1000)} ms"
+      options[:time] = Benchmark.realtime { options[:output] = Change.filter(options[:id]).update_all(unresolved: false) }
+      options[:message] = "Resolved #{pluralize(number_with_delimiter(options[:output]), 'change')} in #{number_with_precision(options[:time] * 1000)} ms"
       options
     end
 
     def unresolve(options = {})
-      options[:time] = Benchmark.realtime { options[:output] = ApiResponse.update_all(unresolved: true) }
-      options[:id] = ApiResponse.maximum(:id)
-      options[:message] = "Unresolved #{pluralize(number_with_delimiter(options[:output]), 'API response')} in #{number_with_precision(options[:time] * 1000)} ms"
+      options[:time] = Benchmark.realtime { options[:output] = Change.update_all(unresolved: true) }
+      options[:id] = Change.maximum(:id)
+      options[:message] = "Unresolved #{pluralize(number_with_delimiter(options[:output]), 'change')} in #{number_with_precision(options[:time] * 1000)} ms"
       options
     end
   end
@@ -125,13 +125,17 @@ class Filter < ActiveRecord::Base
     fail NotImplementedError, 'Children classes should override run_filter method'
   end
 
-  def raise_alerts(responses)
+  def raise_notifications(responses)
     responses.each do |response|
       level = response[:level] || 3
-      alert = Alert.find_or_initialize_by_class_name_and_article_id_and_source_id(class_name: name,
-                                                                                  source_id: response[:source_id],
-                                                                                  article_id: response[:article_id])
-      alert.update_attributes(exception: "", level: level, message: response[:message] ? response[:message] : "An API response error occured")
+      notification = Notification.where(class_name: name,
+                          source_id: response[:source_id],
+                          work_id: response[:work_id]).first_or_initialize
+      notification.update_attributes(exception: "", level: level, message: response[:message] ? response[:message] : "An API response error occured")
     end
+  end
+
+  def update_date
+    updated_at.utc.iso8601
   end
 end

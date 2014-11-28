@@ -1,29 +1,29 @@
-# encoding: UTF-8
-
 class PmcEuropeData < Agent
-  def get_query_url(article)
+  def get_query_url(work)
     if url.starts_with?("http://www.ebi.ac.uk/europepmc/webservices/rest/MED/")
-      return nil unless article.get_ids && article.pmid.present?
+      return nil unless work.get_ids && work.pmid.present?
 
-      url % { :pmid => article.pmid }
+      url % { :pmid => work.pmid }
     elsif url.starts_with?("http://www.ebi.ac.uk/europepmc/webservices/rest/search/query")
-      return nil unless article.doi.present?
+      return nil unless work.doi.present?
 
-      url % { :doi => article.doi }
+      url % { :doi => work.doi }
     end
   end
 
-  def parse_data(result, article, options={})
+  def parse_data(result, work, options={})
     return result if result[:error]
     result = result["responseWrapper"] || result
 
     event_count = (result["hitCount"]).to_i
     events = get_events(result)
 
-    { events: events,
+    { doi: work.doi,
+      source: source,
+      events: events,
       events_by_day: [],
       events_by_month: [],
-      events_url: get_events_url(article),
+      events_url: get_events_url(work),
       event_count: event_count,
       event_metrics: get_event_metrics(citations: event_count) }
   end
@@ -47,7 +47,7 @@ class PmcEuropeData < Agent
             'container-title' => item.fetch('journalTitle') { '' },
             'issued' => get_date_parts_from_parts((item['pubYear']).to_i),
             'url' => url,
-            'type' => 'article-journal' }
+            'type' => 'work-journal' }
         }
       end
     else
@@ -55,9 +55,9 @@ class PmcEuropeData < Agent
     end
   end
 
-  def get_events_url(article)
-    if article.pmid.present?
-      events_url % { :pmid => article.pmid }
+  def get_events_url(work)
+    if work.pmid.present?
+      events_url % { :pmid => work.pmid }
     else
       nil
     end

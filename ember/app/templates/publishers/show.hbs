@@ -1,0 +1,26 @@
+<div class="panel panel-default">
+  <div class="panel-heading panel-title">
+    <div class="btn-toolbar pull-right">
+      <div class="btn-group btn-group-sm">
+        {{#link-to 'publishers' classNames="btn btn-default"}}{{fa-icon "trash"}}{{/link-to}}
+      </div>
+    </div>
+    {{name}}
+  </div>
+  <div class="panel-body">
+    <dl class="dl-horizontal">
+      {{#if otherNames}}
+        <dt>Other Names</dt>
+        <dd>{{#each otherName in otherNames}}{{otherName}}</br>{{/each}}</dd>
+      {{/if}}
+      {{#if prefixes}}
+        <dt>DOI Prefix</dt>
+        <dd>{{#each prefix in prefixes}}{{prefix}} {{/each}}</dd>
+      {{/if}}
+      {{#if users}}
+        <dt>Users</dt>
+        <dd>{{#each user in users}}{{user.username}}</br>{{/each}}</dd>
+      {{/if}}
+    </dl>
+  </div>
+</div>

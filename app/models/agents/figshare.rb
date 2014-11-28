@@ -1,13 +1,11 @@
-# encoding: UTF-8
-
 class Figshare < Agent
-  def get_query_url(article)
-    return nil unless article.doi =~ /^10.1371/
+  def get_query_url(work)
+    return nil unless work.doi =~ /^10.1371/
 
-    url % { :doi => article.doi }
+    url % { :doi => work.doi }
   end
 
-  def parse_data(result, article, options={})
+  def parse_data(result, work, options={})
     return result if result[:error]
 
     events = Array(result["items"])
@@ -18,7 +16,9 @@ class Figshare < Agent
 
     total = views + downloads + likes
 
-    { events: events,
+    { doi: work.doi,
+      source: source,
+      events: events,
       events_by_day: [],
       events_by_month: [],
       events_url: nil,

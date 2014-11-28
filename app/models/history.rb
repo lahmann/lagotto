@@ -5,10 +5,10 @@ class History
   # - hash with error          : ERROR
   #
   # SUCCESS NO DATA
-  # The source knows about the article identifier, but returns an event_count of 0
+  # The source knows about the work identifier, but returns an event_count of 0
   #
   # SUCCESS
-  # The source knows about the article identifier, and returns an event_count > 0
+  # The source knows about the work identifier, and returns an event_count > 0
   #
   # ERROR
   # An error occured, typically 408 (Request Timeout), 403 (Too Many Requests) or 401 (Unauthorized)
@@ -28,12 +28,29 @@ class History
   # include metrics helpers
   include Measurable
 
-  attr_accessor :retrieval_status, :events, :event_count, :previous_count, :previous_retrieved_at, :event_metrics, :events_by_day, :events_by_month, :events_url, :status, :couchdb_id, :rs_rev, :rh_rev, :data
+  attr_accessor :trace, :events, :event_count, :previous_count, :previous_retrieved_at, :event_metrics, :events_by_day, :events_by_month, :events_url, :status, :couchdb_id, :trace_rev, :rh_rev, :data
 
-  def initialize(rs_id, data = {})
-    @retrieval_status = RetrievalStatus.find(rs_id)
-    @previous_count = retrieval_status.event_count
-    @previous_retrieved_at = retrieval_status.retrieved_at
+  def initialize(data = {})
+    work = Work.where(doi: data[:doi]).first
+    source = Source.where(name: data[:source]).first
+    if work && source
+      @trace = Trace.where(work_id: work.id, source_id: source.id).first_or_create
+
+      @previous_count = trace.event_count
+      @previous_retrieved_at = trace.retrieved_at
+
+      # Track changes to traces
+      response = { work_id: trace.work_id,
+                   source_id: trace.source_id,
+                   trace_id: trace.id,
+                   event_count: event_count,
+                   previous_count: previous_count,
+                   update_interval: update_interval,
+                   skipped: skipped }
+      ActiveSupport::Notifications.instrument("change.get") do |payload|
+        payload.merge!(response)
+      end
+    end
 
     @status = case
               when data[:error] then :error
@@ -60,12 +77,11 @@ class History
   end
 
   def save_to_mysql
-    # save data to retrieval_status table
-    retrieval_status.update_attributes(retrieved_at: retrieved_at,
-                                       scheduled_at: retrieval_status.stale_at,
-                                       event_count: event_count,
-                                       event_metrics: event_metrics,
-                                       events_url: events_url)
+    # save data to traces table
+    trace.update_attributes(retrieved_at: retrieved_at,
+                            event_count: event_count,
+                            event_metrics: event_metrics,
+                            events_url: events_url)
   end
 
   def save_to_couchdb
@@ -84,17 +100,17 @@ class History
       @events_by_month = get_events_by_month(previous_data['events_by_month']) if events_by_month.blank?
 
       options = { data: data.clone }
-      options[:source_id] = retrieval_status.source_id
+      options[:source_id] = trace.source_id
 
       if data_rev.present?
         options[:data][:_id] = "#{couchdb_id}"
         options[:data][:_rev] = data_rev
       end
 
-      @rs_rev = put_lagotto_data("#{CONFIG[:couchdb_url]}#{couchdb_id}", options)
+      @trace_rev = put_lagotto_data("#{ENV['COUCHDB_URL']}/#{couchdb_id}", options)
     else
       # only save the data to couchdb
-      @rs_rev = save_lagotto_data(couchdb_id, data: data.clone, source_id: retrieval_status.source_id)
+      @trace_rev = save_lagotto_data(couchdb_id, data: data.clone, source_id: trace.source_id)
     end
   end
 
@@ -102,13 +118,13 @@ class History
     event_arr = Array(event_arr)
 
     # track daily events only the first 30 days after publication
-    # return entry for older articles
-    return event_arr if today - retrieval_status.article.published_on > 30
+    # return entry for older works
+    return event_arr if today - trace.work.published_on > 30
 
     # count entries not including the current day
     event_arr.delete_if { |item| item['day'] == today.day && item['month'] == today.month && item['year'] == today.year }
 
-    if ['counter', 'pmc', 'copernicus', 'figshare'].include?(retrieval_status.source.name)
+    if ['counter', 'pmc', 'copernicus', 'figshare'].include?(trace.source.name)
       html = event_metrics[:html] - event_arr.reduce(0) { |sum, item| sum + item['html'] }
       pdf = event_metrics[:pdf] - event_arr.reduce(0) { |sum, item| sum + item['pdf'] }
 
@@ -134,7 +150,7 @@ class History
     # count entries not including the current month
     event_arr.delete_if { |item| item['month'] == today.month && item['year'] == today.year }
 
-    if ['copernicus', 'figshare'].include?(retrieval_status.source.name)
+    if ['copernicus', 'figshare'].include?(trace.source.name)
       html = event_metrics[:html] - event_arr.reduce(0) { |sum, item| sum + item['html'] }
       pdf = event_metrics[:pdf] - event_arr.reduce(0) { |sum, item| sum + item['pdf'] }
 
@@ -162,7 +178,7 @@ class History
   end
 
   def couchdb_id
-    "#{retrieval_status.source.name}:#{retrieval_status.article.uid_escaped}"
+    "#{trace.source.name}:#{trace.work.uid_escaped}"
   end
 
   def skipped
@@ -175,7 +191,9 @@ class History
   end
 
   def update_interval
-    if [Date.new(1970, 1, 1), today].include?(previous_retrieved_at.to_date)
+    if previous_retrieved_at.nil?
+      nil
+    elsif [Date.new(1970, 1, 1), today].include?(previous_retrieved_at.to_date)
       1
     else
       (today - previous_retrieved_at.to_date).to_i
@@ -187,9 +205,9 @@ class History
   end
 
   def data
-    { CONFIG[:uid].to_sym => retrieval_status.article.uid,
+    { ENV['UID'].to_sym => trace.work.uid,
       retrieved_at: retrieved_at,
-      source: retrieval_status.source.name,
+      source: trace.source.name,
       events: events,
       events_url: events_url,
       event_metrics: event_metrics,

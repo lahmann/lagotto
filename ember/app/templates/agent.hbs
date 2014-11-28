@@ -1,0 +1,25 @@
+<div class="content">
+  <div id="show">
+    {{partial "agents/show"}}
+  </div>
+
+  <ul class="nav nav-pills">
+    <li class="active"><a href="#summary" data-toggle="tab" title="Summary">Summary</a></li>
+    <li><a href="#configuration" data-toggle="tab" title="Configuration">Configuration</a></li>
+    <li><a href="#documentation" data-toggle="tab" title="Documentation">Documentation</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane active" id="summary">
+      <div id="summary-show">
+        {{partial "agents/summary-show"}}
+      </div>
+    </div>
+    <div class="tab-pane" id="configuration">
+      {{partial "agents/configuration"}}
+    </div>
+    <div class="tab-pane" id="documentation">
+      {{partial "card"}}
+    </div>
+  </div>
+</div>

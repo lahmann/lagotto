@@ -1,51 +1,47 @@
 Lagotto::Application.routes.draw do
-  mount JasmineRails::Engine => '/specs' if defined?(JasmineRails)
 
-  devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks", :registrations => "users/registrations" }
+  # authentication
+  devise_for :users, path: 'api/v6/users', controllers: {
+             registrations: "api/v6/users/registrations" },
+             :skip => :sessions
 
-  root :to => "docs#index"
-
-  # constraints is added to allow dot in the url (doi is used to show article)
-  resources :articles, :constraints => { :id => /.+?/, :format => /html|js/ }
-  resources :sources
-  resources :agents do
-    resources :publisher_options, only: [:show, :edit, :update]
-  end
-  resources :users
-  resources :publishers
-  resources :status, only: [:index]
-  resources :heartbeat, only: [:index]
-  resources :docs, :only => [:index, :show], :constraints => { :id => /[0-z\-\.\(\)]+/ }
-  resources :alerts
-  resources :api_requests
-  resources :filters
-
-  match "oembed" => "oembed#show"
-  match "/files/alm_report.zip", to: redirect("/files/alm_report.zip")
-
+  # we only receive /api requests from nginx
   namespace :api do
-    namespace :v3 do
-      resources :articles, :constraints => { :id => /.+?/, :format=> false }, only: [:index, :show]
+
+    # handle CORS options requests
+    match "*path", to: "cors#index", via: [:options]
+
+    get "heartbeat", to: "heartbeat#show", defaults: { format: "json" }
+    get "oembed", to: "oembed#show"
+    resources :sources, only: [:show], constraints: { :format=> "rss" }
+    get "", to: "heartbeat#show", defaults: { format: "json" }
+
+    get "/files/alm_report.zip", to: redirect("/files/alm_report.zip")
+
+    namespace :v3, defaults: { format: "json" } do
+      resources :works, path: "articles", constraints: { :id => /.+?/, :format=> false }
     end
 
-    namespace :v4 do
-      resources :alerts, :constraints => { :format=> false }
-      resources :articles, :constraints => { :id => /.+?/, :format=> false }
+    namespace :v5, defaults: { format: "json" } do
+      resources :works, path: "articles", constraints: { :id => /.+?/, :format=> false }
     end
 
-    namespace :v5 do
-      resources :articles, :constraints => { :id => /.+?/, :format=> false }, only: [:index]
-      resources :sources, :constraints => { :format=> false }, only: [:index, :show]
-      resources :status, :constraints => { :format=> false }, only: [:index]
-      resources :api_requests, :constraints => { :format=> false }, only: [:index]
-      resources :publishers, :constraints => { :format=> false }, only: [:index]
+    namespace :v6, defaults: { format: "json" } do
+      resources :agents
+      resources :notifications
+      resources :api_requests, only: [:index]
+      resources :docs, only: [:index, :show]
+      resources :filters
+      resources :groups
+      resources :publishers
+      resources :deposits
+      resources :sources
+      resources :status, only: [:index]
+      resources :users
+      resources :works, :constraints => { :id => /.+?/ }
     end
   end
-
-  # redirect from old admin namespace
-  get "/admin/:name", to: redirect("/%{name}")
-  get "/admin/", to: redirect("/status")
 
   # rescue routing errors
-  match "*path", to: "alerts#routing_error"
+  match "*path", to: "api/v6/notifications#routing_error", via: [:get, :post]
 end

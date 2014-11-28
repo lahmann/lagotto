@@ -1,46 +1,38 @@
-<% if can?(:manage, Source) && (controller.action_name == "edit" or (controller.action_name == "update" && !@source.errors.empty?)) %>
-  <%= simple_form_for @source, :url => source_path(@source.name), :html => { :remote => true } do |f| %>
-    <fieldset>
-      <legend>Edit Source</legend>
-
-      <%= f.input :display_name %>
-      <%= f.input :active, :as => :boolean, hint: "Source is receiving events" %>
-      <%= f.input :private, :as => :boolean, hint: "Source not made available via API" %>
-      <%= f.input :description, :input_html => { :rows => 3 } %>
-
-      <div class="form-group">
-        <%= f.submit "Save ", class: "btn btn-default" %>
-        <%= link_to 'Cancel', source_path(@source.name), { :remote => true, :class => 'btn' } %>
+<div class="panel panel-default">
+  <div class="panel-heading panel-title" id="api_key" data-name="<%= @source.name %>" data-api_key="<%= ENV['API_KEY'] %>" data-uid_type="<%= ENV['UID'] %>" data-page="" data-per_page="15" data-q="" data-publisher="" data-source="<%= @source.name %>" data-class_name="" data-order="<%= @order.nil? ? nil : @order.name %>">
+    <% if can?(:manage, Source) && controller.action_name != "edit" && !(controller.action_name == "update" && !@source.errors.empty?) %>
+      <div class="btn-toolbar pull-right">
+        <div class="btn-group btn-group-sm">
+          <%= link_to '<span class="glyphicon glyphicon-pencil"></span>'.html_safe, edit_source_path(@source), { :remote => true, :class => 'btn btn-default' } %>
+        </div>
       </div>
-    </fieldset>
-  <% end %>
-<% else %>
-  <div class="page-header">
-    <h1 id="api_key" data-name="<%= @source.name %>" data-api_key="<%= CONFIG[:api_key] %>" data-uid_type="<%= CONFIG[:uid] %>" data-page="<%= @page %>" data-per_page="15" data-q="" data-class_name="" data-source="<%= @source.name %>" data-order="<%= @order.present? ? @order.name : "" %>" data-publisher="<%= @publisher.present? ? @publisher.crossref_id : "" %>">
-      <% if can?(:manage, Source) %>
-        <%= link_to '<span class="glyphicon glyphicon-pencil"></span>'.html_safe, edit_source_path(@source.name), { :remote => true, :class => 'btn btn-default btn-sm pull-right configuration-edit', :title => "Edit" } %>
-      <% end %>
-      <%= @source.display_name %> <small id="update_date"><%= date_from_iso8601(@source.update_date) + ' UTC' %>
-      <%= link_to image_tag("feed-icon-28x28.png"), source_path(@source, format: "rss") %></small>
-    </h1>
-
-    <dl class="dl-horizontal" id="dl-horizontal">
-      <% unless @source.group.blank? %>
-        <dt>Group</dt>
-        <dd><%= h(@source.group.display_name) %></dd>
-      <% end %>
-      <% unless @source.description.blank? %>
-        <dt>Description</dt>
-        <dd><%= @source.description %></dd>
-      <% end %>
-      <% if @source.private %>
-        <dt>Private source</dt>
-        <dd>Source not made available via API</dd>
-      <% end %>
-      <dt>Articles with Events</dt>
-      <dd id="article_count"><%= number_hiding_zero(@source.article_count) %></dd>
-      <dt>All Events</dt>
-      <dd id="event_count"><%= number_hiding_zero(@source.event_count) %></dd>
-    </dl>
+    <% end %>
+    <%= @source.title %> <small class="pull-right"><%= active_label(@source.active).html_safe %></small>
   </div>
-<% end %>
+  <div class="panel-body">
+    <% if can?(:manage, Source) && (controller.action_name == "edit" || (controller.action_name == "update" && !@source.errors.empty?)) %>
+      <%= simple_form_for @source, :url => source_path(@source), :html => { :role => "form", :remote => true } do |f| %>
+        <%= f.input :title %>
+        <%= f.input :active, :as => :boolean %>
+        <%= f.input :private, :as => :boolean, hint: "Source not made available via API" %>
+        <%= f.input :description, :input_html => { :rows => 3 } %>
+
+        <div class="form-group">
+          <%= f.submit "Save ", class: "btn btn-default" %>
+          <%= link_to 'Cancel', source_path(@source), { :remote => true, :class => 'btn' } %>
+        </div>
+      <% end %>
+    <% else %>
+      <dl class="dl-horizontal">
+        <% unless @source.group.blank? %>
+          <dt>Group</dt>
+          <dd><%= h(@source.group.title) %></dd>
+        <% end %>
+        <% unless @source.description.blank? %>
+          <dt>Description</dt>
+          <dd><%= h(@source.description) %></dd>
+        <% end %>
+      </dl>
+    <% end %>
+  </div>
+</div>

@@ -1,10 +1,8 @@
-# encoding: UTF-8
-
 class PubMed < Agent
-  def get_query_url(article)
-    return nil unless article.get_ids && article.pmid.present?
+  def get_query_url(work)
+    return nil unless work.get_ids && work.pmid.present?
 
-    url % { :pmid => article.pmid }
+    url % { :pmid => work.pmid }
   end
 
   def request_options
@@ -16,13 +14,13 @@ class PubMed < Agent
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
       { :event => item,
-        :event_url => "http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=" + item }
+        :event_url => "http://www.pubmedcentral.nih.gov/workrender.fcgi?artid=" + item }
     end
   end
 
-  def get_events_url(article)
-    if article.pmid.present?
-      events_url % { :pmid => article.pmid }
+  def get_events_url(work)
+    if work.pmid.present?
+      events_url % { :pmid => work.pmid }
     else
       nil
     end

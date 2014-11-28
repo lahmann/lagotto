@@ -34,11 +34,11 @@ class Researchblogging < Agent
   end
 
   def url
-    config.url || "http://researchbloggingconnect.com/blogposts?count=100&article=doi:%{doi}"
+    config.url || "http://researchbloggingconnect.com/blogposts?count=100&work=doi:%{doi}"
   end
 
   def events_url
-    config.events_url || "http://researchblogging.org/post-search/list?article=%{doi}"
+    config.events_url || "http://researchblogging.org/post-search/list?work=%{doi}"
   end
 
   def staleness_year

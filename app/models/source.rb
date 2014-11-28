@@ -1,29 +1,47 @@
-# encoding: UTF-8
-
-require 'cgi'
-require "addressable/uri"
-
 class Source < ActiveRecord::Base
+  # include methods for calculating metrics
+  include Measurable
+
+  # include CouchDB helpers
+  include Couchable
+
+  # include date methods concern
+  include Dateable
+
   # include summary counts
   include Countable
 
-  has_many :retrieval_statuses, :dependent => :destroy
-  has_many :articles, :through => :retrieval_statuses
-  has_many :alerts
-  has_many :api_responses
+  # include hash helper
+  include Hashie::Extensions::DeepFetch
+
+  has_many :traces, :dependent => :destroy
+  has_many :works, :through => :traces
+  has_many :deposits, :dependent => :destroy
+  has_many :notifications
   belongs_to :group
 
-  validates :name, :presence => true, :uniqueness => true
-  validates :display_name, :presence => true
+  serialize :config, OpenStruct
 
-  scope :active, where("active = ?", 1).order("group_id, sources.display_name")
+  validates :name, :presence => true, :uniqueness => true
+  validates :title, :presence => true
+
+  scope :order_by_name, -> { order("group_id, sources.title") }
+  scope :active, -> { where(active: true).order_by_name }
 
   # some sources cannot be redistributed
-  scope :public_sources, lambda { where("private = ?", false) }
-  scope :private_sources, lambda { where("private = ?", true) }
+  scope :public_sources, -> { where(private: false) }
+  scope :private_sources, -> { where(private: true) }
 
   def to_param  # overridden, use name instead of id
     name
+  end
+
+  def display_name
+    title
+  end
+
+  def status
+    (active ? "active" : "inactive")
   end
 
   def cache_key
@@ -46,31 +64,35 @@ class Source < ActiveRecord::Base
 
     # loop through cached attributes we want to update
     [:event_count,
-     :article_count].each { |cached_attr| send("#{cached_attr}=", timestamp) }
+     :work_count,
+     :with_events_by_day_count,
+     :without_events_by_day_count,
+     :with_events_by_month_count,
+     :without_events_by_month_count].each { |cached_attr| send("#{cached_attr}=", timestamp) }
 
     update_column(:cached_at, now)
   end
 
   # Remove all retrieval records for this source that have never been updated,
   # return true if all records are removed
-  def remove_all_retrievals
-    rs = retrieval_statuses.where(:retrieved_at == '1970-01-01').delete_all
-    retrieval_statuses.count == 0
+  def remove_all_traces
+    rs = traces.where(:retrieved_at == '1970-01-01').delete_all
+    traces.count == 0
   end
 
-  # Create an empty retrieval record for every article for the new source
-  def create_retrievals
-    article_ids = RetrievalStatus.where(:source_id => id).pluck(:article_id)
+  # Create an empty retrieval record for every work for the new source
+  def create_traces
+    work_ids = Trace.where(:source_id => id).pluck(:work_id)
 
-    (0...article_ids.length).step(1000) do |offset|
-      ids = article_ids[offset...(offset + 1000)]
-      delay(priority: 2, queue: "retrieval-status").insert_retrievals(ids)
+    (0...work_ids.length).step(1000) do |offset|
+      ids = work_ids[offset...offset + 1000]
+      delay(priority: 2, queue: "trace").insert_traces(ids)
     end
   end
 
-  def insert_retrievals(ids)
-    sql = "insert into retrieval_statuses (article_id, source_id, created_at, updated_at, scheduled_at) select id, #{id}, now(), now(), now() from articles"
-    sql += " where articles.id not in (#{article_ids.join(",")})" if ids.any?
+  def insert_traces(ids)
+    sql = "insert into traces (work_id, source_id, created_at, updated_at) select id, #{id}, now(), now() from works"
+    sql += " where works.id not in (#{work_ids.join(',')})" if ids.any?
 
     ActiveRecord::Base.connection.execute sql
   end

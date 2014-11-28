@@ -1,17 +1,15 @@
-# encoding: UTF-8
-
 class CitationMilestoneAlert < Filter
   def run_filter(state)
-    responses = ApiResponse.filter(state[:id]).citation_milestone(limit, source_ids)
+    responses = Change.filter(state[:id]).citation_milestone(limit, source_ids)
 
     if responses.count > 0
-      responses = responses.all.map do |response|
+      responses = responses.to_a.map do |response|
         { source_id: response.source_id,
           article_id: response.article_id,
-          level: Alert::INFO,
+          level: Notification::INFO,
           message: "Article has been cited #{response.event_count} times" }
       end
-      raise_alerts(responses)
+      raise_notifications(responses)
     end
 
     responses.count
@@ -19,7 +17,7 @@ class CitationMilestoneAlert < Filter
 
   def get_config_fields
     [{ field_name: "source_ids" },
-     { field_name: "limit", field_type: "text_field", field_hint: "Creates an alert if an article has been cited the specified number of times." }]
+     { field_name: "limit", field_type: "text_field", field_hint: "Creates an notification if an article has been cited the specified number of times." }]
   end
 
   def limit

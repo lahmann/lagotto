@@ -3,15 +3,15 @@ require 'rouge'
 
 module ApplicationHelper
   def login_link
-    if CONFIG[:persona]
+    if ENV['CAS_URL']
+      link_to "Sign In", user_omniauth_authorize_path(:cas), :id => "sign_in"
+    else
       s = form_tag '/users/auth/persona/callback', :id => 'persona_form', :class => "navbar-form" do
         p = hidden_field_tag('assertion')
         p << button_tag('Sign In with Persona', :id => 'sign_in', :class => 'btn btn-link persona')
         p
       end
       s.html_safe
-    elsif CONFIG[:cas_url]
-      link_to "Sign In", user_omniauth_authorize_path(:cas), :id => "sign_in"
     end
   end
 
@@ -24,7 +24,7 @@ module ApplicationHelper
     formatter = Rouge::Formatters::HTML.new(:css_class => 'hll')
     lexer = Rouge::Lexers::Shell.new
 
-    doc = Nokogiri::HTML(html)
+    doc = Nokogiri::HTML::DocumentFragment.parse(html)
     doc.search("//pre").each { |pre| pre.replace formatter.format(lexer.lex(pre.text)) }
     doc.to_s
   end
@@ -34,9 +34,17 @@ module ApplicationHelper
     when "working" then '<span class="label label-success">working</span>'
     when "inactive" then '<span class="label label-info">inactive</span>'
     when "disabled" then '<span class="label label-warning">disabled</span>'
-    when "available" then '<span class="label label-primary">available</span>'
-    when "retired" then '<span class="label label-default">retired</span>'
+    when "available" then '<span class="label label-default">available</span>'
+    when "retired" then '<span class="label label-primary">retired</span>'
     else state
+    end
+  end
+
+  def active_label(active)
+    if active
+      "active"
+    else
+      '<span class="label label-info">inactive</span>'
     end
   end
 
@@ -55,18 +63,18 @@ module ApplicationHelper
   end
 
   def sources
-    Source.order("group_id, display_name")
+    Source.order("group_id, title")
   end
 
   def publishers
     Publisher.order("name")
   end
 
-  def alerts
-    %w(Net::HTTPUnauthorized Net::HTTPForbidden Net::HTTPRequestTimeOut Delayed::WorkerTimeout DelayedJobError Net::HTTPConflict Net::HTTPServiceUnavailable Faraday::ResourceNotFound ActiveRecord::RecordInvalid TooManyErrorsBySourceError SourceInactiveError TooManyWorkersError EventCountDecreasingError EventCountIncreasingTooFastError ApiResponseTooSlowError HtmlRatioTooHighError ArticleNotUpdatedError SourceNotUpdatedError CitationMilestoneAlert)
+  def notifications
+    %w(Net::HTTPUnauthorized Net::HTTPForbidden Net::HTTPRequestTimeOut Net::HTTPGatewayTimeOut Net::HTTPConflict Net::HTTPServiceUnavailable - Faraday::ResourceNotFound ActiveRecord::RecordInvalid - Delayed::WorkerTimeout DelayedJobError TooManyErrorsBySourceError SourceInactiveError TooManyWorkersError - EventCountDecreasingError EventCountIncreasingTooFastError HtmlRatioTooHighError WorkNotUpdatedError AgentNotUpdatedError CitationMilestoneAlert)
   end
 
-  def article_statistics_report_path
+  def work_statistics_report_path
     path = "/files/alm_report.zip"
     if File.exist?("#{Rails.root}/public#{path}")
       path
@@ -75,10 +83,10 @@ module ApplicationHelper
     end
   end
 
-  def date_format(article)
-    if article.day
+  def date_format(work)
+    if work.day
       :long
-    elsif article.month
+    elsif work.month
       :month
     else
       :year
@@ -90,19 +98,19 @@ module ApplicationHelper
   end
 
   def description_with_link(report)
-    if report.name == 'article_statistics_report' && article_statistics_report_path
-      h(report.description) + link_to("Download", article_statistics_report_path, :class => 'pull-right')
+    if report.name == 'work_statistics_report' && work_statistics_report_path
+      h(report.description) + link_to("Download", work_statistics_report_path, :class => 'pull-right')
     else
       h(report.description)
     end
   end
 
-  def article_alerts
-    %w(EventCountDecreasingError EventCountIncreasingTooFastError ApiResponseTooSlowError HtmlRatioTooHighError ArticleNotUpdatedError CitationMilestoneAlert)
+  def work_notifications
+    %w(EventCountDecreasingError EventCountIncreasingTooFastError HtmlRatioTooHighError WorkNotUpdatedError CitationMilestoneAlert)
   end
 
   def documents
-    %w(Home Installation Setup Sources API Rake Alerts FAQ Releases Roadmap Contributors)
+    %w(Installation Deployment Setup - Sources API Rake Notifications - Releases Roadmap Contributors)
   end
 
   def roles

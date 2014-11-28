@@ -1,17 +1,15 @@
-# encoding: UTF-8
-
 class EventCountDecreasingError < Filter
   def run_filter(state)
-    responses = ApiResponse.filter(state[:id]).decreasing(source_ids)
+    responses = Change.filter(state[:id]).decreasing(source_ids)
 
     if responses.count > 0
-      responses = responses.all.map do |response|
+      responses = responses.to_a.map do |response|
         { source_id: response.source_id,
-          article_id: response.article_id,
-          level: Alert::WARN,
+          work_id: response.work_id,
+          level: Notification::WARN,
           message: "Event count decreased from #{response.previous_count} to #{response.event_count}" }
       end
-      raise_alerts(responses)
+      raise_notifications(responses)
     end
 
     responses.count

@@ -1,0 +1,76 @@
+<div class="content">
+  <div class="page-header">
+    <div class="btn-toolbar pull-right">
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-default">{{fa-icon "plus"}}</button>
+      </div>
+    </div>
+    <h1 class="pull-left">Works</h1>
+
+    {{input type="text" class="form-inline form-control text-center" placeholder="Search by DOI" value=search action="query"}}
+  </div>
+
+  <div class="work">&nbsp;
+    <div class="btn-toolbar pull-left">
+      <div class="btn-group btn-group-sm" id="work-alerts">
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+          {{fa-icon "filter"}}
+          {{#if className}}{{className}}{{else}}All Alerts{{/if}}
+          <span class="caret"></span>
+        </a><ul class="dropdown-menu">
+          <li><a href="#">All Works</a></li>
+          <li class="divider"></li>
+          <li><a href="#">All Alerts</a></li>
+          <li class="divider"></li>
+          {{#each className in workClassNames}}
+            <li>{{#link-to 'works' (query-params className=className)}}{{className}}{{/link-to}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      {{#if hasManyPublishers}}
+        <div class="btn-group btn-group-sm" id="work-publishers">
+          <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+            {{fa-icon "filter"}}
+            {{#if publisher}}{{publisher.name}}{{else}}All Publishers{{/if}}
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li>{{#link-to 'works' (query-params publisher_id=nullParams)}}All Publishers{{/link-to}}</li>
+            <li class="divider"></li>
+            {{#each publishers}}
+              <li>{{#link-to 'works' (query-params publisher_id=this.id)}}{{this.title}}{{/link-to}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+      <div class="btn-group btn-group-sm" id="work-source">
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+          {{fa-icon "filter"}}
+          {{#if source}}{{source.title}}{{else}}All Sources{{/if}}
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li>{{#link-to 'works' (query-params source_id=nullParams)}}All Sources{{/link-to}}</li>
+          <li class="divider"></li>
+          {{#each sources}}
+            <li>{{#link-to 'works' (query-params source_id=this.id)}}{{this.title}}{{/link-to}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+    <div class="btn-toolbar pull-right">
+      <div class="btn-group btn-group-sm" id="work-order">
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+          {{fa-icon "sort"}}
+          {{#if order}}{{order}}{{else}}Sort by Date{{/if}}
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu pull-right">
+          <li><a href="#">Sort by Date</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  {{work-list works=works}}
+</div>

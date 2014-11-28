@@ -1,44 +1,37 @@
 # encoding: UTF-8
 # Load reports
-
-error_report = Report.find_or_create_by_name(
-                :name => 'error_report',
-                :display_name => 'Error Report',
+error_report = Report.where(name: 'error_report').first_or_create(
+                :title => 'Error Report',
                 :description => 'Reports error summary',
                 :interval => 1.day,
                 :private => true)
 
-stale_source_report = Report.find_or_create_by_name(
-                :name => 'stale_source_report',
-                :display_name => 'Stale Source Report',
-                :description => 'Reports when a source has not been updated',
+stale_agent_report = Report.where(name: 'stale_agent_report').first_or_create(
+                :title => 'Stale Agent Report',
+                :description => 'Reports when an agent has not been updated',
                 :interval => 1.day,
                 :private => true)
 
-status_report = Report.find_or_create_by_name(
-                :name => 'status_report',
-                :display_name => 'Status Report',
+status_report = Report.where(name: 'status_report').first_or_create(
+                :title => 'Status Report',
                 :description => 'Reports application status',
                 :interval => 1.week,
                 :private => true)
 
-article_statistics_report = Report.find_or_create_by_name(
-                :name => 'article_statistics_report',
-                :display_name => 'Article Statistics Report',
-                :description => 'Generates CSV file with ALM for all articles',
+work_statistics_report = Report.where(name: 'work_statistics_report').first_or_create(
+                :title => 'Work Statistics Report',
+                :description => 'Generates CSV file with ALM for all works',
                 :interval => 1.month,
                 :private => false)
 
-fatal_error_report = Report.find_or_create_by_name(
-                :name => 'fatal_error_report',
-                :display_name => 'Fatal Error Report',
+fatal_error_report = Report.where(name: 'fatal_error_report').first_or_create(
+                :title => 'Fatal Error Report',
                 :description => 'Reports when a fatal error has occured',
                 :interval => 0,
                 :private => true)
 
-missing_workers_report = Report.find_or_create_by_name(
-                :name => 'missing_workers_report',
-                :display_name => 'Missing Workers Report',
+missing_workers_report = Report.where(name: 'missing_workers_report').first_or_create(
+                :title => 'Missing Workers Report',
                 :description => 'Reports when workers are not running',
                 :interval => 0,
                 :private => true)

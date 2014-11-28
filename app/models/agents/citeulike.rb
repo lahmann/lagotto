@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 class Citeulike < Agent
   def request_options
     { content_type: 'xml' }
