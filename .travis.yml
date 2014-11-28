@@ -15,10 +15,10 @@ before_script:
   - mkdir -p tmp/pids
 
 script:
-  - bin/rake db:setup RAILS_ENV=test
-  - bin/rspec
-  - bin/rake brakeman:run
-  - bin/rubocop
+  - bundle exec rake db:setup RAILS_ENV=test
+  - bundle exec rspec
+  - bundle exec rake brakeman:run
+  - bundle exec rubocop
 
 env:
   global:
