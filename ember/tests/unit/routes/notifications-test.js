@@ -3,7 +3,7 @@ import {
   test
 } from 'ember-qunit';
 
-moduleFor('route:sources/view', 'SourcesViewRoute', {
+moduleFor('route:notifications', 'NotificationsRoute', {
   // Specify the other units that are required for this test.
   // needs: ['controller:foo']
 });

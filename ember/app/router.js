@@ -6,7 +6,6 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-  this.route('login');
   this.resource('apiRequests');
   this.resource('status');
   this.resource('works');
@@ -20,14 +19,14 @@ Router.map(function() {
   this.resource('users');
   this.resource('filters');
   this.resource('filter', { path: '/filters/:filter_id' });
-  this.resource('alerts');
+  this.resource('notifications');
   this.resource('docs');
   this.resource('doc', { path: '/docs/:doc_id'});
-  this.route('works/view');
-  this.route('sources/view');
-  this.route('agents/view');
-  this.route('works/show');
-  this.route('sources/show');
+  // this.route('works/view');
+  // this.route('sources/view');
+  // this.route('agents/view');
+  // this.route('works/show');
+  // this.route('sources/show');
 });
 
 export default Router;

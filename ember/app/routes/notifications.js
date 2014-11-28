@@ -1,10 +1,9 @@
 import Ember from 'ember';
-import AuthenticatedRouteMixin from 'simple-auth/mixins/authenticated-route-mixin';
 
-export default Ember.Route.extend(AuthenticatedRouteMixin, {
+export default Ember.Route.extend({
   model: function(params) {
     return Ember.RSVP.hash({
-      alerts: this.store.find('alert', {
+      notifications: this.store.find('alert', {
               page: params.page,
               hostname: params.hostname,
               agent_id: params.agent_id,

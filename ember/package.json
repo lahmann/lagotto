@@ -33,11 +33,7 @@
     "broccoli-merge-trees": "~0.2.1",
     "broccoli-static-compiler": "~0.2.1",
     "ember-cli-font-awesome": "0.0.4",
-    "ember-cli-dotenv": "~0.3.4",
-    "ember-cli-simple-auth": "~0.7.1",
-    "ember-cli-simple-auth-devise": "~0.7.1",
-    "ember-cli-simple-auth-torii": "~0.7.1",
-    "torii": "~0.2.2"
+    "ember-cli-dotenv": "~0.3.4"
   },
   "dependencies": {
     "broccoli-sass": "~0.3.3",
