@@ -9,14 +9,24 @@ var inflector = Ember.Inflector.inflector;
 inflector.uncountable('status');
 
 Router.map(function() {
-  this.resource('works', function() { });
-  this.resource('sources', function() { });
-  this.resource('agents', function() { });
+  this.resource('works', function() {
+    this.route('new');
+  });
+  this.resource('sources', function() {
+    this.route('show');
+  });
+  this.resource('agents', function() {
+    this.route('show');
+  });
   this.resource('users', function() { });
   this.resource('notifications', function() { });
-  this.resource('publishers', function() { });
+  this.resource('publishers', function() {
+    this.route('new');
+  });
   this.resource('docs', function() { });
   this.resource('status', function() { });
+  this.resource('filters', function() { });
+  this.resource('api-requests', function() { });
 });
 
 export default Router;
