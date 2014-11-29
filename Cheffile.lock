@@ -3,7 +3,7 @@ SITE
   specs:
     7-zip (1.0.2)
       windows (>= 1.2.2)
-    apt (2.5.3)
+    apt (2.6.0)
     ark (0.9.0)
       7-zip (>= 0.0.0)
       windows (>= 0.0.0)
@@ -71,10 +71,10 @@ SITE
 GIT
   remote: git@github.com:articlemetrics/capistrano-cookbook.git
   ref: master
-  sha: ead7d7deb389ddcf1418337cbcda0d17d6f74ef4
+  sha: 5fb3b81c441738ead5b91caebb6e609231ab3ce0
   specs:
-    capistrano (0.6.21)
-      ruby (~> 0.5.0)
+    capistrano (0.7.1)
+      ruby (~> 0.6.0)
 
 GIT
   remote: git@github.com:articlemetrics/dotenv-cookbook.git
@@ -86,56 +86,56 @@ GIT
 GIT
   remote: git@github.com:articlemetrics/ember_cli-cookbook.git
   ref: master
-  sha: 063ebea73569df4c15041763e3a9256dc940539e
+  sha: ccdbab71f94b14a2046eea5241ee827065ae5593
   specs:
-    ember_cli (0.1.0)
+    ember_cli (0.1.4)
       nodejs (~> 2.2.0)
 
 GIT
   remote: git@github.com:articlemetrics/lagotto-cookbook.git
   ref: master
-  sha: 3090ae944e22de5d0a0cdcd1bc0081ded50753ec
+  sha: 5335c317d868cf5501ba5b40d1b5f31779271bea
   specs:
-    lagotto (3.6.14)
+    lagotto (4.0.4)
       apt (>= 0.0.0)
-      capistrano (~> 0.6.0)
+      capistrano (~> 0.7.0)
       couchdb (>= 0.0.0)
       database (>= 0.0.0)
       dotenv (~> 0.1.0)
+      ember_cli (~> 0.1.0)
       memcached (>= 0.0.0)
       mysql (~> 5.4.3)
       mysql_rails (~> 0.3.0)
       passenger_nginx (~> 0.3.0)
-      phantomjs (>= 0.0.0)
       postfix (>= 0.0.0)
-      ruby (~> 0.5.0)
+      ruby (~> 0.6.0)
 
 GIT
   remote: git@github.com:articlemetrics/mysql_rails-cookbook.git
   ref: master
-  sha: 8a39a0c9f4aa5c2aa446df6aadbca1e0466eeb57
+  sha: a37e3bedd0e86928146d757e78cad6891063e82e
   specs:
     mysql_rails (0.3.8)
       database (>= 0.0.0)
       mysql (>= 0.0.0)
-      ruby (~> 0.5.0)
+      ruby (~> 0.6.0)
 
 GIT
   remote: git@github.com:articlemetrics/passenger_nginx-cookbook.git
   ref: master
-  sha: 55693399872a666da0b7e9dca4bb9ab4f8b5f2e9
+  sha: 62fc6aab4aba4b4ed7274e7f68517af950417c35
   specs:
-    passenger_nginx (0.3.3)
-      apt (~> 2.5.3)
-      ruby (~> 0.5.0)
+    passenger_nginx (0.3.6)
+      apt (>= 0.0.0)
+      ruby (~> 0.6.0)
 
 GIT
   remote: git@github.com:articlemetrics/ruby-cookbook.git
   ref: master
-  sha: 4a58b44d6c03b7a59a3c49ef92e4d70f1bb6bedc
+  sha: 323293afd36ede76c8906a1b432d528b77c6df63
   specs:
-    ruby (0.5.0)
-      apt (~> 2.5.3)
+    ruby (0.6.3)
+      apt (>= 0.0.0)
 
 DEPENDENCIES
   capistrano (>= 0)
