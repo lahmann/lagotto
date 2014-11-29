@@ -162,13 +162,17 @@ namespace :db do
 
     desc "Add user"
     task :add => :environment do
-      before = ApiRequest.count
-      request = ApiRequest.order("created_at DESC").offset(100000).first
-      unless request.nil?
-        ApiRequest.where("created_at <= ?", request.created_at).delete_all
+      unless ENV['EMAIL']
+        puts "You must provide an email address via the EMAIL ENV variable."
+        exit
       end
-      after = ApiRequest.count
-      puts "Deleted #{before - after} API requests, #{after} API requests remaining"
+
+      user = User.create!(name: ENV['EMAIL'],
+                          username: ENV['EMAIL'],
+                          email: ENV['EMAIL'],
+                          authentication_token: ENV['API_KEY'])
+
+      puts "User #{user.username} with API key #{user.api_key} created."
     end
   end
 
