@@ -19,8 +19,18 @@ module.exports = function(environment) {
     }
   };
 
+  ENV.contentSecurityPolicy = {
+    'default-src': "'none'",
+    'script-src': "'self' 'unsafe-eval' http://10.2.2.4:35729",
+    'font-src': "'self' http://fonts.gstatic.com",
+    'connect-src': "'self' http://10.2.2.4:35729 ws://10.2.2.4:35729",
+    'img-src': "'self'",
+    'style-src': "'self' 'unsafe-inline' http://fonts.googleapis.com",
+    'media-src': "'self'"
+  };
+
   if (environment === 'development') {
-    // ENV.APP.LOG_RESOLVER = true;
+    ENV.APP.LOG_RESOLVER = true;
     ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
