@@ -1,0 +1,78 @@
+<div class="content">
+  <div class="panel panel-default">
+    <div class="panel-heading panel-title">
+      <div class="btn-toolbar pull-right">
+        <div class="btn-group btn-group-sm">
+          {{#link-to 'works' classNames="btn btn-default"}}{{fa-icon "pencil"}}{{/link-to}}
+        </div>
+        <div class="btn-group btn-group-sm">
+          {{#link-to 'works' classNames="btn btn-default"}}{{fa-icon "trash"}}{{/link-to}}
+        </div>
+      </div>
+      {{title}}
+    </div>
+    <div class="panel-body">
+      <dl class="dl-horizontal">
+        <dt>Publication Date</dt>
+        <dd>{{format-date issuedDate}}</dd>
+        {{#if publisher}}
+          <dt>Publisher</dt>
+          <dd>{{#link-to 'publisher' publisher}}{{publisher.name}}{{/link-to}}</dd>
+        {{/if}}
+        {{#if doi}}
+          <dt>DOI</dt>
+          <dd class="doi" %>{{external-link doi "http://dx.doi.org/"}}</dd>
+        {{/if}}
+        {{#if pmid}}
+          <dt>PubMed ID</dt>
+          <dd id="pmid">{{external-link pmid "http://www.ncbi.nlm.nih.gov/pubmed/"}}</dd>
+        {{/if}}
+        {{#if pmcid}}
+          <dt>PubMed Central ID</dt>
+          <dd id="pmcid">{{external-link pmcid "http://www.ncbi.nlm.nih.gov/pmc/works/PMC"}}</dd>
+        {{/if}}
+        <dt>URLs</dt>
+        <dd>
+          {{#if canonicalUrl}}
+            <a target="_blank" {{bind-attr href="canonicalUrl"}}>canonicalUrl</a><br/>
+          {{/if}}
+          {{#if pmid}}
+            {{external-link "http://europepmc.org/abstract/MED/" "http://europepmc.org/abstract/MED/"}}<br/>
+          {{/if}}
+          {{#if mendeleyUrl}}
+            <a target="_blank" {{bind-attr href="mendeleyUrl"}}>mendeleyUrl</a><br/>
+          {{/if}}
+          {{#if citeulikeUrl}}
+            <a target="_blank" {{bind-attr href="citeulikeUrl"}}>citeulikeUrl</a><br/>
+          {{/if}}
+        </dd>
+      </dl>
+    </div>
+  </div>
+
+  <div id="alert-error-message">
+    {{partial "works/notification-message"}}
+  </div>
+
+  <ul class="nav nav-pills">
+    <li class="active"><a href="#metrics" data-toggle="tab" title="Metrics">Metrics</a></li>
+    <li><a href="#events" data-toggle="tab" title="Events">Events</a></li>
+    <li><a href="#more" data-toggle="tab" title="More">Details</a></li>
+    <li><a href="#alert" data-toggle="tab" title="Alerts">Alerts</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane active" id="metrics">
+      {{partial "works/metrics"}}
+    </div>
+    <div class="tab-pane" id="events">
+      {{partial "works/events"}}
+    </div>
+    <div class="tab-pane" id="more">
+      {{partial "works/more"}}
+    </div>
+    <div class="tab-pane" id="alert">
+      {{partial "works/notification"}}
+    </div>
+  </div>
+</div>
