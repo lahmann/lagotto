@@ -71,9 +71,9 @@ SITE
 GIT
   remote: git@github.com:articlemetrics/capistrano-cookbook.git
   ref: master
-  sha: 5fb3b81c441738ead5b91caebb6e609231ab3ce0
+  sha: 8169fd7de3359ef49413ec87e44ca57a01994436
   specs:
-    capistrano (0.7.1)
+    capistrano (0.7.2)
       ruby (~> 0.6.0)
 
 GIT
@@ -94,9 +94,9 @@ GIT
 GIT
   remote: git@github.com:articlemetrics/lagotto-cookbook.git
   ref: master
-  sha: 5335c317d868cf5501ba5b40d1b5f31779271bea
+  sha: fbb26a3f8ddc32c0b637ff497088e489c56516d7
   specs:
-    lagotto (4.0.4)
+    lagotto (4.0.6)
       apt (>= 0.0.0)
       capistrano (~> 0.7.0)
       couchdb (>= 0.0.0)
