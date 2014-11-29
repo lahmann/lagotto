@@ -158,6 +158,20 @@ namespace :db do
     end
   end
 
+  namespace :users do
+
+    desc "Add user"
+    task :add => :environment do
+      before = ApiRequest.count
+      request = ApiRequest.order("created_at DESC").offset(100000).first
+      unless request.nil?
+        ApiRequest.where("created_at <= ?", request.created_at).delete_all
+      end
+      after = ApiRequest.count
+      puts "Deleted #{before - after} API requests, #{after} API requests remaining"
+    end
+  end
+
   namespace :api_requests do
 
     desc "Delete API requests, keeping last 100,000 requests"

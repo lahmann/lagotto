@@ -26,10 +26,10 @@ namespace :mailer do
   task :rename_report => :environment do
     Report.where(name: "disabled_source_report").delete_all
     fatal_error_report = Report.where(name: 'fatal_error_report').first_or_create(
-                :display_name => 'Fatal Error Report',
-                :description => 'Reports when a fatal error has occured',
-                :interval => 0,
-                :private => true)
+                                      display_name: 'Fatal Error Report',
+                                      description: 'Reports when a fatal error has occured',
+                                      interval: 0,
+                                      private: true)
     puts "Reports updated"
   end
 

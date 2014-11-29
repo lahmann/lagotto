@@ -10,4 +10,9 @@ namespace :ember do
     # using the Rails application has API backend
     Dir.chdir("ember-app") { sh "ember serve --proxy=#{ENV['SERVERNAME']}" }
   end
+
+  desc "Test Ember frontend"
+  task :test => :environment do
+    Dir.chdir("ember-app") { sh "ember test" }
+  end
 end
