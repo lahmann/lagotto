@@ -167,12 +167,12 @@ namespace :db do
         exit
       end
 
-      user = User.create!(name: ENV['EMAIL'],
-                          username: ENV['EMAIL'],
+      user = User.create!(name: (ENV['NAME'] || ENV['EMAIL']),
+                          username: (ENV['USERNAME'] || ENV['EMAIL']),
                           email: ENV['EMAIL'],
-                          authentication_token: ENV['API_KEY'])
+                          authentication_token: ENV['TOKEN'])
 
-      puts "User #{user.username} with API key #{user.api_key} created."
+      puts "User #{user.name} with API key #{user.api_key} created."
     end
   end
 
