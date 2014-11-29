@@ -15,4 +15,22 @@ namespace :ember do
   task :test => :environment do
     Dir.chdir("ember-app") { sh "ember test" }
   end
+
+  namespace :npm do
+
+    desc "Install npm packages for Ember frontend"
+    task :install => :environment do
+      Dir.chdir("ember-app") { sh "npm install" }
+    end
+
+  end
+
+  namespace :bower do
+
+    desc "Install bower packages for Ember frontend"
+    task :install => :environment do
+      Dir.chdir("ember-app") { sh "bower install" }
+    end
+
+  end
 end
