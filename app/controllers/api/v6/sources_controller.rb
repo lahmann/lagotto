@@ -35,8 +35,7 @@ class Api::V6::SourcesController < Api::V6::BaseController
   def load_source
     @source = Source.where(name: params[:id]).first
 
-    # raise error if source wasn't found
-    fail ActiveRecord::RecordNotFound, "No record for \"#{params[:id]}\" found" if @source.blank?
+    render json: { error: "Source #{params[:id]} not found." }, status: :not_found if @source.blank?
   end
 
   private

@@ -3,7 +3,7 @@ json.error @error
 
 json.cache! ['v6', @work], skip_digest: true do
   json.work do
-    json.(@work, :id, :doi, :pmid, :pmcid, :mendeley_uuid, :url, :canonical_url, :title, :issued, :viewed, :saved, :discussed, :cited, :update_date)
+    json.(@work, :id, :doi, :pmid, :pmcid, :url, :canonical_url, :title, :issued, :viewed, :saved, :discussed, :cited, :update_date)
 
     unless params[:info] == "summary"
       json.sources @work.traces do |trace|
