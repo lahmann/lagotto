@@ -16,8 +16,8 @@ export function signPosts(work) {
   // if (discussed > 0) { b.push("Discussed: " + formatFixed(discussed)); }
   if (viewed > 0) { b.push("Viewed: " + viewed); }
   if (cited > 0) { b.push("Cited: " + cited); }
-  if (saved > 0) { b.push("Saved: " + saved); }
-  if (discussed > 0) { b.push("Discussed: " + discussed); }
+  if (saved > 0) { b.push("Saved: " + saved); }
+  if (discussed > 0) { b.push("Discussed: " + discussed); }
   if (b.length > 0) {
     a.push(b.join(" • "));
     return a.join(" | ");
