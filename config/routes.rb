@@ -40,8 +40,8 @@ Lagotto::Application.routes.draw do
       resources :users
       resources :works, :constraints => { :id => /.+?/ }
     end
-  end
 
-  # rescue routing errors
-  match "*path", to: "api/v6/notifications#routing_error", via: [:get, :post]
+    # rescue routing errors
+    match "*path", to: "api/v6/notifications#routing_error", via: [:get, :post]
+  end
 end
