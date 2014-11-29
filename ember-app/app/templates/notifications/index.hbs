@@ -1,0 +1,143 @@
+<div class="content">
+  <div class="page-header">
+    <div class="btn-toolbar pull-right">
+      <div class="btn-group btn-group-sm">
+        {{#link-to 'filters' classNames="btn btn-default"}}{{fa-icon "flag"}} Filters{{/link-to}}
+      </div>
+    </div>
+    <h1 class="pull-left">Notifications</h1>
+
+    {{input type="text" class="form-inline form-control text-center" placeholder="Search" value=search action="query"}}
+  </div>
+
+  <div class="work">&nbsp;
+    <div class="btn-toolbar pull-left">
+      <div class="btn-group btn-group-sm">
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+          <i class="fa fa-filter"></i>
+          {{#if agent}}{{agent.title}}{{else}}All Agents{{/if}}
+          <span class="caret"></span>
+        </a><ul class="dropdown-menu">
+          <li>{{#link-to 'notifications' (query-params agent_id=nullParams)}}All Agents{{/link-to}}</li>
+          {{#each group in groups}}
+            {{#if group.agents}}
+              <li class="divider"></li>
+              {{#each agent in group.agents}}
+                <li>{{#link-to 'notifications' (query-params agent_id=agent.id)}}{{agent.title}}{{/link-to}}</li>
+              {{/each}}
+            {{/if}}
+          {{/each}}
+        </ul>
+      </div>
+      <div class="btn-group btn-group-sm">
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+          <i class="fa fa-filter"></i>
+          {{#if source}}{{source.title}}{{else}}All Sources{{/if}}
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li>{{#link-to 'notifications' (query-params source_id=nullParams)}}All Sources{{/link-to}}</li>
+          {{#each group in groups}}
+            {{#if group.sources}}
+              <li class="divider"></li>
+              {{#each source in group.sources}}
+                <li>{{#link-to 'notifications' (query-params source_id=source.id)}}{{source.title}}{{/link-to}}</li>
+              {{/each}}
+            {{/if}}
+          {{/each}}
+        </ul>
+      </div>
+      <div class="btn-group btn-group-sm">
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+          <i class="fa fa-filter"></i>
+          {{#if level}}{{capitalize-string level}}{{else}}All Levels{{/if}}
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li>{{#link-to 'notifications' (query-params level=nullParams)}}All Levels{{/link-to}}</li>
+          <li class="divider"></li>
+          {{#each lev in levels}}
+            <li>{{#link-to 'notifications' (query-params level=lev)}}{{capitalize-string lev}}{{/link-to}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      <div class="btn-group btn-group-sm">
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+          <i class="fa fa-filter"></i>
+          {{#if className}}{{className}}{{else}}All Alerts{{/if}}
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li>{{#link-to 'notifications' (query-params className=nullParams)}}All Alerts{{/link-to}}</li>
+          <li class="divider"></li>
+          {{#each className in classNames}}
+            <li>{{#link-to 'notifications' (query-params className=className)}}{{className}}{{/link-to}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  {{#if notifications}}
+    <div class="panel-group" id="notification">
+      {{#each notification in notifications}}
+        <div class="panel panel-default">
+          <div class="panel-heading panel-title panel-list">
+            <a href="#" class="accordion-toggle" data-toggle="collapse" data-parent="#notification">{{notification.message}}</a>
+          </div>
+          <div class="panel-collapse collapse" id="notification_">
+            <div class="panel-body notification-inner">
+                <div class="btn-group btn-group-sm pull-right">
+                  <a class="btn btn-default dropdown-toggle" id="-delete" data-toggle="dropdown" href="#">
+                    <i class="fa fa-trash"></i> <span class="caret"></span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li>by Message</li>
+                    <li>by Class</li>
+                  </ul>
+                </div>
+              <p class="class_name">{{notification.className}}</p>
+              {{#if notification.source}}
+                <h5>Source</h5>
+                {{notification.source.title}}
+              {{/if}}
+
+              {{#if notification.work}}
+                <h5>Work</h5>
+                {{notification.work.uid}}
+              {{/if}}
+
+              <h5>Time</h5>
+              {{notification.createDate}}
+
+              {{#if notification.hostname}}
+                <h5>Hostname</h5>
+                {{notification.hostname}}
+              {{/if}}
+
+              {{#if notification.targetUrl}}
+                <h5>Target URL</h5>
+                {{notification.targetUrl}}
+              {{/if}}
+
+              {{#if notification.details}}
+                <h5>Details</h5>
+                {{notification.details}}
+              {{/if}}
+
+              {{#if notification.trace}}
+                <h5>Trace</h5>
+                {{notification.trace}}
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+    <div class="text-center">
+
+    </div>
+  {{else}}
+    <div class="notification notification-info">No notifications found</div>
+  {{/if}}
+</div>

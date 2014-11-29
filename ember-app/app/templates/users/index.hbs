@@ -1,0 +1,56 @@
+<div class="content">
+  <div class="page-header clearfix">
+    <div class="btn-toolbar pull-right">
+      <div class="btn-group btn-group-sm">
+        {{#link-to 'api-requests' classNames="btn btn-default"}}{{fa-icon "tachometer"}} API Requests{{/link-to}}
+      </div>
+    </div>
+    <h1 class="pull-left">Users</h1>
+  </div>
+
+  <div class="work">&nbsp;
+    <div class="btn-toolbar pull-left">
+      <div class="btn-group btn-group-sm">
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">{{fa-icon "filter"}}</i> All Roles<span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="#">All Roles</a></li>
+          <li class="divider"></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-group" id="user">
+    {{#each user in users}}
+      <div class="panel panel-default">
+        <div class="panel-heading panel-title panel-list">
+          <a href="#" class="accordion-toggle" data-toggle="collapse" data-parent="#user">{{user.name}}<small class='pull-right'>{{format-date user.updateDate}}</small>
+        </div>
+        <div id="user_" class="panel-collapse collapse">
+          <div class="panel-body">
+            <div class="btn-toolbar pull-right">
+              <div class="btn-group btn-group-sm">
+                {{fa-icon "pencil"}}
+              </div>
+              <div class="btn-group btn-group-sm">
+                {{fa-icon "trash"}}
+              </div>
+            </div>
+
+            <h5>Username</h5>
+            {{user.username}}
+
+            <h5>Email</h5>
+            {{user.email}}
+
+            <h5>Role</h5>
+            {{user.role}}
+
+            <h5>Account created</h5>
+            {{format-date user.createDate}}
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>

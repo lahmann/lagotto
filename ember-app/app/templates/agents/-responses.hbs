@@ -1,0 +1,32 @@
+{{#if groups}}
+  {{#each group in groups}}
+    {{#if group.agents}}
+      <div class="panel panel-default">
+        <div class="panel-heading">{{group.title}}</div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="name">Agent</th>
+              <th class="number">Responses&nbsp;(24&nbsp;hours)</th>
+              <th class="number">Average&nbsp;(ms)</th>
+              <th class="number">Errors (24&nbsp;hours)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each agent in group.agents}}
+              <tr>
+                <td>{{#link-to 'agents.show' agent}}{{agent.title}}{{/link-to}}</td>
+                <td>{{state-label agent.status}}</td>
+                <td class="number">{{format-number agent.responses.count}}</td>
+                <td class="number">{{format-number agent.responses.average}}</td>
+                <td class="number">{{format-number agent.errorCount}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{/if}}
+  {{/each}}
+{{else}}
+  <div class="alert alert-info">No active agents found</div>
+{{/if}}

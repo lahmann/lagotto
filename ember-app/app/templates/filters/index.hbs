@@ -1,0 +1,36 @@
+<div class="content">
+  <div class="page-header">
+    <h1>Filters</h1>
+  </div>
+
+  {{#if controller}}
+    <div class="panel-group" id="filter">
+      {{#each filter in controller}}
+        <div class="panel panel-default">
+          <div class="panel-heading panel-title panel-list">
+            <a href="#filter_" class="accordion-toggle">{{filter.title}}</a>
+            {{#if filter.status}}
+              <small class="pull-right">active</small>
+            {{/if}}
+          </div>
+          <div id="filter_" class="panel-collapse collapse">
+            <div class="panel-body">
+              <div class="btn-toolbar pull-right">
+                <div class="btn-group btn-group-sm">
+                  {{#if filter.status}}
+                    Inactivate
+                  {{else}}
+                    Activate
+                  {{/if}}
+                </div>
+              </div>
+              <p>{{filter.description}}</p>
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="alert alert-info">There are currently no filters</div>
+  {{/if}}
+</div>
