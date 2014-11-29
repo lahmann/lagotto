@@ -73,7 +73,7 @@ describe "/api/v6/users", :type => :api do
 
       it "JSON" do
         get uri, nil, headers
-        expect(last_response.status).to eq(401)
+        expect(last_response.status).to eq(403)
 
         response = JSON.parse(last_response.body)
         expect(response).to eq (error)
@@ -81,7 +81,7 @@ describe "/api/v6/users", :type => :api do
 
       it "JSONP" do
         get "#{uri}?callback=_func", nil, jsonp_headers
-        expect(last_response.status).to eq(401)
+        expect(last_response.status).to eq(403)
 
         response = JSON.parse(last_response.body)
         expect(response).to eq (error)

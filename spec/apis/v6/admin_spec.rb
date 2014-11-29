@@ -336,7 +336,7 @@ describe "/api/v6/works", :type => :api do
 
       it "JSON" do
         delete uri, nil, headers
-        expect(last_response.status).to eq(401)
+        expect(last_response.status).to eq(403)
 
         response = JSON.parse(last_response.body)
         expect(response).to eq("error" => "You are not authorized to access this page.")
@@ -348,7 +348,7 @@ describe "/api/v6/works", :type => :api do
 
       it "JSON" do
         delete uri, nil, headers
-        expect(last_response.status).to eq(401)
+        expect(last_response.status).to eq(403)
 
         response = JSON.parse(last_response.body)
         expect(response).to eq("error" => "You are not authorized to access this page.")
@@ -361,7 +361,7 @@ describe "/api/v6/works", :type => :api do
 
       it "JSON" do
         delete uri, nil, headers
-        expect(last_response.status).to eq(401)
+        expect(last_response.status).to eq(403)
 
         response = JSON.parse(last_response.body)
         expect(response).to eq("error" => "You are not authorized to access this page.")

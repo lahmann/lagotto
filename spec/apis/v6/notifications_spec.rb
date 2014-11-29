@@ -12,7 +12,7 @@ describe "/api/v6/notifications", :type => :api do
   end
 
   context "index" do
-    context "most recent articles" do
+    context "most recent works" do
       let(:uri) { "/api/v6/notifications" }
 
       before(:each) { FactoryGirl.create_list(:notification, 55) }
@@ -151,7 +151,7 @@ describe "/api/v6/notifications", :type => :api do
 
       it "JSON" do
         get uri, nil, headers
-        expect(last_response.status).to eq(401)
+        expect(last_response.status).to eq(403)
 
         response = JSON.parse(last_response.body)
         expect(response).to eq("error"=>"You are not authorized to access this page.")

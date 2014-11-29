@@ -86,25 +86,6 @@ describe "/api/v6/works", :type => :api do
       end
     end
 
-    context "works found via Mendeley" do
-      before(:each) do
-        work_list = works.map { |work| "#{work.mendeley_uuid}" }.join(",")
-        @uri = "/api/v6/works?ids=#{work_list}&type=mendeley_uuid&info=summary"
-      end
-
-      it "JSON" do
-        get @uri, nil, 'HTTP_ACCEPT' => 'application/json'
-        expect(last_response.status).to eq(200)
-
-        response = JSON.parse(last_response.body)
-        items = response["works"]
-        expect(items.length).to eq(50)
-        expect(items.any? do |item|
-          item["mendeley_uuid"] == works[0].mendeley_uuid
-        end).to be true
-      end
-    end
-
     context "no identifiers" do
       before(:each) do
         work_list = works.map { |work| "#{work.doi_escaped}" }.join(",")
