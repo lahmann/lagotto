@@ -44,6 +44,6 @@ Lagotto::Application.routes.draw do
     end
 
     # rescue routing errors
-    match "*path", to: "api/v6/notifications#routing_error", via: [:get, :post]
+    # match "*path", to: "api/v6/notifications#routing_error", via: [:get, :post]
   end
 end

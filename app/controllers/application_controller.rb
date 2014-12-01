@@ -67,7 +67,7 @@ class ApplicationController < ActionController::Base
     request.env["devise.skip_trackable"] = true
   end
 
-  rescue_from ActiveRecord::RecordNotFound do |exception|
+  rescue_from ActiveRecord::RecordNotFound, ActionController::RoutingError do |exception|
     render json: { error: exception.message }, status: :not_found
   end
 
