@@ -22,11 +22,8 @@ end
 
 ActiveSupport::Notifications.subscribe "api_response.get" do |name, start, finish, id, payload|
   ApiResponse.create! do |api_response|
-    api_response.work_id = payload[:work_id]
     api_response.agent_id = payload[:agent_id]
-    api_response.task_id = payload[:task_id]
     api_response.duration = (finish - start) * 1000
-    api_response.status = payload[:status]
   end
 end
 
