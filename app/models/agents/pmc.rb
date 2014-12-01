@@ -33,7 +33,7 @@ class Pmc < Agent
   # Retrieve usage stats in XML and store in /data directory. Returns an empty array if no error occured
   def get_feed(month, year, options={})
     journals_with_errors = []
-    options[:source_id] = id
+    options[:agent_id] = id
 
     publisher_configs.each do |publisher|
       publisher_id = publisher[0]
@@ -49,7 +49,7 @@ class Pmc < Agent
                             :class_name => "Net::HTTPInternalServerError",
                             :message => "PMC Usage stats for journal #{journal}, month #{month}, year #{year} could not be saved",
                             :status => 500,
-                            :source_id => id)
+                            :agent_id => id)
         journals_with_errors << journal
       end
     end
@@ -77,7 +77,7 @@ class Pmc < Agent
           Notification.create(:exception => "", :class_name => "Net::HTTPInternalServerError",
                               :message => "PMC Usage stats for journal #{journal}, month #{month} and year #{year}: #{error_message}",
                               :status => 500,
-                              :source_id => id)
+                              :agent_id => id)
           journals_with_errors << journal
         else
           # go through all the works in the xml document

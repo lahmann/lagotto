@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 class Group < ActiveRecord::Base
   has_many :sources, -> { order(:title) }, :dependent => :nullify
   has_many :agents, -> { order(:title) }, :dependent => :nullify
