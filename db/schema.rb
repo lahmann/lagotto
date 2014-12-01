@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141126222708) do
+ActiveRecord::Schema.define(version: 20141201035035) do
 
   create_table "agents", force: true do |t|
     t.string   "type",                                        null: false
@@ -103,6 +103,22 @@ ActiveRecord::Schema.define(version: 20141126222708) do
 
   add_index "deposits", ["updated_at"], name: "index_deposits_on_updated_at", using: :btree
 
+  create_table "events", force: true do |t|
+    t.integer  "work_id",         null: false
+    t.integer  "source_id",       null: false
+    t.text     "title"
+    t.text     "container-title"
+    t.text     "author"
+    t.string   "doi"
+    t.text     "url"
+    t.date     "published_on"
+    t.string   "type"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "events", ["work_id", "source_id", "published_on"], name: "index_events_on_work_id_and_source_id_and_published_on", using: :btree
+
   create_table "filters", force: true do |t|
     t.string   "type",                       null: false
     t.string   "name",                       null: false
@@ -120,6 +136,23 @@ ActiveRecord::Schema.define(version: 20141126222708) do
     t.datetime "updated_at"
     t.string   "title"
   end
+
+  create_table "histories", force: true do |t|
+    t.integer  "work_id",        null: false
+    t.integer  "source_id",      null: false
+    t.integer  "trace_id",       null: false
+    t.integer  "year"
+    t.integer  "month"
+    t.integer  "total_count"
+    t.integer  "html_count"
+    t.integer  "pdf_count"
+    t.integer  "comments_count"
+    t.integer  "likes_count"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+  end
+
+  add_index "histories", ["work_id", "source_id", "year", "month"], name: "index_histories_on_work_id_and_source_id_and_year_and_month", using: :btree
 
   create_table "notifications", force: true do |t|
     t.integer  "source_id"
