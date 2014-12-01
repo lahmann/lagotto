@@ -54,8 +54,8 @@ describe Work, :type => :model do
     end
   end
 
-  context "validate date " do
-    before(:each) { allow(Date).to receive(:today).and_return(Date.new(2013, 9, 5)) }
+  context "validate date" do
+    before(:each) { allow(Time).to receive(:now).and_return(Time.mktime(2013, 9, 5)) }
 
     it 'validate date' do
       work = FactoryGirl.build(:work)
@@ -75,7 +75,7 @@ describe Work, :type => :model do
     it 'don\'t validate date with missing year, month and day' do
       work = FactoryGirl.build(:work, year: nil, month: nil, day: nil)
       expect(work).not_to be_valid
-      expect(work.errors.messages).to eq(year: ["is not a number", "should be between 1650 and 2014"])
+      expect(work.errors.messages).to eq(year: ["is not a number"], published_on: ["is before 1650"])
     end
 
     it 'don\'t validate wrong date' do
@@ -85,7 +85,7 @@ describe Work, :type => :model do
     end
 
     it 'don\'t validate date in the future' do
-      date = Date.today + 1.day
+      date = Time.zone.now.to_date + 1.day
       work = FactoryGirl.build(:work, year: date.year, month: date.month, day: date.day)
       expect(work).not_to be_valid
       expect(work.errors.messages).to eq(published_on: ["is a date in the future"])
@@ -99,23 +99,17 @@ describe Work, :type => :model do
 
     it 'issued' do
       work = FactoryGirl.create(:work)
-      date = { "date-parts" => [[work.year, work.month, work.day]] }
-      expect(work.issued).to eq(date)
+      expect(work.issued).to eq("date-parts" => [[work.year, work.month, work.day]])
     end
 
-    it 'issued_date year month day' do
-      work = FactoryGirl.create(:work, year: 2013, month: 2, day: 9)
-      expect(work.issued_date).to eq("February 9, 2013")
-    end
-
-    it 'issued_date year month' do
+    it 'issued year month' do
       work = FactoryGirl.create(:work, year: 2013, month: 2, day: nil)
-      expect(work.issued_date).to eq("February 2013")
+      expect(work.issued).to eq("date-parts"=>[[2013, 2]])
     end
 
-    it 'issued_date year' do
+    it 'issued year' do
       work = FactoryGirl.create(:work, year: 2013, month: nil, day: nil)
-      expect(work.issued_date).to eq("2013")
+      expect(work.issued).to eq("date-parts"=>[[2013]])
     end
   end
 

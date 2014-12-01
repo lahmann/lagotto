@@ -6,9 +6,9 @@ FactoryGirl.define do
     pmcid 2568856
     mendeley_uuid "46cb51a0-6d08-11df-afb8-0026b95d30b2"
     title 'Defrosting the Digital Library: Bibliographic Tools for the Next Generation Web'
-    year { Date.today.year - 1 }
-    month { Date.today.month }
-    day { Date.today.day }
+    year { Time.zone.now.to_date.year - 1 }
+    month { Time.zone.now.to_date.month }
+    day { Time.zone.now.to_date.day }
     publisher_id 340
 
     trait(:cited) { doi '10.1371/journal.pone.0000001' }
@@ -127,6 +127,19 @@ FactoryGirl.define do
         FactoryGirl.create(:task, :with_twitter_search, work: work)
       end
     end
+  end
+
+  factory :event do
+    title "This is an event about an article"
+    year { Time.zone.now.to_date.year - 1 }
+    month { Time.zone.now.to_date.month }
+    day { Time.zone.now.to_date.day }
+    url "http://dx.doi.org/10.5555/123456"
+
+    association :work
+    association :source
+
+    initialize_with { Event.where(work_id: work.id, source_id: source.id).first_or_initialize }
   end
 
   factory :trace do

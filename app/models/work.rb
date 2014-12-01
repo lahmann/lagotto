@@ -11,6 +11,9 @@ class Work < ActiveRecord::Base
   # include helper module for DOI resolution
   include Resolvable
 
+  # include custom validations
+  include Validateable
+
   belongs_to :publisher, primary_key: :crossref_id
   has_many :tasks, :dependent => :destroy
   has_many :traces, :dependent => :destroy
@@ -20,8 +23,8 @@ class Work < ActiveRecord::Base
 
   validates :uid, :title, :presence => true
   validates :doi, :uniqueness => true, :format => { :with => DOI_FORMAT }, :allow_nil => true
-  validates :year, :numericality => { :only_integer => true }, :inclusion => { :in => 1650..(Time.zone.now.year), :message => "should be between 1650 and #{Time.zone.now.year}" }
-  validate :validate_published_on, if: proc { |work| work.year.present? }
+  validates :year, numericality: { only_integer: true }
+  validate :validate_published_on
 
   before_validation :sanitize_title
   after_create :create_traces
@@ -262,7 +265,7 @@ class Work < ActiveRecord::Base
   alias_method :cited, :citations
 
   def issued
-    { "date-parts" => [[year, month, day].reject(&:blank?)] }
+    { "date-parts" => [[year, month, day].reject(&:nil?)] }
   end
 
   def issued_date
@@ -289,24 +292,6 @@ class Work < ActiveRecord::Base
   end
 
   private
-
-  # Use values from year, month, day for published_on
-  # Uses  "01" for month and day if they are missing
-  def validate_published_on
-    date_parts = [year, month, day].reject(&:blank?)
-    published_on = Date.new(*date_parts)
-    if published_on > Date.today
-      errors.add :published_on, "is a date in the future"
-    else
-      write_attribute(:published_on, published_on)
-    end
-  rescue ArgumentError
-    errors.add :published_on, "is not a valid date"
-  end
-
-  def sanitize_title
-    self.title = ActionController::Base.helpers.sanitize(title)
-  end
 
   def create_traces
     # Create an empty trace recordfor every source for the new work
