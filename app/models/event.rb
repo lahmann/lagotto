@@ -1,4 +1,4 @@
-class History < ActiveRecord::Base
+class Event < ActiveRecord::Base
   # include HTTP request helpers
   include Networkable
 
@@ -10,6 +10,5 @@ class History < ActiveRecord::Base
 
   belongs_to :work, :touch => true
   belongs_to :source
-  belongs_to :trace
 
 end

@@ -35,6 +35,8 @@ Lagotto::Application.routes.draw do
       resources :groups
       resources :publishers
       resources :deposits
+      resources :events
+      resources :histories
       resources :sources
       resources :status, only: [:index]
       resources :users
