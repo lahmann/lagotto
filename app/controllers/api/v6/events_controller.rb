@@ -17,6 +17,15 @@ class Api::V6::EventsController < Api::V6::BaseController
     end
   end
 
+  def show
+    @event = Deposit.where(id: params[:id]).first
+    @event = @event.decorate
+  end
+
+  def destroy
+    @event.destroy
+  end
+
   private
 
   def event_params
