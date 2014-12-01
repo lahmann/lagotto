@@ -27,7 +27,7 @@ describe Api::OembedController, :type => :controller do
     end
 
     it "GET oembed escaped" do
-      get "http://#{ENV['SERVERNAME']}/api/oembed?url=maxwidth=474&maxheight=711&url=#{CGI.escape(api_v6_work_url(work))}&format=json"
+      get "http://#{ENV['SERVERNAME']}/api/oembed?url=#{CGI.escape(api_v6_work_url(work))}&maxwidth=474&maxheight=711&format=json"
       expect(last_response.status).to eq(200)
       response = JSON.parse(last_response.body)
       expect(response["type"]).to eq("rich")
