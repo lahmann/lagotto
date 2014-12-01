@@ -30,16 +30,6 @@ class Task < ActiveRecord::Base
   scope :by_name, ->(agent) { joins(:agent).where("agents.name = ?", agent) }
   scope :with_agents, -> { joins(:agent).where("agents.state > ?", 0).order("group_id, title") }
 
-  def perform_get_data
-    result = agent.get_data(work, timeout: agent.timeout, work_id: work_id, agent_id: agent_id)
-    data = agent.parse_data(result, work, work_id: work_id, agent_id: agent_id)
-
-    # result = get_result(api_v6_deposits_url, data: data)
-
-    history = History.new(data)
-    history.status
-  end
-
   def data
     @data ||= event_count > 0 ? get_lagotto_data("#{agent.name}:#{work.uid_escaped}") : nil
   end

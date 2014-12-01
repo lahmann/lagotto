@@ -13,12 +13,12 @@ class AgentJob < Struct.new(:task_ids, :agent_id)
   include CustomError
 
   def enqueue(_job)
-    # keep track of when the article was queued up
+    # keep track of when the work was queued up
     Task.where("id in (?)", task_ids).update_all(queued_at: Time.zone.now)
   end
 
   def perform
-    agent = Agent.find(agent_id)
+    agent = Agent.where(id: agent_id).first
     agent.work_after_check
 
     # Check that agent is working and we have workers for this agent
@@ -28,13 +28,21 @@ class AgentJob < Struct.new(:task_ids, :agent_id)
 
     task_ids.each do |task_id|
       task = Task.where(task_id: task_id).first
+      start_time = Time.zone.now
 
       # Track API response result and duration in api_responses table
-      response = { article_id: task.article_id, agent_id: task.agent_id, task_id: task_id }
-      start_time = Time.zone.now
       ActiveSupport::Notifications.instrument("api_response.get") do |payload|
-        response[:status] = task.perform_get_data
-        payload.merge!(response)
+        payload = { agent_id: agent_id }
+        work = task.work
+
+        # get API response from external API
+        result = agent.get_data(work, timeout: agent.timeout)
+
+        # parse into standard format
+        data = agent.parse_data(result, work, work_id: work_id, agent_id: agent_id)
+
+        # deposit with internal API
+        result = get_result(api_v6_deposits_url, source_id: agent.source, data: data)
       end
 
       # observe rate-limiting settings
