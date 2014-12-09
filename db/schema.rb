@@ -104,23 +104,13 @@ ActiveRecord::Schema.define(version: 20141201035035) do
   add_index "deposits", ["updated_at"], name: "index_deposits_on_updated_at", using: :btree
 
   create_table "events", force: true do |t|
-    t.integer  "work_id",                        null: false
-    t.integer  "source_id",                      null: false
-    t.text     "title",                          null: false
-    t.text     "container_title"
-    t.text     "author"
-    t.string   "doi"
-    t.text     "url",                            null: false
-    t.date     "published_on",                   null: false
-    t.integer  "year",            default: 1970
-    t.integer  "month"
-    t.integer  "day"
-    t.string   "type"
-    t.datetime "created_at",                     null: false
-    t.datetime "updated_at",                     null: false
+    t.integer  "work_id",          null: false
+    t.integer  "citation_id",      null: false
+    t.integer  "source_id",        null: false
+    t.integer  "relation_type_id", null: false
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
   end
-
-  add_index "events", ["work_id", "source_id", "published_on"], name: "index_events_on_work_id_and_source_id_and_published_on", using: :btree
 
   create_table "filters", force: true do |t|
     t.string   "type",                       null: false
@@ -156,6 +146,14 @@ ActiveRecord::Schema.define(version: 20141201035035) do
   end
 
   add_index "histories", ["work_id", "source_id", "year", "month"], name: "index_histories_on_work_id_and_source_id_and_year_and_month", using: :btree
+
+  create_table "identifiers", force: true do |t|
+    t.integer  "work_id"
+    t.string   "identifier_type", null: false
+    t.text     "identifier",      null: false
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
 
   create_table "notifications", force: true do |t|
     t.integer  "source_id"
@@ -208,6 +206,12 @@ ActiveRecord::Schema.define(version: 20141201035035) do
 
   add_index "publishers", ["crossref_id"], name: "index_publishers_on_crossref_id", unique: true, using: :btree
 
+  create_table "relation_types", force: true do |t|
+    t.string   "name",       null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "reports", force: true do |t|
     t.string   "name"
     t.datetime "created_at"
@@ -225,6 +229,12 @@ ActiveRecord::Schema.define(version: 20141201035035) do
 
   add_index "reports_users", ["report_id", "user_id"], name: "index_reports_users_on_report_id_and_user_id", using: :btree
   add_index "reports_users", ["user_id"], name: "index_reports_users_on_user_id", using: :btree
+
+  create_table "responses", force: true do |t|
+    t.text     "data",       limit: 16777215
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+  end
 
   create_table "retrieval_histories", force: true do |t|
     t.integer  "trace_id",                 null: false
@@ -337,6 +347,12 @@ ActiveRecord::Schema.define(version: 20141201035035) do
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   add_index "users", ["username"], name: "index_users_username", unique: true, using: :btree
 
+  create_table "work_types", force: true do |t|
+    t.string   "name",       null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "workers", force: true do |t|
     t.integer  "identifier", null: false
     t.string   "queue",      null: false
@@ -354,14 +370,22 @@ ActiveRecord::Schema.define(version: 20141201035035) do
     t.datetime "updated_at"
     t.text     "canonical_url"
     t.string   "mendeley_uuid"
-    t.integer  "year",          default: 1970
+    t.integer  "year",            default: 1970
     t.integer  "month"
     t.integer  "day"
     t.integer  "publisher_id"
+    t.string   "pid_type",                       null: false
+    t.string   "pid",                            null: false
+    t.text     "container_title"
+    t.text     "author"
+    t.string   "volume"
+    t.string   "issue"
+    t.string   "page"
+    t.integer  "work_type_id"
+    t.integer  "response_id"
   end
 
-  add_index "works", ["doi", "published_on", "id"], name: "index_articles_doi_published_on_article_id", using: :btree
-  add_index "works", ["doi"], name: "index_works_on_doi", unique: true, using: :btree
+  add_index "works", ["pid_type", "pid", "published_on"], name: "index_works_on_pid_type_and_pid_and_published_on", unique: true, using: :btree
   add_index "works", ["published_on"], name: "index_works_on_published_on", using: :btree
   add_index "works", ["publisher_id", "published_on"], name: "index_works_on_publisher_id_and_published_on", using: :btree
 
