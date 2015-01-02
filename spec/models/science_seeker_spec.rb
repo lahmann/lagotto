@@ -91,15 +91,12 @@ describe ScienceSeeker, type: :model, vcr: true do
       expect(response[:events_by_month].first).to eq(year: 2012, month: 5, total: 3)
 
       event = response[:events].first
-
-      expect(event[:event_csl]['author']).to eq([{"family"=>"Duncan", "given"=>""}])
-      expect(event[:event_csl]['title']).to eq("Web analytics: Numbers speak louder than words")
-      expect(event[:event_csl]['container-title']).to eq("O'Really?")
-      expect(event[:event_csl]['issued']).to eq("date-parts"=>[[2012, 5, 18]])
-      expect(event[:event_csl]['type']).to eq("post")
-
-      expect(event[:event_time]).to eq("2012-05-18T07:58:34Z")
-      expect(event[:event_url]).to eq(event[:event]['link']['href'])
+      expect(event['URL']).to eq("http://duncan.hull.name/2012/05/18/two-ton/")
+      expect(event['author']).to eq([{"family"=>"Duncan", "given"=>""}])
+      expect(event['title']).to eq("Web analytics: Numbers speak louder than words")
+      expect(event['container-title']).to eq("O'Really?")
+      expect(event['issued']).to eq("date-parts"=>[[2012, 5, 18]])
+      expect(event['type']).to eq("post")
     end
 
     it "should report if there is one event returned by the ScienceSeeker API" do
@@ -117,15 +114,12 @@ describe ScienceSeeker, type: :model, vcr: true do
       expect(response[:events_by_month].first).to eq(year: 2012, month: 5, total: 1)
 
       event = response[:events].first
-
-      expect(event[:event_csl]['author']).to eq([{"family"=>"Duncan", "given"=>""}])
-      expect(event[:event_csl]['title']).to eq("Web analytics: Numbers speak louder than words")
-      expect(event[:event_csl]['container-title']).to eq("O'Really?")
-      expect(event[:event_csl]['issued']).to eq("date-parts"=>[[2012, 5, 18]])
-      expect(event[:event_csl]['type']).to eq("post")
-
-      expect(event[:event_time]).to eq("2012-05-18T07:58:34Z")
-      expect(event[:event_url]).to eq(event[:event]['link']['href'])
+      expect(event['URL']).to eq("http://duncan.hull.name/2012/05/18/two-ton/")
+      expect(event['author']).to eq([{"family"=>"Duncan", "given"=>""}])
+      expect(event['title']).to eq("Web analytics: Numbers speak louder than words")
+      expect(event['container-title']).to eq("O'Really?")
+      expect(event['issued']).to eq("date-parts"=>[[2012, 5, 18]])
+      expect(event['type']).to eq("post")
     end
 
     it "should catch timeout errors with the ScienceSeeker API" do
