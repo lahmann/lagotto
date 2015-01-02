@@ -33,5 +33,12 @@ module Dateable
     def get_date_parts_from_parts(year, month = nil, day = nil)
       { 'date-parts' => [[year.to_i, month.to_i, day.to_i].reject { |part| part == 0 }] }
     end
+
+    def get_date_from_date_parts(issued)
+      date_parts = issued.fetch("date-parts", []).first
+      Date.new(*date_parts)
+    rescue NoMethodError
+      nil
+    end
   end
 end
