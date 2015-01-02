@@ -4,7 +4,7 @@ class ArticleCoverageCurated < Source
   def get_query_url(work)
     return nil unless work.doi =~ /^10.1371/
 
-    url % { :doi => work.doi_escaped }
+    url % { doi: work.doi_escaped }
   end
 
   def response_options
@@ -12,23 +12,15 @@ class ArticleCoverageCurated < Source
   end
 
   def get_events(result)
-    Array(result['referrals']).map do |item|
+    Array(result.fetch("referrals", nil)).map do |item|
       event_time = get_iso8601_from_time(item['published_on'])
-      url = item['referral']
 
-      { event: item,
-        event_time: event_time,
-        event_url: url,
-
-        # the rest is CSL (citation style language)
-        event_csl: {
-          'author' => '',
-          'title' => item.fetch('title') { '' },
-          'container-title' => item.fetch('publication') { '' },
-          'issued' => get_date_parts(event_time),
-          'url' => url,
-          'type' => get_csl_type(item['type']) }
-        }
+      { "author" => nil,
+        "title" => item.fetch("title", nil),
+        "container-title" => item.fetch("publication", nil),
+        "issued" => get_date_parts(event_time),
+        "URL" => item.fetch("referral", nil),
+        "type" => get_csl_type(item.fetch("type", nil)) }
     end
   end
 
