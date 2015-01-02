@@ -32,20 +32,14 @@ class EuropePmcFulltext < Source
       url = doi ? "http://dx.doi.org/#{doi}" : "http://europepmc.org/abstract/MED/#{pmid}"
       author_string = item.fetch("authorString", "").chomp(".")
 
-      { event: item,
-        event_url: url,
-
-        # the rest is CSL (citation style language)
-        event_csl: {
-          "author" => get_authors(author_string.split(", "), reversed: true),
-          "title" => item.fetch("title", "").chomp("."),
-          "container-title" => item.fetch("journalTitle", nil),
-          "issued" => get_date_parts_from_parts(item.fetch("pubYear", nil)),
-          "doi" => doi,
-          "pmid" => pmid,
-          "url" => url,
-          "type" => "article-journal" }
-      }
+      { "author" => get_authors(author_string.split(", "), reversed: true),
+        "title" => item.fetch("title", "").chomp("."),
+        "container-title" => item.fetch("journalTitle", nil),
+        "issued" => get_date_parts_from_parts(item.fetch("pubYear", nil)),
+        "DOI" => doi,
+        "PMID" => pmid,
+        "URL" => url,
+        "type" => "article-journal" }
     end
   end
 

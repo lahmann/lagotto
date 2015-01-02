@@ -80,12 +80,12 @@ describe EuropePmcFulltext, type: :model, vcr: true do
       expect(response[:events_by_month]).to be_empty
 
       event = response[:events].last
-      expect(event[:event_csl]['author']).to eq([{"family"=>"Richardson", "given"=>"Mf"}, {"family"=>"Weinert", "given"=>"La"}, {"family"=>"Welch", "given"=>"Jj"}, {"family"=>"Linheiro", "given"=>"Rs"}, {"family"=>"Magwire", "given"=>"Mm"}, {"family"=>"Jiggins", "given"=>"Fm"}, {"family"=>"Bergman", "given"=>"Cm"}])
-      expect(event[:event_csl]['title']).to eq("Population genomics of the Wolbachia endosymbiont in Drosophila melanogaster")
-      expect(event[:event_csl]['container-title']).to eq("PLoS Genet")
-      expect(event[:event_csl]['issued']).to eq("date-parts"=>[[2012]])
-      expect(event[:event_csl]['type']).to eq("article-journal")
-      expect(event[:event_csl]['url']).to eq("http://dx.doi.org/10.1371/journal.pgen.1003129")
+      expect(event['author']).to eq([{"family"=>"Richardson", "given"=>"Mf"}, {"family"=>"Weinert", "given"=>"La"}, {"family"=>"Welch", "given"=>"Jj"}, {"family"=>"Linheiro", "given"=>"Rs"}, {"family"=>"Magwire", "given"=>"Mm"}, {"family"=>"Jiggins", "given"=>"Fm"}, {"family"=>"Bergman", "given"=>"Cm"}])
+      expect(event['title']).to eq("Population genomics of the Wolbachia endosymbiont in Drosophila melanogaster")
+      expect(event['container-title']).to eq("PLoS Genet")
+      expect(event['issued']).to eq("date-parts"=>[[2012]])
+      expect(event['type']).to eq("article-journal")
+      expect(event['URL']).to eq("http://dx.doi.org/10.1371/journal.pgen.1003129")
     end
 
     it "should catch timeout errors with the Europe PMC Search API" do
