@@ -24,19 +24,12 @@ class PlosComments < Source
     Array(result['data']).map do |item|
       event_time = get_iso8601_from_time(item['created'])
 
-      { event: item,
-        event_time: event_time,
-        event_url: nil,
-
-        # the rest is CSL (citation style language)
-        event_csl: {
-          'author' => get_authors([item.fetch('creatorFormattedName', "")]),
-          'title' => item.fetch('title', ""),
-          'container-title' => 'PLOS Comments',
-          'issued' => get_date_parts(event_time),
-          'url' => work.doi_as_url,
-          'type' => 'personal_communication' }
-      }
+      { "author" => get_authors([item.fetch('creatorFormattedName', "")]),
+        "title" => item.fetch('title', nil),
+        "container-title" => 'PLOS Comments',
+        "issued" => get_date_parts(event_time),
+        "URL" => work.doi_as_url,
+        "type" => 'personal_communication' }
     end
   end
 
