@@ -3,24 +3,16 @@
 class Nature < Source
   def get_events(result)
     Array(result['data']).map do |item|
-      item.extend Hashie::Extensions::DeepFetch
       event_time = get_iso8601_from_time(item['post']['created_at'])
-      url = item['post']['url']
-      url = "http://#{url}" unless url.start_with?("http://")
+      url = item.fetch("post", {}).fetch("url", nil)
+      url = "http://#{url}" unless url.blank? || url.start_with?("http://")
 
-      { event: item['post'],
-        event_time: event_time,
-        event_url: url,
-
-        # the rest is CSL (citation style language)
-        event_csl: {
-          'author' => '',
-          'title' => item.deep_fetch('post', 'title') { '' },
-          'container-title' => item.deep_fetch('post', 'blog', 'title') { '' },
-          'issued' => get_date_parts(event_time),
-          'url' => url,
-          'type' => 'post' }
-      }
+      { "author" => nil,
+        "title" => item.fetch("post", {}).fetch("title", nil),
+        "container-title" => item.fetch("post", {}).fetch("blog", {}).fetch("title", nil),
+        "issued" => get_date_parts(event_time),
+        "URL" => url,
+        "type" => 'post' }
     end
   end
 
