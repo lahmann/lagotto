@@ -3,7 +3,7 @@ require 'rails_helper'
 describe Wordpress, type: :model, vcr: true do
   subject { FactoryGirl.create(:wordpress) }
 
-  let(:work) { FactoryGirl.build(:work, :doi => "10.1371/journal.pbio.1002020", canonical_url: "", published_on: "2007-07-01") }
+  let(:work) { FactoryGirl.build(:work, :doi => "10.1371/journal.pbio.1002020", canonical_url: "http://www.plosone.org/article/info:doi/10.1371/journal.pone.1002020", published_on: "2007-07-01") }
 
   context "query_url" do
     it "should return nil if the doi and canonical_url are missing" do
@@ -77,15 +77,12 @@ describe Wordpress, type: :model, vcr: true do
       expect(response[:events_by_month].first).to eq(year: 2007, month: 7, total: 1)
 
       event = response[:events].first
-
-      expect(event[:event_csl]['author']).to eq([{"family"=>"Piwowar", "given"=>"Heather"}])
-      expect(event[:event_csl]['title']).to eq("Presentation on Citation Rate for Shared Data")
-      expect(event[:event_csl]['container-title']).to eq("")
-      expect(event[:event_csl]['issued']).to eq("date-parts"=>[[2007, 7, 12]])
-      expect(event[:event_csl]['type']).to eq("post")
-
-      expect(event[:event_time]).to eq("2007-07-12T15:36:38Z")
-      expect(event[:event_url]).to eq(event[:event]['link'])
+      expect(event['URL']).to eq("http://researchremix.wordpress.com/2007/07/12/presentation-on-citation-rate-for-shared-data/")
+      expect(event['author']).to eq([{"family"=>"Piwowar", "given"=>"Heather"}])
+      expect(event['title']).to eq("Presentation on Citation Rate for Shared Data")
+      expect(event['container-title']).to be_nil
+      expect(event['issued']).to eq("date-parts"=>[[2007, 7, 12]])
+      expect(event['type']).to eq("post")
     end
 
     it "should catch timeout errors with the Wordpress API" do
