@@ -27,7 +27,7 @@ class CrossRef < Source
     if work.publisher
       event_count = events.length
     else
-      event_count = result.deep_fetch('crossref_result', 'query_result', 'body', 'query', 'fl_count') { 0 }
+      event_count = result.fetch("crossref_result", {}).fetch("query_result", {}).fetch("body", {}).fetch("query", {}).fetch("fl_count", 0)
     end
 
     { events: events,
@@ -39,7 +39,7 @@ class CrossRef < Source
   end
 
   def get_events(result)
-    events = result.deep_fetch('crossref_result', 'query_result', 'body', 'forward_link') { nil }
+    events = result.fetch("crossref_result", {}).fetch("query_result", {}).fetch("body", {}).fetch("forward_link", nil)
     if events.is_a?(Hash) && events['journal_cite']
       events = [events]
     elsif events.is_a?(Hash)
@@ -47,24 +47,22 @@ class CrossRef < Source
     end
 
     Array(events).map do |item|
-      item = item.fetch('journal_cite') { {} }
+      item = item.fetch("journal_cite", {})
       if item.empty?
         nil
       else
-        url = get_url_from_doi(item.fetch('doi', nil))
+        doi = item.fetch("doi", nil)
 
-        { event: item,
-          event_url: url,
-
-          # the rest is CSL (citation style language)
-          event_csl: {
-            'author' => get_authors(item.fetch('contributors', {}).fetch('contributor', [])),
-            'title' => String(item.fetch('article_title') { '' }).titleize,
-            'container-title' => item.fetch('journal_title') { '' },
-            'issued' => get_date_parts_from_parts(item['year']),
-            'url' => url,
-            'type' => 'article-journal' }
-        }
+        { "author" => get_authors(item.fetch('contributors', {}).fetch('contributor', [])),
+          "title" => String(item.fetch("article_title", "")).titleize,
+          "container-title" => item.fetch("journal_title", nil),
+          "issued" => get_date_parts_from_parts(item.fetch("year", nil)),
+          "DOI" => doi,
+          "URL" => get_url_from_doi(doi),
+          "volume" => item.fetch("volume", nil),
+          "issue" => item.fetch("issue", nil),
+          "page" => item.fetch("first_page", nil),
+          "type" => 'article-journal' }
       end
     end.compact
   end
