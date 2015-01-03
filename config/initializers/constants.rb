@@ -32,3 +32,50 @@ INTERVAL_OPTIONS = [['½ hour', 30.minutes],
                     ['3 months', 3.months],
                     ['6 months', 6.months],
                     ['12 months', 12.months]]
+
+# CrossRef types from http://api.crossref.org/types
+CROSSREF_TYPE_TRANSLATIONS = {
+  "proceedings" => nil,
+  "reference-book" => nil,
+  "journal-issue" => nil,
+  "proceedings-article" => "paper-conference",
+  "other" => nil,
+  "dissertation" => "thesis",
+  "dataset" => "dataset",
+  "edited-book" => "book",
+  "journal-article" => "article-journal",
+  "journal" => nil,
+  "report" => "report",
+  "book-series" => nil,
+  "report-series" => nil,
+  "book-track" => nil,
+  "standard" => nil,
+  "book-section" => "chapter",
+  "book-part" => nil,
+  "book" => "book",
+  "book-chapter" => "chapter",
+  "standard-series" => nil,
+  "monograph" => "book",
+  "component" => nil,
+  "reference-entry" => "entry-dictionary",
+  "journal-volume" => nil,
+  "book-set" => nil
+}
+
+# DataCite resourceTypeGeneral from DataCite metadata schema: http://dx.doi.org/10.5438/0010
+DATACITE_TYPE_TRANSLATIONS = {
+  "Audiovisual" => "motion_picture",
+  "Collection" => nil,
+  "Dataset" => "dataset",
+  "Event" => nil,
+  "Image" => "graphic",
+  "InteractiveResource" => nil,
+  "Model" => nil,
+  "PhysicalObject" => nil,
+  "Service" => nil,
+  "Software" => nil,
+  "Sound" => "song",
+  "Text" => "report",
+  "Workflow" => nil,
+  "Other" => nil
+}
