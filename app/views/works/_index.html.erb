@@ -18,6 +18,7 @@
           <%= f.input_field :month, as: :month %>
           <%= f.input_field :year, as: :year %>
         <% end %>
+        <%= f.input :tracked, :as => :boolean, label: "Track events for this work" %>
 
         <div class="form-group">
           <%= f.submit "Save ", class: "btn btn-default" %>
