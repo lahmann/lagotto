@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150102155118) do
+ActiveRecord::Schema.define(version: 20150103103902) do
 
   create_table "alerts", force: :cascade do |t|
     t.integer  "source_id",    limit: 4
@@ -200,6 +200,15 @@ ActiveRecord::Schema.define(version: 20150102155118) do
   add_index "reports_users", ["report_id", "user_id"], name: "index_reports_users_on_report_id_and_user_id", using: :btree
   add_index "reports_users", ["user_id"], name: "index_reports_users_on_user_id", using: :btree
 
+  create_table "responses", force: :cascade do |t|
+    t.integer  "retrieval_status_id", limit: 4,        null: false
+    t.text     "data",                limit: 16777215
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+  end
+
+  add_index "responses", ["retrieval_status_id"], name: "index_responses_on_retrieval_status_id", using: :btree
+
   create_table "retrieval_histories", force: :cascade do |t|
     t.integer  "retrieval_status_id", limit: 4,               null: false
     t.integer  "work_id",             limit: 4,               null: false
@@ -216,17 +225,18 @@ ActiveRecord::Schema.define(version: 20150102155118) do
   add_index "retrieval_histories", ["source_id", "status", "updated_at"], name: "index_retrieval_histories_on_source_id_and_status_and_updated", using: :btree
 
   create_table "retrieval_statuses", force: :cascade do |t|
-    t.integer  "work_id",       limit: 4,                                     null: false
-    t.integer  "source_id",     limit: 4,                                     null: false
+    t.integer  "work_id",       limit: 4,                                        null: false
+    t.integer  "source_id",     limit: 4,                                        null: false
     t.datetime "queued_at"
-    t.datetime "retrieved_at",                default: '1970-01-01 00:00:00', null: false
-    t.integer  "event_count",   limit: 4,     default: 0
+    t.datetime "retrieved_at",                   default: '1970-01-01 00:00:00', null: false
+    t.integer  "event_count",   limit: 4,        default: 0
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.datetime "scheduled_at",                default: '1970-01-01 00:00:00', null: false
+    t.datetime "scheduled_at",                   default: '1970-01-01 00:00:00', null: false
     t.text     "events_url",    limit: 65535
     t.string   "event_metrics", limit: 255
     t.text     "other",         limit: 65535
+    t.text     "extra",         limit: 16777215
   end
 
   add_index "retrieval_statuses", ["source_id", "event_count", "retrieved_at"], name: "index_retrieval_statuses_source_id_event_count_retr_at_desc", using: :btree
