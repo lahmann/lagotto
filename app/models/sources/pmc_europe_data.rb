@@ -5,19 +5,19 @@ class PmcEuropeData < Source
     if url.starts_with?("http://www.ebi.ac.uk/europepmc/webservices/rest/MED/")
       return nil unless url.present? && work.get_ids && work.pmid.present?
 
-      url % { :pmid => work.pmid }
+      url % { pmid: work.pmid }
     elsif url.starts_with?("http://www.ebi.ac.uk/europepmc/webservices/rest/search/query")
       return nil unless work.doi.present?
 
-      url % { :doi => work.doi }
+      url % { doi: work.doi }
     end
   end
 
   def parse_data(result, work, options={})
     return result if result[:error]
-    result = result["responseWrapper"] || result
+    result = result.fetch("responseWrapper", nil) || result
 
-    event_count = (result["hitCount"]).to_i
+    event_count = result.fetch("hitCount", nil).to_i
     events = get_events(result)
 
     { events: events,
@@ -29,26 +29,20 @@ class PmcEuropeData < Source
   end
 
   def get_events(result)
-    if result["dbCountList"]
+    if result.fetch("dbCountList", nil)
       result["dbCountList"]["db"].reduce({}) { |hash, db| hash.update(db["dbName"] => db["count"]) }
-    elsif result["resultList"]
-      result.extend Hashie::Extensions::DeepFetch
-      events = result.deep_fetch('resultList', 'result') { nil }
+    elsif result.fetch("resultList", nil)
+      events = result.fetch("resultList", {}).fetch("result", nil)
       events = [events] if events.is_a?(Hash)
       Array(events).map do |item|
-        url = item['pmid'] ? "http://europepmc.org/abstract/MED/#{item['pmid']}" : nil
-        { event: item,
-          event_url: url,
+        url = item['pmid'].nil? ? nil : "http://europepmc.org/abstract/MED/#{item['pmid']}"
 
-          # the rest is CSL (citation style language)
-          event_csl: {
-            'author' => get_authors([item.fetch('authorString', "")]),
-            'title' => item.fetch('title', ""),
-            'container-title' => item.fetch('journalTitle', ""),
-            'issued' => get_date_parts_from_parts((item['pubYear']).to_i),
-            'url' => url,
-            'type' => 'article-journal' }
-        }
+        { "author" => get_authors([item.fetch('authorString', "")]),
+          "title" => item.fetch('title', nil),
+          "container-title" => item.fetch('journalTitle', nil),
+          "issued" => get_date_parts_from_parts((item.fetch("pubYear", nil)).to_i),
+          "url" => url,
+          "type" => 'article-journal' }
       end
     else
       []
@@ -57,7 +51,7 @@ class PmcEuropeData < Source
 
   def get_events_url(work)
     if work.pmid.present?
-      events_url % { :pmid => work.pmid }
+      events_url % { pmid: work.pmid }
     else
       nil
     end

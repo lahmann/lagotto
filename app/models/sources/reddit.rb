@@ -4,7 +4,7 @@ class Reddit < Source
   def parse_data(result, work, options={})
     return result if result[:error]
 
-    events = result.deep_fetch('data', 'children') { [] }
+    events = result.fetch("data", {}).fetch("children", [])
 
     likes = get_sum(events, 'data', 'score')
     comments = get_sum(events, 'data', 'num_comments')

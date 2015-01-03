@@ -50,8 +50,7 @@ class F1000 < Source
   # Parse f1000 feed and store in CouchDB. Returns an empty array if no error occured
   def parse_feed(options={})
     document = read_from_file(filename)
-    document.extend Hashie::Extensions::DeepFetch
-    recommendations = document.deep_fetch('ObjectList', 'Article') { nil }
+    recommendations = document.fetch("ObjectList", {}).fetch("Article", nil)
 
     Array(recommendations).each do |item|
       doi = item['Doi']

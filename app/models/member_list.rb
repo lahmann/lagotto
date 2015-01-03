@@ -32,9 +32,6 @@ class MemberList
 
   def get_data(options={})
     result = get_result(query_url, options)
-
-    # extend hash fetch method to nested hashes
-    result.extend Hashie::Extensions::DeepFetch
   end
 
   def parse_data(result)
@@ -42,9 +39,9 @@ class MemberList
     return result if result["status"] != "ok"
 
     # total number of results for pagination
-    @total_entries = result.deep_fetch('message', 'total-results') { 0 }
+    @total_entries = result.fetch("message", {}).fetch("total-results", 0)
 
-    items = result['message'] && result.deep_fetch('message', 'items') { nil }
+    items = result['message'] && result.fetch("message", {}).fetch("items", nil)
 
     # return array of unsaved ActiveRecord objects
     Array(items).map do |item|

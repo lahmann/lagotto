@@ -22,8 +22,7 @@ module Measurable
 
     def get_sum(items, key, nested_key = nil)
       items.empty? ? 0 : items.reduce(0) do |sum, hash|
-        value = hash[key]
-        value = value[nested_key] if nested_key
+        value = hash.fetch(key, {}).fetch(nested_key, nil)
         sum + value.to_i
       end
     end

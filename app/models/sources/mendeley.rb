@@ -11,7 +11,7 @@ class Mendeley < Source
 
     events = result.fetch('stats') { {} }
 
-    readers = result.deep_fetch('stats', 'readers') { 0 }
+    readers = result.fetch("stats", {}).fetch("readers", 0)
     groups = Array(result['groups']).length
     total = readers + groups
 

@@ -30,7 +30,7 @@ class Counter < Source
   end
 
   def get_events(result)
-    events = result.deep_fetch('rest', 'response', 'results', 'item') { nil }
+    events = result.fetch("rest", {}).fetch("response", {}).fetch("results", {}).fetch("item", nil)
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
       { month: item['month'],

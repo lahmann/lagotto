@@ -19,15 +19,12 @@ class Facebook < Source
   def parse_data(result, work, options={})
     return result if result[:error]
 
-    result.extend Hashie::Extensions::DeepFetch
-
     # use depreciated v2.0 API if linkstat_url is used
     # requires user account registerd before August 2014
     if linkstat_url.present?
-      total = result.deep_fetch('data', 0, 'total_count') { 0 }
+      total = result.fetch("data", [{}])[0].fetch("total_count", 0)
     else
-      total = result.deep_fetch('share', 'share_count') { 0 }
-
+      total = result.fetch("share", {}).fetch("share_count", 0)
     end
 
     # don't trust results if event count is above preset limit
@@ -35,14 +32,15 @@ class Facebook < Source
     if total > count_limit.to_i
       shares, comments, likes, total = 0, 0, 0, 0
       events = {}
-    elsif linkstat_url.blank?
+    elsif linkstat_url.present?
+      counts = result.fetch("data", [{}]).first
+      shares = counts.fetch("share_count", 0)
+      comments = counts.fetch("comment_count", 0)
+      likes = counts.fetch("like_count", 0)
+      events = result.fetch("data", {})
+    else
       shares, comments, likes = 0, 0, 0
       events = result
-    else
-      shares = result.deep_fetch('data', 0, 'share_count') { 0 }
-      comments = result.deep_fetch('data', 0, 'comment_count') { 0 }
-      likes = result.deep_fetch('data', 0, 'like_count') { 0 }
-      events = result['data'] || {}
     end
 
     { events: events,
