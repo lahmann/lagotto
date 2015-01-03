@@ -213,14 +213,12 @@ describe Mendeley, :type => :model do
 
     it "should report if the doi, pmid, mendeley uuid and title are missing" do
       result = {}
-      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(null_response)
     end
 
     it "should report if there are events and event_count returned by the Mendeley API" do
       body = File.read(fixture_path + 'mendeley.json')
       result = JSON.parse(body)
-      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:events]).not_to be_nil
       expect(response[:events_url]).not_to be_nil
@@ -230,7 +228,6 @@ describe Mendeley, :type => :model do
     it "should report no events and event_count if the Mendeley API returns incomplete response" do
       body = File.read(fixture_path + 'mendeley_incomplete.json')
       result = JSON.parse(body)
-      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(null_response)
       expect(Alert.count).to eq(0)
     end
@@ -238,7 +235,6 @@ describe Mendeley, :type => :model do
     it "should report no events and event_count if the Mendeley API returns malformed response" do
       body = File.read(fixture_path + 'mendeley_nil.json')
       result = { 'data' => body }
-      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(null_response)
       expect(Alert.count).to eq(0)
     end
@@ -246,7 +242,6 @@ describe Mendeley, :type => :model do
     it "should report no events and event_count if the Mendeley API returns not found error" do
       body = File.read(fixture_path + 'mendeley_error.json')
       result = { error: JSON.parse(body) }
-      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(null_response)
       expect(Alert.count).to eq(0)
     end
@@ -254,7 +249,6 @@ describe Mendeley, :type => :model do
     it "should catch timeout errors with the Mendeley API" do
       work = FactoryGirl.create(:work, :doi => "10.1371/journal.pone.0000001")
       result = { error: "the server responded with status 408 for https://api-oauth2.mendeley.com/oapi/documents/details/#{work.mendeley_uuid}", status: 408 }
-      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response).to eq(result)
     end

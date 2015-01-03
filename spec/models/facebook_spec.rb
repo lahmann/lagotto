@@ -151,14 +151,12 @@ describe Facebook, type: :model, vcr: true do
     it "should report if the doi and canonical URL are missing" do
       work = FactoryGirl.build(:work, doi: nil, canonical_url: nil)
       result = {}
-      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(:events=>{}, :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>0, :groups=>nil, :comments=>0, :likes=>0, :citations=>nil, :total=>0})
     end
 
     it "should report if there are no events and event_count returned by the Facebook API" do
       body = File.read(fixture_path + 'facebook_nil.json')
       result = JSON.parse(body)
-      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:event_count]).to eq(0)
       events = response[:events]
@@ -169,7 +167,6 @@ describe Facebook, type: :model, vcr: true do
     it "should report if there are events and event_count returned by the Facebook API" do
       body = File.read(fixture_path + 'facebook.json')
       result = JSON.parse(body)
-      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:event_count]).to eq(9972)
       events = response[:events]
@@ -191,7 +188,6 @@ describe Facebook, type: :model, vcr: true do
     it "should report if there are no events and event_count returned by the Facebook API" do
       body = File.read(fixture_path + 'facebook_linkstat_nil.json')
       result = JSON.parse(body)
-      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:events]).to eq([{"url"=>"http://dx.doi.org/10.1371/journal.pone.0000001", "share_count"=>0, "like_count"=>0, "comment_count"=>0, "click_count"=>0, "total_count"=>0, "comments_fbid"=>nil}, {"url"=>"http://www.plosmedicine.org/article/info:doi/10.1371/journal.pone.0000001", "share_count"=>0, "like_count"=>0, "comment_count"=>0, "click_count"=>0, "total_count"=>0, "comments_fbid"=>"10150168740355926"}])
       expect(response[:event_count]).to eq(0)
@@ -200,7 +196,6 @@ describe Facebook, type: :model, vcr: true do
     it "should report if there are events and event_count returned by the Facebook API" do
       body = File.read(fixture_path + 'facebook_linkstat.json')
       result = JSON.parse(body)
-      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:events]).to eq([{"url"=>"http://dx.doi.org/10.1371/journal.pmed.0020124", "share_count"=>3120, "like_count"=>1715, "comment_count"=>1910, "click_count"=>2, "total_count"=>6745, "comments_fbid"=>"10150805897619922"}, {"url"=>"http://www.plosmedicine.org/article/info:doi/10.1371/journal.pmed.0020124", "share_count"=>3120, "like_count"=>1715, "comment_count"=>1910, "click_count"=>2, "total_count"=>6745, "comments_fbid"=>"10150168740355926"}])
       expect(response[:event_count]).to eq(6745)

@@ -126,7 +126,6 @@ describe PmcEuropeData, type: :model, vcr: true do
       work = FactoryGirl.build(:work, :pmid => "")
       body = File.read(fixture_path + 'pmc_europe_data.xml')
       result = Hash.from_xml(body)
-      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:event_count]).to eq(1)
       expect(response[:events_url]).to be_nil

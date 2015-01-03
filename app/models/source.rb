@@ -32,9 +32,6 @@ class Source < ActiveRecord::Base
   # include Active Job helpers
   include Jobable
 
-  # include hash helper
-  include Hashie::Extensions::DeepFetch
-
   has_many :retrieval_statuses, :dependent => :destroy
   has_many :works, :through => :retrieval_statuses
   has_many :publishers, :through => :publisher_options
@@ -159,9 +156,6 @@ class Source < ActiveRecord::Base
       # make sure we return a hash
       result = { 'data' => result } unless result.is_a?(Hash)
     end
-
-    # extend hash fetch method to nested hashes
-    result.extend Hashie::Extensions::DeepFetch
   end
 
   def parse_data(result, work, options = {})
