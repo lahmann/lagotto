@@ -43,7 +43,7 @@ describe Figshare, type: :model, vcr: true do
   end
 
   context "parse_data" do
-    let(:null_response) { { :events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>0, :html=>0, :shares=>nil, :groups=>nil, :comments=>nil, :likes=>0, :citations=>nil, :total=>0} } }
+    let(:null_response) { { :events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>0, :html=>0, :shares=>nil, :groups=>nil, :comments=>nil, :likes=>0, :citations=>nil, :total=>0}, extra: nil } }
 
     it "should report if the doi is missing" do
       work = FactoryGirl.build(:work, :doi => nil)
@@ -69,7 +69,7 @@ describe Figshare, type: :model, vcr: true do
       result = JSON.parse(body)
       response = subject.parse_data(result, work)
       expect(response[:event_count]).to eq(14)
-      expect(response[:events].length).to eq(6)
+      expect(response[:extra].length).to eq(6)
       expect(response[:event_metrics]).to eq(pdf: 1, html: 13, shares: nil, groups: nil, comments: nil, likes: 0, citations: nil, total: 14)
     end
 

@@ -54,20 +54,20 @@ describe ArticleCoverageCurated, type: :model, vcr: true do
     it "should report if the doi is missing" do
       work = FactoryGirl.build(:work, :doi => nil)
       result = {}
-      expect(subject.parse_data(result, work)).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>nil, :citations=>nil, :total=>0})
+      expect(subject.parse_data(result, work)).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>nil, :citations=>nil, :total=>0}, :extra=>nil)
     end
 
     it "should report if work doesn't exist in Article Coverage source" do
       result = { error: "Article not found", status: 404 }
       response = subject.parse_data(result, work)
-      expect(response).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>nil, :citations=>nil, :total=>0})
+      expect(response).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>nil, :citations=>nil, :total=>0}, :extra=>nil)
     end
 
     it "should report if there are no events and event_count returned by the Article Coverage API" do
       body = File.read(fixture_path + 'article_coverage_curated_nil.json')
       result = JSON.parse(body)
       response = subject.parse_data(result, work)
-      expect(response).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>nil, :citations=>nil, :total=>0})
+      expect(response).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>nil, :citations=>nil, :total=>0}, :extra=>nil)
     end
 
     it "should report if there are events and event_count returned by the Article Coverage API" do
@@ -87,8 +87,9 @@ describe ArticleCoverageCurated, type: :model, vcr: true do
       expect(event['URL']).to eq("http://www.wildlifeofyourbody.org/?page_id=1348")
       expect(event['author']).to be_nil
       expect(event['title']).to eq("Project Description @ Belly Button Biodiversity")
-      expect(event['container-title']).to be_nil
+      expect(event['container-title']).to be_blank
       expect(event['issued']).to eq("date_parts" => [[]])
+      expect(event['timestamp']).to eq("date_parts" => [[]])
       expect(event['type']).to eq("post")
     end
 

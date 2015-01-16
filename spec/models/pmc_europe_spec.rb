@@ -25,7 +25,7 @@ describe PmcEurope, type: :model, vcr: true do
     end
 
     it "should catch errors with the PMC Europe API" do
-      stub = stub_request(:get, subject.get_query_url(work)).to_return(:status => [408])
+      stub = stub_request(:get, subject.get_query_url(work)).to_return(status: [408])
       response = subject.get_data(work, source_id: subject.id)
       expect(response).to eq(error: "the server responded with status 408 for http://www.ebi.ac.uk/europepmc/webservices/rest/MED/#{work.pmid}/citations/1/json", :status=>408)
       expect(stub).to have_been_requested

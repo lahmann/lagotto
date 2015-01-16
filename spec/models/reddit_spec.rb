@@ -3,6 +3,8 @@ require 'rails_helper'
 describe Reddit, type: :model, vcr: true do
   subject { FactoryGirl.create(:reddit) }
 
+  let(:work) { FactoryGirl.create(:work, doi: "10.1371/journal.ppat.0008776", canonical_url: "http://www.plosone.org/article/info:doi/10.1371/journal.ppat.0008776") }
+
   context "get_data" do
     it "should report that there are no events if the doi and canonical_url are missing" do
       work = FactoryGirl.build(:work, doi: nil, canonical_url: nil)
@@ -10,21 +12,14 @@ describe Reddit, type: :model, vcr: true do
     end
 
     it "should report if there are no events and event_count returned by the Reddit API" do
-      work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0044294")
-      body = File.read(fixture_path + 'reddit_nil.json', encoding: 'UTF-8')
-      stub = stub_request(:get, subject.get_query_url(work)).to_return(:body => body)
+      work = FactoryGirl.build(:work, doi: "10.1371/journal.pone.0044294", canonical_url: "")
       response = subject.get_data(work)
-      expect(response).to eq(JSON.parse(body))
-      expect(stub).to have_been_requested
+      expect(response).to eq(1)
     end
 
     it "should report if there are events and event_count returned by the Reddit API" do
-      work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0008776")
-      body = File.read(fixture_path + 'reddit.json', encoding: 'UTF-8')
-      stub = stub_request(:get, subject.get_query_url(work)).to_return(:body => body)
       response = subject.get_data(work)
-      expect(response).to eq(JSON.parse(body))
-      expect(stub).to have_been_requested
+      expect(response).to eq(1)
     end
 
     it "should catch errors with the Reddit API" do
@@ -73,15 +68,12 @@ describe Reddit, type: :model, vcr: true do
       expect(response[:events_by_month].first).to eq(year: 2013, month: 5, total: 2)
 
       event = response[:events].first
-
-      expect(event[:event_csl]['author']).to eq([{"family"=>"Jjberg2", "given"=>""}])
-      expect(event[:event_csl]['title']).to eq("AskScience AMA: We are the authors of a recent paper on genetic genealogy and relatedness among the people of Europe. Ask us anything about our paper!")
-      expect(event[:event_csl]['container-title']).to eq("Reddit")
-      expect(event[:event_csl]['issued']).to eq("date-parts"=>[[2013, 5, 15]])
-      expect(event[:event_csl]['type']).to eq("personal_communication")
-
-      expect(event[:event_time]).to eq("2013-05-15T17:06:24Z")
-      expect(event[:event_url]).to eq(event[:event]['url'])
+      expect(event['author']).to eq([{"family"=>"Jjberg2", "given"=>""}])
+      expect(event['title']).to eq("AskScience AMA: We are the authors of a recent paper on genetic genealogy and relatedness among the people of Europe. Ask us anything about our paper!")
+      expect(event['container-title']).to eq("Reddit")
+      expect(event['issued']).to eq("date-parts"=>[[2013, 5, 15]])
+      expect(event['timestamp']).to eq("2013-05-15T17:06:24Z")
+      expect(event['type']).to eq("personal_communication")
     end
 
     it "should catch timeout errors with the Reddit API" do

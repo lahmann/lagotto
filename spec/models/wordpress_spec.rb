@@ -24,7 +24,7 @@ describe Wordpress, type: :model, vcr: true do
     end
 
     it "should report if there are no events and event_count returned by the Wordpress API" do
-      work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0044294")
+      work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0044294", canonical_url: "http://www.plosone.org/article/info:doi/10.1371/journal.pone.0044294")
       response = subject.get_data(work)
       expect(response).to eq("data"=>"null")
     end
@@ -37,7 +37,7 @@ describe Wordpress, type: :model, vcr: true do
     end
 
     it "should catch errors with the Wordpress API" do
-      work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0000001")
+      work = FactoryGirl.build(:work, doi: "10.1371/journal.pone.0000001", canonical_url: "http://www.plosone.org/article/info:doi/10.1371/journal.pone.0000001")
       stub = stub_request(:get, subject.get_query_url(work)).to_return(:status => [408])
       response = subject.get_data(work, options = { :source_id => subject.id })
       expect(response).to eq(error: "the server responded with status 408 for http://en.search.wordpress.com/?q=#{work.query_string}&t=post&f=json&size=20", :status=>408)

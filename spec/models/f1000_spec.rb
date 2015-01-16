@@ -96,9 +96,7 @@ describe F1000, type: :model, vcr: true do
       expect(response[:events_by_month].length).to eq(1)
       expect(response[:events_by_month].first).to eq(month: 4, year: 2014, total: 2)
       expect(response[:event_metrics]).to eq(pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 2, total: 2)
-
-      event = response[:events].last
-      expect(event[:event]['classifications']).to eq(["confirmation", "good_for_teaching"])
+      expect(response[:extra]['classifications']).to eq(["confirmation", "good_for_teaching"])
     end
 
     it "should catch timeout errors with f1000" do
