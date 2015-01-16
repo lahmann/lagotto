@@ -8,7 +8,7 @@ http_interactions:
       string: ''
     headers:
       User-Agent:
-      - Lagotto 3.12 - http://lagotto-mysql.local
+      - Lagotto 3.12.1 - http://lagotto-bugfixes.local
       Accept:
       - application/json
   response:
@@ -19,7 +19,7 @@ http_interactions:
       Server:
       - nginx
       Date:
-      - Fri, 02 Jan 2015 21:51:50 GMT
+      - Sun, 04 Jan 2015 13:02:00 GMT
       Content-Type:
       - application/json; charset=UTF-8
       Transfer-Encoding:
@@ -34,7 +34,7 @@ http_interactions:
       X-Frame-Options:
       - SAMEORIGIN
       X-Ac:
-      - 1.fra _sat
+      - 1.lax _dfw
     body:
       encoding: UTF-8
       string: '[{"title":"Are microbes vital on earth?","link":"http:\/\/johandecelle.wordpress.com\/2014\/12\/22\/are-microbes-vital-on-earth\/","epoch_time":"1419280218","author":"johandecelle","guid":"http:\/\/johandecelle.wordpress.com\/2014\/12\/22\/are-microbes-vital-on-earth\/","content":"Life
@@ -43,5 +43,5 @@ http_interactions:
         would not long remain possible in the absence of microbes.\u201d\u2014Louis
         Pasteur\r\nOr [&#8230;]"}]'
     http_version: 
-  recorded_at: Fri, 02 Jan 2015 21:49:03 GMT
+  recorded_at: Sun, 04 Jan 2015 13:02:01 GMT
 recorded_with: VCR 2.9.3

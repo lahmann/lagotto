@@ -146,9 +146,18 @@ describe Work, type: :model, vcr: true do
     end
   end
 
-  it 'sanitize title' do
-    work = FactoryGirl.create(:work, title: "<italic>Test</italic>")
-    expect(work.title).to eq("Test")
+  context "sanitize title" do
+    it "strips tags and attributes" do
+      title = '<span id="date">2013-12-05</span'
+      work = FactoryGirl.create(:work, title: title)
+      expect(work.title).to eq("2013-12-05")
+    end
+
+    it "keeps allowed tags" do
+      title = "Characterization of the Na<sup>+</sup>/H<sup>+</sup> Antiporter from <i>Yersinia pestis</i>"
+      work = FactoryGirl.create(:work, title: title)
+      expect(work.title).to eq(title)
+    end
   end
 
   it 'to doi escaped' do
@@ -190,8 +199,18 @@ describe Work, type: :model, vcr: true do
       expect(work.to_param).to eq "pmcid/PMC#{work.pmcid}"
     end
 
+    it 'for wos' do
+      work = FactoryGirl.create(:work, doi: nil, pmid: nil, pmcid: nil)
+      expect(work.to_param).to eq "wos/#{work.wos}"
+    end
+
+    it 'for scp' do
+      work = FactoryGirl.create(:work, doi: nil, pmid: nil, pmcid: nil, wos: nil)
+      expect(work.to_param).to eq "scp/#{work.scp}"
+    end
+
     it 'for canonical_url' do
-      work = FactoryGirl.create(:work, doi: nil, pmid: nil, pmcid: nil, canonical_url: "http://www.plosone.org/article/info:doi/10.1371/journal.pone.0043007")
+      work = FactoryGirl.create(:work, doi: nil, pmid: nil, pmcid: nil, pmcid: nil, wos: nil, scp: nil, canonical_url: "http://www.plosone.org/article/info:doi/10.1371/journal.pone.0043007")
       expect(work.to_param).to eq "url/#{work.canonical_url}"
     end
   end
@@ -240,7 +259,7 @@ describe Work, type: :model, vcr: true do
 
   it "should get all_urls" do
     work = FactoryGirl.build(:work, :canonical_url => "http://www.plosone.org/work/info%3Adoi%2F10.1371%2Fjournal.pone.0000001")
-    expect(work.all_urls).to eq([work.canonical_url, work.pmid_as_url])
+    expect(work.all_urls).to eq([work.canonical_url, work.pmid_as_europepmc_url].compact + work.events_urls)
   end
 
   context "associations" do

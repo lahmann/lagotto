@@ -3,7 +3,7 @@ require 'rails_helper'
 describe Scopus, type: :model, vcr: true do
   subject { FactoryGirl.create(:scopus) }
 
-  let(:work) { FactoryGirl.build(:work, :doi => "10.1371/journal.pmed.0030442") }
+  let(:work) { FactoryGirl.build(:work, doi: "10.1371/journal.pmed.0030442", scp: nil) }
 
   context "get_data" do
     it "should report that there are no events if the DOI is missing" do
@@ -44,23 +44,27 @@ describe Scopus, type: :model, vcr: true do
     context "parse_data" do
       it "should report if the doi is missing" do
         result = {}
-        expect(subject.parse_data(result, work)).to eq(events: [], :events_by_day=>[], :events_by_month=>[], events_url: nil, event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 }, :extra=>nil)
+        result.extend Hashie::Extensions::DeepFetch
+        expect(subject.parse_data(result, work)).to eq(events: {}, :events_by_day=>[], :events_by_month=>[], events_url: nil, event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 })
       end
 
       it "should report if there are no events and event_count returned by the Scopus API" do
         body = File.read(fixture_path + 'scopus_nil.json')
         result = JSON.parse(body)
+        result.extend Hashie::Extensions::DeepFetch
         work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.000001")
         response = subject.parse_data(result, work)
-        expect(response).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>nil, :likes=>nil, :citations=>0, :total=>0}, :extra=>{"@force-array"=>"true", "error"=>"Result set was empty"})
+        expect(response).to eq(:events=>{"@force-array"=>"true", "error"=>"Result set was empty"}, :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>nil, :likes=>nil, :citations=>0, :total=>0})
       end
 
       it "should report if there are events and event_count returned by the Scopus API" do
         body = File.read(fixture_path + 'scopus.json')
         result = JSON.parse(body)
-        extra = JSON.parse(body)["search-results"]["entry"][0]
+        result.extend Hashie::Extensions::DeepFetch
+        events = JSON.parse(body)["search-results"]["entry"][0]
         response = subject.parse_data(result, work)
-        expect(response).to eq(events: [], :events_by_day=>[], :events_by_month=>[], event_count: 1814, events_url: "http://www.scopus.com/inward/citedby.url?partnerID=HzOxMe3b&scp=33845338724", event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 1814, total: 1814 }, extra: extra)
+        expect(response).to eq(events: events, :events_by_day=>[], :events_by_month=>[], event_count: 1814, events_url: "http://www.scopus.com/inward/citedby.url?partnerID=HzOxMe3b&scp=33845338724", event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 1814, total: 1814 })
+        expect(work.scp).to eq("33845338724")
       end
 
       it "should catch timeout errors with the Scopus API" do

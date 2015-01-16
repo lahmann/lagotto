@@ -3,6 +3,104 @@ layout: card_list
 title: "Releases"
 ---
 
+## Lagotto 3.13 (January 15, 2015)
+
+[Lagotto 3.13](https://github.com/articlemetrics/lagotto/releases/tag/v.3.13) was released on January 15, 2015 with the following changes:
+
+* mention [Lagotto Support Forum](http://discuss.lagotto.io) in `README.md` ([#224](https://github.com/articlemetrics/lagotto/issues/224))
+* updated Chef cookbooks to use `shared` folder instead of `current` for better compatibility with Capistrano ([#227](https://github.com/articlemetrics/lagotto/issues/227))
+* display rate-limiting information from headers sent by Twitter and Github ([#228](https://github.com/articlemetrics/lagotto/issues/228))
+* added automated import from the DataONE ([#231](https://github.com/articlemetrics/lagotto/issues/231))
+
+The big change in this release is the switch from [delayed_job](https://github.com/collectiveidea/delayed_job) to [Sidekiq](https://github.com/mperham/sidekiq) for background processing. Sidekiq requires the `redis` database that can be installed either via the updated Chef scripts, or manually, e.g. on Ubuntu:
+
+```sh
+sudo apt-get install redis-server
+```
+
+Also, make sure the following ENV variable is set in your `.env` file:
+
+```sh
+# number of threads Sidekiq uses
+CONCURRENCY=25
+```
+
+No redis or sidekiq configuration is necessary, but make sure all `delayed_job` worker processes are killed when upgrading.
+
+## Lagotto 3.12.7 (January 9, 2015)
+
+[Lagotto 3.12.7](https://github.com/articlemetrics/lagotto/releases/tag/v.3.12.7) was released on January 9, 2015 with the following change:
+
+* proper handling of HTML `Page Not Found` errors ([#229](https://github.com/articlemetrics/lagotto/issues/229))
+* API keys are no longer required for non-admin API calls ([#230](https://github.com/articlemetrics/lagotto/issues/230))
+
+## Lagotto 3.12.6 (January 6, 2015)
+
+[Lagotto 3.12.6](https://github.com/articlemetrics/lagotto/releases/tag/v.3.12.6) was released on January 6, 2015 with the following change:
+
+* added **works published last day**, **api responses last hour**, and **api requests last hour** to `/heartbeat` API endpoint, and changed status page accordingly ([#226](https://github.com/articlemetrics/lagotto/issues/226))
+
+## Lagotto 3.12.5 (January 6, 2015)
+
+[Lagotto 3.12.5](https://github.com/articlemetrics/lagotto/releases/tag/v.3.12.5) was released on January 6, 2015 with the following change:
+
+* keep `<i>`, `<b>`, `<sup>`, `<sub>`, and `<sc>` HTML tags in work titles, following the [CSL specification on rich text markup](http://citationstyles.org/downloads/upgrade-notes.html#rich-text-markup-within-fields) ([#225](https://github.com/articlemetrics/lagotto/issues/225))
+
+## Lagotto 3.12.4 (January 5, 2015)
+
+[Lagotto 3.12.4](https://github.com/articlemetrics/lagotto/releases/tag/v.3.12.4) was released on January 5, 2015 with the following change:
+
+* Store and display Scopus and Web of Science identifiers ([#221](https://github.com/articlemetrics/lagotto/issues/221))
+
+## Lagotto 3.12.3 (January 4, 2015)
+
+[Lagotto 3.12.3](https://github.com/articlemetrics/lagotto/releases/tag/v.3.12.3) was released on January 4, 2015 with the following change:
+
+* added ORCID as new source ([#220](https://github.com/articlemetrics/lagotto/issues/220))
+
+To load the new source please run
+
+```sh
+RAILS_ENV=production bundle exec rake db:seed
+```
+
+## Lagotto 3.12.2 (January 4, 2015)
+
+[Lagotto 3.12.2](https://github.com/articlemetrics/lagotto/releases/tag/v.3.12.2) was released on January 4, 2015 with the following changes:
+
+* store blank values for works as `nil`, using the [nilify_blanks](https://github.com/rubiety/nilify_blanks) gem ([#218](https://github.com/articlemetrics/lagotto/issues/218))
+* Don't cache worker_count for sources, as otherwise the rate-limiting functionality doesn't work properly ([#219](https://github.com/articlemetrics/lagotto/issues/219))
+
+## Lagotto 3.12.1 (January 4, 2015)
+
+[Lagotto 3.12.1](https://github.com/articlemetrics/lagotto/releases/tag/v.3.12.1) was released on January 4, 2015 with the following changes:
+
+* log responses from external APIs to JSON file in logstash format ([#214](https://github.com/articlemetrics/lagotto/issues/214))
+* better handling of ActiveJob errors ([#215](https://github.com/articlemetrics/lagotto/issues/215))
+* run daily works import at the end of the day using a new `cron:nightly`rake task, and write to separate `cron_import.log` ([#216](https://github.com/articlemetrics/lagotto/issues/216))
+* show all URLs associated with a work (and don't show the citeulike URL if there are no events) ([#217](https://github.com/articlemetrics/lagotto/issues/217))
+
+Starting with this release, the raw responses from external sources are stored in a JSON file `log/agent.log` in logstash format, using the source name and work pid as tags:
+
+```sh
+{
+  "message": "{\"total_rows\"=>328331, \"offset\"=>121903, \"rows\"=>[{\"id\"=>\"232944431433666561\", \"key\"=>\"10.1371/journal.pone.0042231\", \"value\"=>{\"_id\"=>\"232944431433666561\", \"_rev\"=>\"1-40047ae514c178f154fa7b0f877f146a\", \"text\"=>\"Role of the Irr Protein in the Regulation of Iron Metabolism in Rhodobacter sphaeroides http://t.co/JbOupbjK\", \"from_user_id\"=>38951828, \"from_user_name\"=>\"Test\", \"geo\"=>nil, \"profile_image_url_https\"=>\"https://si0.twimg.com/sticky/default_profile_images/default_profile_6_normal.png\", \"iso_language_code\"=>\"en\", \"to_user_name\"=>nil, \"entities\"=>{\"urls\"=>[{\"expanded_url\"=>\"http://bit.ly/O0DVOi\", \"indices\"=>[88, 108], \"display_url\"=>\"bit.ly/O0DVOi\", \"url\"=>\"http://t.co/JbOupbjK\"}, {\"expanded_url\"=>\"http://www.plosone.org/article/info:doi%2F10.1371%2Fjournal.pone.0042231\", \"display_url\"=>\"http://www.plosone.org/article/info:doi%2F10.1371%2Fjournal.pone.0042231\", \"url\"=>\"http://www.plosone.org/article/info:doi%2F10.1371%2Fjournal.pone.0042231\"}], \"hashtags\"=>[], \"user_mentions\"=>[]}, \"to_user_id\"=>0, \"id\"=>232944431433666560, \"to_user_id_str\"=>\"0\", \"source\"=>\"&lt;a href=&quot;http://twitterfeed.com&quot; rel=&quot;nofollow&quot;&gt;twitterfeed&lt;/a&gt;\", \"from_user_id_str\"=>\"38951828\", \"from_user\"=>\"TestCellBio\", \"created_at\"=>\"Tue, 07 Aug 2012 21:00:55 +0000\", \"to_user\"=>nil, \"id_str\"=>\"232944431433666561\", \"profile_image_url\"=>\"http://a0.twimg.com/sticky/default_profile_images/default_profile_6_normal.png\", \"metadata\"=>{\"result_type\"=>\"recent\"}}}]}",
+  "@timestamp": "2015-01-04T01:13:53.387-08:00",
+  "@version": "1",
+  "severity": "INFO",
+  "host": "rwc-prod-alm03",
+  "tags": [
+    "ActiveJob",
+    "SourceJob",
+    "2822afb7-1a37-4084-b3c2-b0b87f0370a0",
+    "twitter",
+    "10.1371/journal.pone.0042231"
+  ]
+}
+```
+
+This file can be further processed with logstash and made available for download.
+
 ## Lagotto 3.12 (January 1, 2015)
 
 [Lagotto 3.12](https://github.com/articlemetrics/lagotto/releases/tag/v.3.12) was released on January 1, 2015 with the following changes:
@@ -28,6 +126,12 @@ The automatic import of works - configured in the `.env` file - has changed:
 # datacite - all works in DataCite metadata index
 # plos - all PLOS articles
 IMPORT=
+```
+
+To load the new sources please run
+
+```sh
+RAILS_ENV=production bundle exec rake db:seed
 ```
 
 ## Lagotto 3.11 (December 24, 2014)
@@ -58,6 +162,12 @@ CAS_INFO_URL=
 CAS_PREFIX=
 ```
 
+To load the new Github source please run
+
+```sh
+RAILS_ENV=production bundle exec rake db:seed
+```
+
 ## Lagotto 3.10 (December 18, 2014)
 
 [Lagotto 3.10](https://github.com/articlemetrics/lagotto/releases/tag/v.3.10) was released on December 18, 2014 with the following changes:
@@ -70,6 +180,12 @@ If you are upgrading and have used DOIs as persistent identifier, please run the
 
 ```sh
 RAILS_ENV=production bundle exec rake db:works:load_pids
+```
+
+To load the renamed filters, please run
+
+```sh
+RAILS_ENV=production bundle exec rake db:seed
 ```
 
 ## Lagotto 3.9.8 (December 17, 2014)

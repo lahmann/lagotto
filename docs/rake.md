@@ -154,18 +154,6 @@ Queue work with given pid:
 bin/rake queue:one[pid]
 ```
 
-Start job queue
-
-```sh
-bin/rake queue:start
-```
-
-Stop job queue
-
-```sh
-bin/rake queue:stop
-```
-
 By default the rake tasks above run for all sources. Do have them run for one or more specific sources, add the source names as parameters:
 
 ```sh
@@ -296,18 +284,30 @@ Zip reports.
 bin/rake report:zip
 ```
 
-## workers.rake
+## sidekiq.rake
 
-Start all the workers.
+Start Sidekiq background processes.
 
 ```sh
-bin/rake workers:start_all
+bin/rake sidekiq:start
 ```
 
-Stop all the workers.
+Stop Sidekiq background processes.
 
 ```sh
-bin/rake workers:stop_all
+bin/rake sidekiq:stop
+```
+
+Stop Sidekiq background processes to accept new work.
+
+```sh
+bin/rake sidekiq:quiet
+```
+
+Check status of Sidekiq background processes.
+
+```sh
+bin/rake sidekiq:monitor
 ```
 
 ## filter.rake

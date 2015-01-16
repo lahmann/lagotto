@@ -56,7 +56,7 @@ describe Researchblogging, type: :model, vcr: true do
       body = File.read(fixture_path + 'researchblogging_nil.xml')
       result = Hash.from_xml(body)
       response = subject.parse_data(result, work)
-      expect(response).to eq(events: [], :events_by_day=>[], :events_by_month=>[], event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 }, events_url: subject.get_events_url(work))
+      expect(response).to eq(events: [], :events_by_day=>[], :events_by_month=>[], event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 }, events_url: nil)
     end
 
     it "should report if there are events and event_count returned by the ResearchBlogging API" do

@@ -1,5 +1,5 @@
 <div class="panel panel-default">
-  <div class="panel-heading panel-title" id="api_key" data-api_key="<%= ENV['API_KEY'] %>" data-pid_type="<%= @work.pid_type %>" data-pid="<%= @work.pid %>">
+  <div class="panel-heading panel-title" id="api_key" data-api_key="<%= current_user && current_user.api_key %>" data-pid_type="<%= @work.pid_type %>" data-pid="<%= @work.pid %>">
     <% if can?(:manage, Work) && controller.action_name != "edit" && !(controller.action_name == "update" && !@work.errors.empty?) %>
       <div class="btn-toolbar pull-right">
         <div class="btn-group btn-group-sm">
@@ -10,26 +10,28 @@
         </div>
         </div>
     <% end %>
-    <%= @work.title %>
+    <%= @work.title.html_safe %>
   </div>
   <div class="panel-body">
     <% if can?(:manage, Work) && (controller.action_name == "edit" || (controller.action_name == "update" && !@work.errors.empty?)) %>
       <%= simple_form_for @work, :url => work_path(@work), :html => { :role => "form", :remote => true } do |f| %>
         <%= f.input :title, :input_html => { :rows => 2 } %>
         <%= f.input :doi, :label => 'DOI', :disabled => @work.pid_type == "doi" %>
-        <%= f.input :pmid, :label => 'PubMed ID', :disabled => @work.pid_type == "pmid" %>
-        <%= f.input :pmcid, :label => 'PubMed Central ID', :disabled => @work.pid_type == "pmcid" %>
         <%= f.input :canonical_url, :label => 'Canonical URL', :disabled => @work.pid_type == "url" %>
+        <%= f.input :pmid, :label => 'PubMed', :disabled => @work.pid_type == "pmid" %>
+        <%= f.input :pmcid, :label => 'PubMed Central', :disabled => @work.pid_type == "pmcid" %>
+        <%= f.input :wos, :label => 'Web of Science', :disabled => @work.pid_type == "wos" %>
+        <%= f.input :scp, :label => 'Scopus', :disabled => @work.pid_type == "scp" %>
+        <%= f.input :ark, :label => 'Ark', :disabled => @work.pid_type == "ark" %>
         <%= f.association :work_type, :include_blank => false %>
         <% if publishers.length > 1 %>
-          <%= f.association :publisher, collection: Publisher.order('title').map { |publisher| [publisher.title, publisher.member_id] }, input_html: { class: "form-user" } %>
+          <%= f.association :publisher, collection: Publisher.order("title").map { |publisher| [publisher.title, publisher.member_id] }, input_html: { class: "form-user" } %>
         <% end %>
         <%= f.input :published_on, label: "Publication Date" do %>
           <%= f.input_field :day, as: :day %>
           <%= f.input_field :month, as: :month %>
           <%= f.input_field :year, as: :year %>
         <% end %>
-        <%= f.input :tracked, :as => :boolean, label: "Track events for this work" %>
 
         <div class="form-group">
           <%= f.submit "Save ", class: "btn btn-default" %>
@@ -52,64 +54,69 @@
           <dt>DOI</dt>
           <dd class="doi" %><%= link_to h(@work.doi), @work.doi_as_url %></dd>
         <% end %>
+        <% if @work.canonical_url.present? %>
+          <dt>Publisher URL</dt>
+          <dd><%= link_to h(@work.canonical_url), @work.canonical_url %></dd>
+        <% end %>
         <% if @work.pmid.present? %>
-          <dt>PubMed ID</dt>
-          <dd id="pmid" data-pmid="<%= @work.pmid %>"><%= link_to @work.pmid, "http://www.ncbi.nlm.nih.gov/pubmed/#{@work.pmid}" %></dd>
+          <dt>PubMed</dt>
+          <dd id="pmid" data-pmid="<%= @work.pmid %>"><%= link_to @work.pmid, @work.pmid_as_url %></dd>
         <% end %>
         <% if @work.pmcid.present? %>
-          <dt>PubMed Central ID</dt>
-          <dd id="pmcid" data-pmcid="<%= @work.pmcid %>"><%= link_to "PMC#{@work.pmcid}", "http://www.ncbi.nlm.nih.gov/pmc/works/PMC#{@work.pmcid}" %></dd>
+          <dt>PubMed Central</dt>
+          <dd id="pmcid" data-pmcid="<%= @work.pmcid %>"><%= link_to "PMC#{@work.pmcid}", @work.pmcid_as_url %></dd>
         <% end %>
-        <% if @work.all_urls.present? %>
-          <dt>URLs</dt>
-          <dd>
-            <% if @work.canonical_url.present? %>
-              <%= link_to h(@work.canonical_url), @work.canonical_url %><br/>
-            <% end %>
-            <% if @work.pmid.present? %>
-              <%= link_to "http://europepmc.org/abstract/MED/#{@work.pmid}", "http://europepmc.org/abstract/MED/#{@work.pmid}" %><br/>
-            <% end %>
-            <% if @work.mendeley_url.present? %>
-              <%= link_to h(@work.mendeley_url), @work.mendeley_url %><br/>
-            <% end %>
-            <% if @work.citeulike_url.present? %>
-              <%= link_to h(@work.citeulike_url), @work.citeulike_url %><br/>
-            <% end %>
-          </dd>
+        <% if @work.pmid.present? %>
+          <dt>Europe PMC</dt>
+          <dd><%= link_to h(@work.pmid_as_europepmc_url), @work.pmid_as_europepmc_url %></dd>
+        <% end %>
+        <% if @work.wos.present? && @work.wos_url.present? %>
+          <dt>Web of Science</dt>
+          <dd><%= link_to @work.wos, @work.wos_url %></dd>
+        <% end %>
+        <% if @work.scp.present? && @work.scopus_url.present? %>
+          <dt>Scopus</dt>
+          <dd><%= link_to @work.scp, @work.scopus_url %></dd>
+        <% end %>
+        <% if @work.ark.present? %>
+          <dt>Ark</dt>
+          <dd><%= link_to @work.ark, @work.ark_as_url %></dd>
+        <% end %>
+        <% if @work.mendeley_url.present? %>
+          <dt>Mendeley</dt>
+          <dd><%= link_to @work.mendeley_url, @work.mendeley_url %></dd>
         <% end %>
       </dl>
     <% end %>
   </div>
 </div>
 
-<% if @work.tracked? %>
-  <% if can?(:read, Alert) %>
-    <div id="alert-error-message">
-      <%= render :partial => 'alert_message' %>
-    </div>
-  <% end %>
-
-  <ul class="nav nav-pills">
-    <li class="active"><a href="#metrics" data-toggle="tab" title="Metrics">Metrics</a></li>
-    <li><a href="#events" data-toggle="tab" title="Events">Events</a></li>
-    <li><a href="#more" data-toggle="tab" title="More">Details</a></li>
-    <% if can?(:read, Alert) %>
-      <li><a href="#alert" data-toggle="tab" title="Alerts">Alerts</a></li>
-    <% end %>
-  </ul>
-
-  <div class="tab-content">
-    <div class="tab-pane active" id="metrics">
-      <%= render :partial => 'metrics' %>
-    </div>
-    <div class="tab-pane" id="events">
-      <%= render :partial => 'events' %>
-    </div>
-    <div class="tab-pane" id="more">
-      <%= render :partial => 'more' %>
-    </div>
-    <div class="tab-pane" id="alert">
-      <%= render :partial => 'alert' %>
-    </div>
+<% if can?(:read, Alert) %>
+  <div id="alert-error-message">
+    <%= render :partial => 'alert_message' %>
   </div>
 <% end %>
+
+<ul class="nav nav-pills">
+  <li class="active"><a href="#metrics" data-toggle="tab" title="Metrics">Metrics</a></li>
+  <li><a href="#events" data-toggle="tab" title="Events">Events</a></li>
+  <li><a href="#more" data-toggle="tab" title="More">Details</a></li>
+  <% if can?(:read, Alert) %>
+    <li><a href="#alert" data-toggle="tab" title="Alerts">Alerts</a></li>
+  <% end %>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="metrics">
+    <%= render :partial => 'metrics' %>
+  </div>
+  <div class="tab-pane" id="events">
+    <%= render :partial => 'events' %>
+  </div>
+  <div class="tab-pane" id="more">
+    <%= render :partial => 'more' %>
+  </div>
+  <div class="tab-pane" id="alert">
+    <%= render :partial => 'alert' %>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+:logfile: ./log/sidekiq.log
+:concurrency: <%= ENV["CONCURRENCY"].to_i %>
+:queues:
+  - [critical, 7]
+  - [high, 5]
+  - [default, 3]
+  - low
+  - mailers

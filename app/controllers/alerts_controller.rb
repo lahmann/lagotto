@@ -78,12 +78,15 @@ class AlertsController < ApplicationController
       collection = collection.where(:class_name => params[:class_name])
       @class_name = params[:class_name]
     end
+    if params[:work_id]
+      collection = collection.where(:work_id => params[:work_id])
+      @work = Work.where(id: params[:work_id]).first
+    end
     collection = collection.query(params[:q]) if params[:q]
 
     @alerts = collection.paginate(:page => params[:page])
     respond_with(@alerts) do |format|
       if params[:work_id]
-        @work = Work.where(id: work_id).first
         format.js { render :alert }
       else
         format.js { render :index }
@@ -92,6 +95,7 @@ class AlertsController < ApplicationController
   end
 
   def routing_error
-    redirect_to root_path, :alert => "The page you are looking for doesn't exist."
+    @alert = Alert.new(message: "The page you are looking for doesn't exist.", status: 404)
+    render "alerts/show", status: 404
   end
 end

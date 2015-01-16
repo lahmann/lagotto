@@ -29,8 +29,8 @@ class Source < ActiveRecord::Base
   # include summary counts
   include Countable
 
-  # include Active Job helpers
-  include Jobable
+  # include hash helper
+  include Hashie::Extensions::DeepFetch
 
   has_many :retrieval_statuses, :dependent => :destroy
   has_many :works, :through => :retrieval_statuses
@@ -44,13 +44,8 @@ class Source < ActiveRecord::Base
 
   validates :name, :presence => true, :uniqueness => true
   validates :display_name, :presence => true
-  validates :priority, :numericality => { :only_integer => true, :greater_than => 0 }
-  validates :workers, :numericality => { :only_integer => true, :greater_than => 0 }
   validates :timeout, :numericality => { :only_integer => true, :greater_than => 0 }
-  validates :wait_time, :numericality => { :only_integer => true, :greater_than => 0 }
   validates :max_failed_queries, :numericality => { :only_integer => true, :greater_than => 0 }
-  validates :max_failed_query_time_interval, :numericality => { :only_integer => true, :greater_than => 0 }
-  validates :job_batch_size, :numericality => { :only_integer => true }, :inclusion => { :in => 1..1000, :message => "should be between 1 and 1000" }
   validates :rate_limiting, :numericality => { :only_integer => true, :greater_than => 0 }
   validates :staleness_week, :numericality => { :only_integer => true, :greater_than => 0 }
   validates :staleness_month, :numericality => { :only_integer => true, :greater_than => 0 }
@@ -86,7 +81,7 @@ class Source < ActiveRecord::Base
   end
 
   def remove_queues
-    delete_jobs(name)
+    # delete_jobs(name)
     retrieval_statuses.update_all(queued_at: nil)
   end
 
@@ -105,7 +100,7 @@ class Source < ActiveRecord::Base
     end
 
     rs = rs.order("retrieval_statuses.id").pluck("retrieval_statuses.id")
-    count = queue_work_jobs(rs, priority: priority)
+    count = queue_work_jobs(rs)
   end
 
   def queue_work_jobs(rs, options = {})
@@ -118,32 +113,44 @@ class Source < ActiveRecord::Base
 
     rs.each_slice(job_batch_size) do |rs_ids|
       RetrievalStatus.where("id in (?)", rs_ids).update_all(queued_at: Time.zone.now)
-      SourceJob.set(queue: name, wait_until: schedule_at).perform_later(rs_ids, self)
+      SourceJob.set(queue: queue, wait_until: schedule_at).perform_later(rs_ids, self)
     end
 
     rs.length
   end
 
-  def schedule_at
-    last_job = get_last_job(name)
-    return Time.zone.now if last_job.nil?
-
-    last_job + batch_interval
+  def last_response
+    @last_response ||= api_responses.maximum(:created_at) || Time.zone.now
   end
 
-  # condition for not adding more jobs and disabling the source
+  def schedule_at
+    last_response + batch_interval
+  end
+
+  # disable source if more than max_failed_queries (default: 200) in 24 hrs
   def check_for_failures
     failed_queries = Alert.where("source_id = ? AND level > 1 AND updated_at > ?", id, Time.zone.now - max_failed_query_time_interval).count
     failed_queries > max_failed_queries
   end
 
-  # limit the number of workers per source
-  def check_for_available_workers
-    workers >= worker_count
+  # disable source if wait time at least 10 sec because of rate-limiting
+  def check_for_rate_limits
+    future_response_count < 360
   end
 
-  def check_for_active_workers
-    worker_count > 1
+  # API responses last 60 min
+  def current_response_count
+    @current_response_count ||= api_responses.total(1).size
+  end
+
+  # expected API responses next 60 min, should be larger than zero
+  def future_response_count
+    @future_response_count ||= [rate_limiting * 2 - current_response_count, 0.001].sort.last
+  end
+
+  # calculate wait time until next API call
+  def wait_time
+    3600 / future_response_count
   end
 
   def get_data(work, options={})
@@ -172,12 +179,12 @@ class Source < ActiveRecord::Base
     metrics = options[:metrics] || :citations
 
     events = get_events(result)
-    extra = get_extra(result)
+    events_url = events.length > 0 ? get_events_url(work) : nil
 
     { events: events,
       events_by_day: get_events_by_day(events, work),
       events_by_month: get_events_by_month(events),
-      events_url: get_events_url(work),
+      events_url: events_url,
       event_count: events.length,
       event_metrics: get_event_metrics(metrics => events.length),
       extra: extra }
@@ -218,13 +225,13 @@ class Source < ActiveRecord::Base
 
   def get_query_url(work)
     if url.present? && work.doi.present?
-      url % { :doi => work.doi_escaped }
+      url % { doi: work.doi_escaped }
     end
   end
 
   def get_events_url(work)
     if events_url.present? && work.doi.present?
-      events_url % { :doi => work.doi_escaped }
+      events_url % { doi: work.doi_escaped }
     end
   end
 
@@ -295,7 +302,6 @@ class Source < ActiveRecord::Base
     # loop through cached attributes we want to update
     [:event_count,
      :work_count,
-     :job_count,
      :queued_count,
      :stale_count,
      :response_count,

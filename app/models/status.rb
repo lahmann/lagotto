@@ -2,9 +2,6 @@ class Status
   # include HTTP request helpers
   include Networkable
 
-  # include Active Job helpers
-  include Jobable
-
   RELEASES_URL = "https://api.github.com/repos/articlemetrics/lagotto/releases"
 
   def works_count
@@ -19,17 +16,17 @@ class Status
     Rails.cache.write("status/works_count/#{timestamp}", Work.count)
   end
 
-  def works_last30_count
+  def works_last_day_count
     if ActionController::Base.perform_caching
-      Rails.cache.read("status/works_last30_count/#{update_date}").to_i
+      Rails.cache.read("status/works_last_day_count/#{update_date}").to_i
     else
-      Work.last_x_days(30).count
+      Work.last_x_days(1).count
     end
   end
 
-  def works_last30_count=(timestamp)
-    Rails.cache.write("status/works_last30_count/#{timestamp}",
-                      Work.last_x_days(30).count)
+  def works_last_day_count=(timestamp)
+    Rails.cache.write("status/works_last_day_count/#{timestamp}",
+                      Work.last_x_days(1).count)
   end
 
   def events_count
@@ -60,34 +57,90 @@ class Status
                       Alert.errors.count)
   end
 
+  def workers_size
+    @workers_size ||= workers.size
+  end
+
   def workers
-    if ActionController::Base.perform_caching && ENV["APP_WORKERS"].present?
-      Rails.cache.read("status/workers/#{update_date}") || []
+    @workers ||= Sidekiq::Workers.new
+  end
+
+  def stats
+    @stats ||= Sidekiq::Stats.new
+  end
+
+  def current_status
+    if workers_size > 0
+      "working"
+    elsif process_set.size > 0
+      "waiting"
     else
-      Worker.all
+      "stopped"
     end
   end
 
-  def workers=(timestamp)
-    Rails.cache.write("status/workers/#{timestamp}",
-                      Worker.all)
+  def process_set
+    @process_set ||= Sidekiq::ProcessSet.new
   end
 
-  def workers_count
-    workers.length
+  def process_pid
+    process_set.first ? process_set.first["pid"] : nil
   end
 
-  def job_count
-    if ActionController::Base.perform_caching
-      Rails.cache.read("status/job_count/#{update_date}").to_i
+  def process_pidfile
+    "/var/www/#{ENV['APPLICATION']}/shared/tmp/pids/sidekiq.pid"
+  end
+
+  def process_logfile
+    "/var/www/#{ENV['APPLICATION']}/shared/log/sidekiq.log"
+  end
+
+  def process_configfile
+    "/var/www/#{ENV['APPLICATION']}/current/config/sidekiq.yml"
+  end
+
+  def process_stop
+    if process_pid
+      IO.write(process_pidfile, process_pid) unless File.exist? process_pidfile
+      message = `/usr/bin/env bundle exec sidekiqctl stop #{process_pidfile} 10`
     else
-      get_job_count
+      message = "No Sidekiq process running."
     end
   end
 
-  def job_count=(timestamp)
-    Rails.cache.write("status/job_count/#{timestamp}",
-                      get_job_count)
+  def process_quiet
+    if process_pid
+      IO.write(process_pidfile, process_pid) unless File.exist? process_pidfile
+      `/usr/bin/env bundle exec sidekiqctl quiet #{process_pidfile}`
+      message = "Sidekiq turned quiet."
+    else
+      message = "No Sidekiq process running."
+    end
+  end
+
+  def process_start
+    if process_pid
+      ps = process_set.first
+      message = "Sidekiq process running, Sidekiq process started at #{Time.at(ps['started_at']).utc.iso8601}."
+    else
+      `/usr/bin/env bundle exec sidekiq --pidfile #{process_pidfile} --environment #{ENV['RAILS_ENV']} --logfile #{process_logfile} --config #{process_configfile} --daemon`
+      message = "No Sidekiq process running, Sidekiq process started at #{Time.zone.now.utc.iso8601}."
+    end
+  end
+
+  def process_monitor
+    ps = process_set.first
+    if ps.nil?
+      process_start
+      message = "No Sidekiq process running, Sidekiq process started at #{Time.zone.now.utc.iso8601}."
+      Alert.create(:exception => "",
+                   :class_name => "StandardError",
+                   :message => message,
+                   :level => Alert::FATAL)
+      message
+    else
+      message = "Sidekiq process running, Sidekiq process started at #{Time.at(ps['started_at']).utc.iso8601}."
+    end
   end
 
   def responses_count
@@ -114,6 +167,19 @@ class Status
   def requests_count=(timestamp)
     Rails.cache.write("status/requests_count/#{timestamp}",
                       ApiRequest.total(1).count)
+  end
+
+  def requests_average
+    if ActionController::Base.perform_caching
+      Rails.cache.fetch("status/requests_average/#{update_date}").to_i
+    else
+      ApiRequest.total(1).average("duration").to_i
+    end
+  end
+
+  def requests_average=(timestamp)
+    Rails.cache.write("status/requests_average/#{timestamp}",
+                      ApiRequest.total(1).average("duration").to_i)
   end
 
   def users_count
@@ -191,14 +257,13 @@ class Status
 
     # loop through cached attributes we want to update
     [:works_count,
-     :works_last30_count,
+     :works_last_day_count,
      :events_count,
      :alerts_count,
-     :job_count,
      :responses_count,
      :requests_count,
+     :requests_average,
      :current_version,
-     :workers,
      :update_date].each { |cached_attr| send("#{cached_attr}=", timestamp) }
   end
 end

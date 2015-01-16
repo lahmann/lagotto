@@ -12,14 +12,12 @@
       <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.1/html5shiv.js" type="text/javascript"></script>
     <![endif]-->
 
-    <% if controller.controller_name == "works" && controller.action_name == "show" %>
+    <% if controller.controller_name == "works" && controller.action_name == "show" && @work %>
     <link rel="alternate" type="application/json+oembed" href="/oembed?url=<%= work_path(@work) %>" title="Work oEmbed Profile" />
     <% end %>
 
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,600italic' rel='stylesheet' type='text/css'>
     <%= stylesheet_link_tag "application", :media => "all" %>
-    <%= favicon_link_tag %>
-
     <%= javascript_include_tag "application" %>
     <% if ENV['OMNIAUTH'] == "persona" %>
       <script src="https://login.persona.org/include.js" type="text/javascript"></script>

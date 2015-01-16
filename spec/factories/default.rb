@@ -4,6 +4,8 @@ FactoryGirl.define do
     sequence(:doi) { |n| "10.1371/journal.pone.00000#{n}" }
     sequence(:pmid) { |n| "1897483#{n}" }
     sequence(:pmcid) { |n| "256885#{n}" }
+    sequence(:wos) { |n| "00023796690000#{n}" }
+    sequence(:scp) { |n| "3384533872#{n}" }
     sequence(:canonical_url) { |n| "http://www.plosone.org/article/info:doi/10.1371/journal.pone.00000#{n}" }
     mendeley_uuid "46cb51a0-6d08-11df-afb8-0026b95d30b2"
     title 'Defrosting the Digital Library: Bibliographic Tools for the Next Generation Web'
@@ -183,12 +185,6 @@ FactoryGirl.define do
     initialize_with { RetrievalStatus.where(work_id: work.id, source_id: source.id).first_or_initialize }
   end
 
-  factory :delayed_job do
-    queue 'citeulike'
-
-    initialize_with { DelayedJob.where(queue: queue).first_or_initialize }
-  end
-
   factory :report do
     name 'error_report'
     display_name 'Error Report'
@@ -303,6 +299,8 @@ FactoryGirl.define do
       role "admin"
       authentication_token "12345"
     end
+
+    initialize_with { User.where(authentication_token: authentication_token).first_or_initialize }
   end
 
   factory :publisher do

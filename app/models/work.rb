@@ -9,6 +9,9 @@ class Work < ActiveRecord::Base
   # include helper module for DOI resolution
   include Resolvable
 
+  # store blank values as nil
+  nilify_blanks
+
   belongs_to :publisher, primary_key: :member_id
   belongs_to :work_type
   has_many :retrieval_statuses, :dependent => :destroy
@@ -99,7 +102,19 @@ class Work < ActiveRecord::Base
   end
 
   def pmid_as_url
+    "http://www.ncbi.nlm.nih.gov/pubmed/#{pmid}" if pmid.present?
+  end
+
+  def pmid_as_europepmc_url
     "http://europepmc.org/abstract/MED/#{pmid}" if pmid.present?
+  end
+
+  def pmcid_as_url
+    "http://www.ncbi.nlm.nih.gov/pmc/works/PMC#{pmcid}" if pmcid.present?
+  end
+
+  def ark_as_url
+    "http://n2t.net/#{ark}" if ark.present?
   end
 
   def doi_prefix
@@ -150,7 +165,7 @@ class Work < ActiveRecord::Base
   end
 
   def all_urls
-    [canonical_url, pmid_as_url, mendeley_url, citeulike_url].reject(&:blank?)
+    [canonical_url, pmid_as_europepmc_url].compact
   end
 
   def canonical_url_escaped
@@ -165,12 +180,24 @@ class Work < ActiveRecord::Base
     @signposts ||= sources.pluck(:name, :event_count, :events_url)
   end
 
+  def events_urls
+    signposts.map { |source| source[2] }.compact
+  end
+
   def event_count(name)
     signposts.reduce(0) { |sum, source| source[0] == name ? source[1].to_i : sum }
   end
 
   def events_url(name)
     signposts.reduce(nil) { |sum, source| source[0] == name ? source[2] : sum }
+  end
+
+  def scopus_url
+    @scopus_url ||= events_url("scopus")
+  end
+
+  def wos_url
+    @wos_url ||= events_url("wos")
   end
 
   def mendeley_url
@@ -248,7 +275,7 @@ class Work < ActiveRecord::Base
   end
 
   def sanitize_title
-    self.title = ActionController::Base.helpers.sanitize(title)
+    self.title = ActionController::Base.helpers.sanitize(title, tags: %w(b i sc sub sup))
   end
 
   def normalize_url
@@ -263,7 +290,7 @@ class Work < ActiveRecord::Base
     end
   end
 
-  # pid is required, use doi, pmid, pmcid, or canonical url in that order
+  # pid is required, use doi, pmid, pmcid, wos, scp or canonical url in that order
   def set_pid
     if doi.present?
       write_attribute(:pid, doi)
@@ -274,6 +301,15 @@ class Work < ActiveRecord::Base
     elsif pmcid.present?
       write_attribute(:pid, "PMC#{pmcid}")
       write_attribute(:pid_type, "pmcid")
+    elsif wos.present?
+      write_attribute(:pid, wos)
+      write_attribute(:pid_type, "wos")
+    elsif scp.present?
+      write_attribute(:pid, scp)
+      write_attribute(:pid_type, "scp")
+    elsif ark.present?
+      write_attribute(:pid, ark)
+      write_attribute(:pid_type, "ark")
     elsif canonical_url.present?
       write_attribute(:pid, canonical_url)
       write_attribute(:pid_type, "url")
