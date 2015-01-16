@@ -22,7 +22,8 @@ class EuropePmcFulltext < Source
       events_by_month: [],
       events_url: get_events_url(work),
       event_count: total,
-      event_metrics: get_event_metrics(citations: total) }
+      event_metrics: get_event_metrics(citations: total),
+      extra: nil }
   end
 
   def get_events(result, work)

@@ -17,17 +17,19 @@ class PlosComments < Source
       events_by_month: get_events_by_month(events),
       events_url: nil,
       event_count: total,
-      event_metrics: get_event_metrics(comments: events.length, total: total) }
+      event_metrics: get_event_metrics(comments: events.length, total: total),
+      extra: nil }
   end
 
   def get_events(result, work)
     Array(result['data']).map do |item|
-      event_time = get_iso8601_from_time(item['created'])
+      timestamp = get_iso8601_from_time(item.fetch("created", nil))
 
       { "author" => get_authors([item.fetch('creatorFormattedName', "")]),
         "title" => item.fetch('title', nil),
         "container-title" => 'PLOS Comments',
-        "issued" => get_date_parts(event_time),
+        "issued" => get_date_parts(timestamp),
+        "timestamp" => timestamp,
         "URL" => work.doi_as_url,
         "type" => 'personal_communication' }
     end

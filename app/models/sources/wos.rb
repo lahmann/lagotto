@@ -28,7 +28,7 @@ class Wos < Source
     event_count = 0 if event_count > 100000
     events_url = values[2]
 
-    { events: {},
+    { events: [],
       events_by_day: [],
       events_by_month: [],
       events_url: events_url,

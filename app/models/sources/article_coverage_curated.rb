@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 class ArticleCoverageCurated < Source
   def get_query_url(work)
     return nil unless work.doi =~ /^10.1371/
@@ -13,26 +11,20 @@ class ArticleCoverageCurated < Source
 
   def get_events(result)
     Array(result.fetch("referrals", nil)).map do |item|
-      event_time = get_iso8601_from_time(item['published_on'])
+      timestamp = get_iso8601_from_time(item.fetch("published_on", nil))
 
       { "author" => nil,
-        "title" => item.fetch("title", nil),
+        "title" => item.fetch("title", "No title"),
         "container-title" => item.fetch("publication", nil),
-        "issued" => get_date_parts(event_time),
+        "issued" => get_date_parts(timestamp),
+        "timestamp" => timestamp,
         "URL" => item.fetch("referral", nil),
         "type" => get_csl_type(item.fetch("type", nil)) }
     end
   end
 
   def get_csl_type(type)
-    return nil if type.blank?
-
-    types = { 'Blog' => 'post',
-              'News' => 'article-newspaper',
-              'Podcast/Video' => 'broadcast',
-              'Lab website/homepage' => 'webpage',
-              'University page' => 'webpage' }
-    types[type]
+    MEDIACURATION_TYPE_TRANSLATIONS.fetch(type, nil)
   end
 
   def config_fields

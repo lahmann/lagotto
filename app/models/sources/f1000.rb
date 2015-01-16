@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 class F1000 < Source
   def parse_data(result, work, options={})
     # properly handle not found errors
@@ -7,26 +5,27 @@ class F1000 < Source
 
     return result if result[:error]
 
-    events = get_events(result)
+    extra = get_extra(result)
 
-    if events.empty?
+    if extra.empty?
       event_count = 0
       events_url = nil
     else
-      event = events.last[:event]
-      event_count = event['score']
-      events_url = event['url']
+      event = extra.last[:event]
+      event_count = event.fetch("score", 0)
+      events_url = event.fetch("url", nil)
     end
 
-    { events: events,
+    { events: [],
       events_by_day: [],
-      events_by_month: get_events_by_month(events),
+      events_by_month: get_events_by_month(extra),
       events_url: events_url,
       event_count: event_count,
-      event_metrics: get_event_metrics(citations: event_count) }
+      event_metrics: get_event_metrics(citations: event_count),
+      extra: extra }
   end
 
-  def get_events(result)
+  def get_extra(result)
     result['recommendations'] ||= {}
     Array(result['recommendations']).map do |item|
       { :event => item,

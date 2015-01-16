@@ -172,13 +172,15 @@ class Source < ActiveRecord::Base
     metrics = options[:metrics] || :citations
 
     events = get_events(result)
+    extra = get_extra(result)
 
     { events: events,
       events_by_day: get_events_by_day(events, work),
       events_by_month: get_events_by_month(events),
       events_url: get_events_url(work),
       event_count: events.length,
-      event_metrics: get_event_metrics(metrics => events.length) }
+      event_metrics: get_event_metrics(metrics => events.length),
+      extra: extra }
   end
 
   def get_events_by_day(events, work)
@@ -200,6 +202,10 @@ class Source < ActiveRecord::Base
         month: k[5..6].to_i,
         total: v.length }
     end
+  end
+
+  def get_extra(result)
+    nil
   end
 
   def request_options

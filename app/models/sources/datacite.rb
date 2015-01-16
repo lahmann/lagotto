@@ -4,8 +4,6 @@ class Datacite < Source
       doi = item.fetch("doi", nil)
       year = item.fetch("publicationYear", nil).to_i
       title = String(item.fetch("title", []).first).chomp(".")
-      type = item.fetch("resourceTypeGeneral", nil)
-      type = DATACITE_TYPE_TRANSLATIONS[type] if type
 
       { "author" => get_authors(item.fetch('creator', []), sep: ", ", reversed: true),
         "title" => title,
@@ -14,8 +12,12 @@ class Datacite < Source
         "DOI" => doi,
         "URL" => get_url_from_doi(doi),
         "publisher" => item.fetch("publisher", nil),
-        "type" => type }
+        "type" => get_csl_type(item.fetch("resourceTypeGeneral", nil)) }
     end
+  end
+
+  def get_csl_type(type)
+    DATACITE_TYPE_TRANSLATIONS.fetch(type, nil)
   end
 
   def config_fields

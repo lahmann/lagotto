@@ -4,12 +4,13 @@ class Wordpress < Source
   def get_events(result)
     result['data'] = nil if result['data'].is_a?(String)
     Array(result.fetch("data", nil)).map do |item|
-      event_time = get_iso8601_from_epoch(item["epoch_time"])
+      timestamp = get_iso8601_from_epoch(item.fetch("epoch_time", nil))
 
       { "author" => get_authors([item.fetch('author', "")]),
         "title" => item.fetch("title", nil),
         'container-title' => nil,
-        'issued' => get_date_parts(event_time),
+        'issued' => get_date_parts(timestamp),
+        'timestamp' => timestamp,
         'URL' => item.fetch("link", nil),
         'type' => 'post' }
     end

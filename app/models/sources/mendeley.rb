@@ -9,18 +9,19 @@ class Mendeley < Source
     # We should handle all 3 cases, but return an error otherwise
     return result if result[:error].is_a?(String)
 
-    events = result.fetch('stats') { {} }
+    extra = result.fetch("stats", {})
 
     readers = result.fetch("stats", {}).fetch("readers", 0)
-    groups = Array(result['groups']).length
+    groups = Array(result.fetch("groups", nil)).length
     total = readers + groups
 
-    { events: events,
+    { events: [],
       events_by_day: [],
       events_by_month: [],
       events_url: result['mendeley_url'],
       event_count: total,
-      event_metrics: get_event_metrics(shares: readers, groups: groups, total: total) }
+      event_metrics: get_event_metrics(shares: readers, groups: groups, total: total),
+      extra: extra }
   end
 
   def get_mendeley_uuid(work, options={})

@@ -8,7 +8,7 @@ class PmcEurope < Source
   def parse_data(result, work, options={})
     return result if result[:error]
 
-    event_count = result["hitCount"] || 0
+    event_count = result.fetch("hitCount", 0)
 
     { events: [],
       events_by_day: [],

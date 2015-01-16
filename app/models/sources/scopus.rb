@@ -8,23 +8,24 @@ class Scopus < Source
   def parse_data(result, work, options={})
     return result if result[:error]
 
-    events = result.fetch("search-results", {}).fetch("entry", [{}]).first
+    extra = result.fetch("search-results", {}).fetch("entry", []).first
 
-    if events["link"]
-      event_count = events['citedby-count'].to_i
-      link = events["link"].find { |link| link["@ref"] == "scopus-citedby" }
-      events_url = link["@href"]
+    if extra && extra["link"]
+      event_count = extra.fetch("citedby-count", nil).to_i
+      link = extra["link"].find { |link| link["@ref"] == "scopus-citedby" }
+      events_url = link.fetch("@href", nil)
     else
       event_count = 0
       events_url = nil
     end
 
-    { events: events,
+    { events: [],
       events_by_day: [],
       events_by_month: [],
       events_url: events_url,
       event_count: event_count,
-      event_metrics: get_event_metrics(citations: event_count) }
+      event_metrics: get_event_metrics(citations: event_count),
+      extra: extra }
   end
 
   def config_fields

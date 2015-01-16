@@ -9,12 +9,13 @@ class Researchblogging < Source
     events = result.fetch("blogposts", {}).fetch("post", nil)
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
-      event_time = get_iso8601_from_time(item.fetch("published_date", nil))
+      timestamp = get_iso8601_from_time(item.fetch("published_date", nil))
 
       { "author" => get_authors([item.fetch('blogger_name', nil)]),
         "title" => item.fetch('post_title', "No title"),
         "container-title" => item.fetch('blog_name', nil),
-        "issued" => get_date_parts(event_time),
+        "issued" => get_date_parts(timestamp),
+        "timestamp" => timestamp,
         "URL" => item.fetch("post_URL", nil),
         "type" => 'post' }
     end

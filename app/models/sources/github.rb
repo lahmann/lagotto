@@ -20,12 +20,15 @@ class Github < Source
     likes = result.fetch("stargazers_count", 0)
     total = shares + likes
 
-    { events: result,
+    extra = result.slice("stargazers_count", "stargazers_url", "forks_count", "forks_url")
+
+    { events: [],
       events_by_day: [],
       events_by_month: [],
       events_url: nil,
       event_count: total,
-      event_metrics: get_event_metrics(shares: shares, likes: likes, total: total) }
+      event_metrics: get_event_metrics(shares: shares, likes: likes, total: total),
+      extra: extra }
   end
 
   def config_fields

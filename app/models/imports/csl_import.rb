@@ -27,7 +27,7 @@ class CslImport < Import
       date_parts = item.fetch("issued", {}).fetch("date-parts", [])[0]
       year, month, day = date_parts[0], date_parts[1], date_parts[2]
 
-      title = item.fetch("title", nil)
+      title = String(item.fetch("title", nil)).chomp(".")
       member_id = @member.first
       if member_id
         publisher = Publisher.where(member_id: member_id).first

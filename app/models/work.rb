@@ -78,14 +78,6 @@ class Work < ActiveRecord::Base
     end
   end
 
-  # def url
-  #   case pid_type
-  #   when "doi" then "http://dx.doi.org/#{doi}"
-  #   when "pmic" then "http://www.ncbi.nlm.nih.gov/pubmed/#{pmid}"
-  #   when "pmcid" then "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC#{pmcid}"
-  #   end
-  # end
-
   def to_param
     "#{pid_type}/#{pid}"
   end
@@ -103,7 +95,11 @@ class Work < ActiveRecord::Base
   end
 
   def doi_as_url
-    Addressable::URI.encode("http://dx.doi.org/#{doi}")  if doi.present?
+    Addressable::URI.encode("http://dx.doi.org/#{doi}") if doi.present?
+  end
+
+  def pmid_as_url
+    "http://europepmc.org/abstract/MED/#{pmid}" if pmid.present?
   end
 
   def doi_prefix
@@ -154,10 +150,7 @@ class Work < ActiveRecord::Base
   end
 
   def all_urls
-    urls = []
-    urls << doi_as_url if doi.present?
-    urls << canonical_url if canonical_url.present?
-    urls
+    [canonical_url, pmid_as_url, mendeley_url, citeulike_url].reject(&:blank?)
   end
 
   def canonical_url_escaped

@@ -34,16 +34,17 @@ class Wikipedia < Source
   end
 
   def parse_data(result, work, options={})
-    events = result
-    events["total"] = events.values.reduce(0) { |sum, x| x.nil? ? sum : sum + x } unless events.empty?
-    total = events['total'].to_i
+    extra = result
+    extra["total"] = extra.values.reduce(0) { |sum, x| x.nil? ? sum : sum + x } unless extra.empty?
+    total = extra['total'].to_i
 
-    { events: events,
+    { events: [],
       events_by_day: [],
       events_by_month: [],
       events_url: get_events_url(work),
       event_count: total,
-      event_metrics: get_event_metrics(citations: total) }
+      event_metrics: get_event_metrics(citations: total),
+      extra: extra }
   end
 
   def config_fields

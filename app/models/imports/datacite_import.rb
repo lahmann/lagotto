@@ -67,8 +67,7 @@ class DataciteImport < Import
         member_id = nil
       end
 
-      type = item.fetch("resourceTypeGeneral", nil)
-      type = DATACITE_TYPE_TRANSLATIONS[type] if type
+      type = get_csl_type(item.fetch("resourceTypeGeneral", nil))
       work_type_id = WorkType.where(name: type).pluck(:id).first
 
       csl = {
@@ -90,5 +89,9 @@ class DataciteImport < Import
         work_type_id: work_type_id,
         csl: csl }
     end
+  end
+
+  def get_csl_type(type)
+    DATACITE_TYPE_TRANSLATIONS.fetch(type, nil)
   end
 end

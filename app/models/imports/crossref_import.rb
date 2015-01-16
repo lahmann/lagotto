@@ -78,8 +78,7 @@ class CrossrefImport < Import
       publisher_id = item.fetch("member", nil)
       publisher_id = publisher_id[30..-1].to_i if publisher_id
 
-      type = item.fetch("type", nil)
-      type = CROSSREF_TYPE_TRANSLATIONS[type] if type
+      type = get_csl_type(item.fetch("type", nil))
       work_type_id = WorkType.where(name: type).pluck(:id).first
 
       csl = {
@@ -105,5 +104,9 @@ class CrossrefImport < Import
         work_type_id: work_type_id,
         csl: csl }
     end
+  end
+
+  def get_csl_type(type)
+    CROSSREF_TYPE_TRANSLATIONS.fetch(type, nil)
   end
 end

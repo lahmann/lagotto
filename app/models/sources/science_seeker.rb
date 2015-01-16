@@ -9,12 +9,13 @@ class ScienceSeeker < Source
     events = result['feed'] && result.fetch("feed", {}).fetch("entry", nil)
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
-      event_time = get_iso8601_from_time(item["updated"])
+      timestamp = get_iso8601_from_time(item.fetch("updated", nil))
 
       { "author" => get_authors([item.fetch('author', {}).fetch('name', "")]),
         "title" => item.fetch('title', nil),
         "container-title" => item.fetch('source', {}).fetch('title', ""),
-        "issued" => get_date_parts(event_time),
+        "issued" => get_date_parts(timestamp),
+        "timestamp" => timestamp,
         "URL" => item.fetch("link", {}).fetch("href", nil),
         "type" => 'post' }
     end
