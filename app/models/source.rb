@@ -179,6 +179,7 @@ class Source < ActiveRecord::Base
     metrics = options[:metrics] || :citations
 
     events = get_events(result)
+    extra = get_extra(result)
     events_url = events.length > 0 ? get_events_url(work) : nil
 
     { events: events,
@@ -190,10 +191,10 @@ class Source < ActiveRecord::Base
       extra: extra }
   end
 
-  def get_events_by_day(events, work)
-    events = events.reject { |event| event.fetch("issued", {}).fetch("date-parts", []).empty? || get_date_from_date_parts(event["issued"]) - work.published_on > 30 }
+    def get_events_by_day(events, work)
+    events = events.reject { |event| event["timestamp"].nil? || Date.iso8601(event["timestamp"]) - work.published_on > 30 }
 
-    events.group_by { |event| get_date_from_date_parts(event["issued"]).strftime("%Y-%m-%d") }.sort.map do |k, v|
+    events.group_by { |event| event["timestamp"][0..9] }.sort.map do |k, v|
       { year: k[0..3].to_i,
         month: k[5..6].to_i,
         day: k[8..9].to_i,
@@ -202,9 +203,9 @@ class Source < ActiveRecord::Base
   end
 
   def get_events_by_month(events)
-    events = events.reject { |event| event.fetch("issued", {}).fetch("date-parts", []).empty? }
+    events = events.reject { |event| event["timestamp"].nil? }
 
-    events.group_by { |event| get_date_from_date_parts(event["issued"]).strftime("%Y-%m") }.sort.map do |k, v|
+    events.group_by { |event| event["timestamp"][0..6] }.sort.map do |k, v|
       { year: k[0..3].to_i,
         month: k[5..6].to_i,
         total: v.length }

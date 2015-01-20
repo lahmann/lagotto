@@ -82,7 +82,7 @@ describe F1000, type: :model, vcr: true do
       work = FactoryGirl.create(:work, :doi => "10.1371/journal.pone.0044294")
       result = { error: "not_found", status: 404 }
       response = subject.parse_data(result, work)
-      expect(response).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :event_count=>0, :events_url=>nil, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>nil, :likes=>nil, :citations=>0, :total=>0})
+      expect(response).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :event_count=>0, :events_url=>nil, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>nil, :likes=>nil, :citations=>0, :total=>0}, extra: nil)
     end
 
     it "should report if there are events and event_count returned by f1000" do
