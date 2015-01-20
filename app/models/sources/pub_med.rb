@@ -12,7 +12,7 @@ class PubMed < Source
   end
 
   def get_events(result)
-    events = result.fetch("PubMedToPMCcitingformSET", {}).fetch("REFORM", {}).fetch("PMCID", nil)
+    events = result.deep_fetch('PubMedToPMCcitingformSET', 'REFORM', 'PMCID') { nil }
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
       { :event => item,

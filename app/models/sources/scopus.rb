@@ -8,7 +8,7 @@ class Scopus < Source
   def parse_data(result, work, options={})
     return result if result[:error]
 
-    extra = result.fetch("search-results", {}).fetch("entry", []).first
+    extra = result.deep_fetch('search-results', 'entry', 0) { {} }
 
     if extra && extra["link"]
       event_count = extra.fetch("citedby-count", nil).to_i

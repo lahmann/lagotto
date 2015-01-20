@@ -11,7 +11,7 @@ class Mendeley < Source
 
     extra = result.fetch("stats", {})
 
-    readers = result.fetch("stats", {}).fetch("readers", 0)
+    readers = result.deep_fetch('stats', 'readers') { 0 }
     groups = Array(result.fetch("groups", nil)).length
     total = readers + groups
 

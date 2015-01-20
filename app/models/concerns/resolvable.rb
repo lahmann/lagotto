@@ -93,7 +93,8 @@ module Resolvable
 
       if is_json?(response.body)
         json = JSON.parse(response.body)
-        json.fetch("records", {}).first || { error: 'not found' }
+        json.extend Hashie::Extensions::DeepFetch
+        json.deep_fetch('records', 0) { { error: 'not found' } }
       else
         { error: 'not found' }
       end

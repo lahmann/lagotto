@@ -6,7 +6,7 @@ class ScienceSeeker < Source
   end
 
   def get_events(result)
-    events = result['feed'] && result.fetch("feed", {}).fetch("entry", nil)
+    events = result['feed'] && result.deep_fetch('feed', 'entry') { nil }
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
       timestamp = get_iso8601_from_time(item.fetch("updated", nil))

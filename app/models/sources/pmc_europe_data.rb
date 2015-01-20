@@ -33,7 +33,8 @@ class PmcEuropeData < Source
     if result.fetch("dbCountList", nil)
       result["dbCountList"]["db"].reduce({}) { |hash, db| hash.update(db["dbName"] => db["count"]) }
     elsif result.fetch("resultList", nil)
-      events = result.fetch("resultList", {}).fetch("result", nil)
+      result.extend Hashie::Extensions::DeepFetch
+      events = result.deep_fetch('resultList', 'result') { nil }
       events = [events] if events.is_a?(Hash)
       Array(events).map do |item|
         url = item['pmid'].nil? ? nil : "http://europepmc.org/abstract/MED/#{item['pmid']}"

@@ -4,7 +4,7 @@ class Openedition < Source
   end
 
   def get_events(result)
-    events = result.fetch("RDF", {}).fetch("item", nil)
+    events = result.deep_fetch('RDF', 'item') { nil }
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
       { event: item,

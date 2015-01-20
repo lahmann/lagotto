@@ -27,7 +27,7 @@ class CrossRef < Source
     if work.publisher
       event_count = events.length
     else
-      event_count = result.fetch("crossref_result", {}).fetch("query_result", {}).fetch("body", {}).fetch("query", {}).fetch("fl_count", 0)
+      event_count = result.deep_fetch('crossref_result', 'query_result', 'body', 'query', 'fl_count') { 0 }
     end
 
     { events: events,
@@ -40,7 +40,7 @@ class CrossRef < Source
   end
 
   def get_events(result)
-    events = result.fetch("crossref_result", {}).fetch("query_result", {}).fetch("body", {}).fetch("forward_link", nil)
+    events = result.deep_fetch('crossref_result', 'query_result', 'body', 'forward_link') { nil }
     if events.is_a?(Hash) && events['journal_cite']
       events = [events]
     elsif events.is_a?(Hash)

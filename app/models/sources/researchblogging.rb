@@ -6,7 +6,7 @@ class Researchblogging < Source
   end
 
   def get_events(result)
-    events = result.fetch("blogposts", {}).fetch("post", nil)
+    events = result.deep_fetch('blogposts', 'post') { nil }
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
       timestamp = get_iso8601_from_time(item.fetch("published_date", nil))

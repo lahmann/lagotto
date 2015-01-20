@@ -4,13 +4,14 @@ class Reddit < Source
   def parse_data(result, work, options={})
     return result if result[:error]
 
-    result = result.fetch("data", {}).fetch("children", [])
+    events = result.deep_fetch('data', 'children') { [] }
 
-    likes = get_sum(result, 'data', 'score')
-    comments = get_sum(result, 'data', 'num_comments')
+    likes = get_sum(events, 'data', 'score')
+    comments = get_sum(events, 'data', 'num_comments')
     total = likes + comments
 
-    events = get_events(result)
+    events = get_events(events)
+    events_url = total > 0 ? get_events_url(work) : nil
 
     { events: events,
       events_by_day: get_events_by_day(events, work),

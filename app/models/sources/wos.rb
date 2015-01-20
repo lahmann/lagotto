@@ -13,6 +13,7 @@ class Wos < Source
       data = get_xml_request(work)
       result = get_result(query_url, options.merge(content_type: 'xml', data: data))
     end
+    result.extend Hashie::Extensions::DeepFetch
   end
 
   def parse_data(result, work, options={})
@@ -22,7 +23,7 @@ class Wos < Source
     error_status = check_error_status(result, work)
     return { error: error_status } if error_status
 
-    values = Array(result.fetch("response", {}).fetch("fn", {}).fetch("map", {}).fetch("map", {}).fetch("map", {}).fetch("val", nil))
+    values = Array(result.deep_fetch('response', 'fn', 'map', 'map', 'map', 'val') { nil })
     event_count = values[0].to_i
 
     # store Web of Science ID if we haven't done this already
@@ -44,7 +45,7 @@ class Wos < Source
   end
 
   def check_error_status(result, work)
-    status = result.fetch("response", {}).fetch("fn", {}).fetch("rc", "OK")
+    status = result.deep_fetch('response', 'fn', 'rc') { 'OK' }
 
     if status.casecmp('OK') == 0
       return false
@@ -56,7 +57,7 @@ class Wos < Source
         class_name = 'Net::HTTPNotFound'
         status_code = 404
       end
-      error = result.fetch("response", {}).fetch("fn", {}).fetch("error", "an error occured")
+      error = result.deep_fetch('response', 'fn', 'error') { 'an error occured' }
       message = "Web of Science error #{status}: '#{error}' for work #{work.doi}"
       Alert.create(exception: '',
                    message: message,

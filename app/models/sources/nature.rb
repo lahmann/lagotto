@@ -8,8 +8,8 @@ class Nature < Source
       url = "http://#{url}" unless url.blank? || url.start_with?("http://")
 
       { "author" => nil,
-        "title" => item.fetch("post", {}).fetch("title", nil),
-        "container-title" => item.fetch("post", {}).fetch("blog", {}).fetch("title", nil),
+        "title" => item.deep_fetch('post', 'title') { '' },
+        "container-title" => item.deep_fetch('post', 'blog', 'title') { '' },
         "issued" => get_date_parts(timestamp),
         "timestamp" => timestamp,
         "URL" => url,
