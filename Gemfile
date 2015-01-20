@@ -15,7 +15,7 @@ gem "logstash-logger", "~> 0.7.0"
 
 gem "faraday", "~> 0.9.0"
 gem "faraday_middleware", "~> 0.9.1"
-gem "typhoeus", "~> 0.6.7"
+gem 'excon', '~> 0.43.0'
 gem 'addressable', "~> 2.3.5"
 gem 'postrank-uri', '~> 1.0.18'
 gem "multi_xml", "~> 0.5.5"
@@ -62,7 +62,6 @@ group :development do
   gem 'capistrano', '~> 3.3.5'
   gem 'capistrano-rails', '~> 1.1.1', :require => false
   gem 'capistrano-bundler', '~> 1.1.2', :require => false
-  gem 'capistrano-sidekiq'
   gem 'spring', '~> 1.1.2'
 end
 
