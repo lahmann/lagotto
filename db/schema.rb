@@ -74,6 +74,24 @@ ActiveRecord::Schema.define(version: 20150111105117) do
   add_index "api_responses", ["event_count"], name: "index_api_responses_on_event_count", using: :btree
   add_index "api_responses", ["unresolved", "id"], name: "index_api_responses_unresolved_id", using: :btree
 
+  create_table "days", force: :cascade do |t|
+    t.integer  "work_id",             limit: 4,             null: false
+    t.integer  "source_id",           limit: 4,             null: false
+    t.integer  "retrieval_status_id", limit: 4,             null: false
+    t.integer  "year",                limit: 4,             null: false
+    t.integer  "month",               limit: 4,             null: false
+    t.integer  "day",                 limit: 4,             null: false
+    t.integer  "total_count",         limit: 4, default: 0, null: false
+    t.integer  "html_count",          limit: 4
+    t.integer  "pdf_count",           limit: 4
+    t.integer  "comments_count",      limit: 4
+    t.integer  "likes_count",         limit: 4
+    t.datetime "created_at",                                null: false
+    t.datetime "updated_at",                                null: false
+  end
+
+  add_index "days", ["work_id", "source_id", "year", "month"], name: "index_days_on_work_id_and_source_id_and_year_and_month", using: :btree
+
   create_table "events", force: :cascade do |t|
     t.integer  "work_id",          limit: 4, null: false
     t.integer  "citation_id",      limit: 4, null: false
@@ -98,6 +116,23 @@ ActiveRecord::Schema.define(version: 20150111105117) do
     t.datetime "updated_at"
     t.string   "display_name", limit: 255
   end
+
+  create_table "months", force: :cascade do |t|
+    t.integer  "work_id",             limit: 4,             null: false
+    t.integer  "source_id",           limit: 4,             null: false
+    t.integer  "retrieval_status_id", limit: 4,             null: false
+    t.integer  "year",                limit: 4,             null: false
+    t.integer  "month",               limit: 4,             null: false
+    t.integer  "total_count",         limit: 4, default: 0, null: false
+    t.integer  "html_count",          limit: 4
+    t.integer  "pdf_count",           limit: 4
+    t.integer  "comments_count",      limit: 4
+    t.integer  "likes_count",         limit: 4
+    t.datetime "created_at",                                null: false
+    t.datetime "updated_at",                                null: false
+  end
+
+  add_index "months", ["work_id", "source_id", "year", "month"], name: "index_months_on_work_id_and_source_id_and_year_and_month", using: :btree
 
   create_table "publisher_options", force: :cascade do |t|
     t.integer  "publisher_id", limit: 4
@@ -173,7 +208,7 @@ ActiveRecord::Schema.define(version: 20150111105117) do
     t.datetime "scheduled_at",                default: '1970-01-01 00:00:00', null: false
     t.text     "events_url",    limit: 65535
     t.string   "event_metrics", limit: 255
-    t.text     "other",         limit: 65535
+    t.text     "extra",         limit: 65535
   end
 
   add_index "retrieval_statuses", ["source_id", "event_count", "retrieved_at"], name: "index_retrieval_statuses_source_id_event_count_retr_at_desc", using: :btree
@@ -279,7 +314,7 @@ ActiveRecord::Schema.define(version: 20150111105117) do
     t.string   "pid",           limit: 255,                  null: false
     t.text     "csl",           limit: 65535
     t.integer  "work_type_id",  limit: 4
-    t.integer  "response_id",   limit: 4
+    t.boolean  "tracked",       limit: 1,     default: true
     t.string   "scp",           limit: 255
     t.string   "wos",           limit: 255
     t.string   "ark",           limit: 255
@@ -288,7 +323,7 @@ ActiveRecord::Schema.define(version: 20150111105117) do
   add_index "works", ["ark", "published_on", "id"], name: "index_works_on_ark_published_on_id", using: :btree
   add_index "works", ["ark"], name: "index_works_on_ark", unique: true, using: :btree
   add_index "works", ["canonical_url", "published_on", "id"], name: "index_works_on_url_published_on_id", length: {"canonical_url"=>100, "published_on"=>nil, "id"=>nil}, using: :btree
-  add_index "works", ["canonical_url"], name: "index_works_on_url", unique: true, length: {"canonical_url"=>100}, using: :btree
+  add_index "works", ["canonical_url"], name: "index_works_on_url", length: {"canonical_url"=>100}, using: :btree
   add_index "works", ["doi", "published_on", "id"], name: "index_articles_doi_published_on_article_id", using: :btree
   add_index "works", ["doi"], name: "index_works_on_doi", unique: true, using: :btree
   add_index "works", ["pmcid", "published_on", "id"], name: "index_works_on_pmcid_published_on_id", using: :btree
