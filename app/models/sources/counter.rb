@@ -31,9 +31,9 @@ class Counter < Source
   end
 
   def get_extra(result)
-    events = result.deep_fetch('rest', 'response', 'results', 'item') { nil }
-    events = [events] if events.is_a?(Hash)
-    Array(events).map do |item|
+    extra = result.deep_fetch('rest', 'response', 'results', 'item') { nil }
+    extra = [extra] if extra.is_a?(Hash)
+    Array(extra).map do |item|
       { month: item.fetch("month", nil),
         year: item.fetch("year", nil),
         pdf_views: item.fetch("get_pdf", 0),

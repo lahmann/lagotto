@@ -9,7 +9,7 @@ describe "/api/v5/sources", :type => :api do
       before(:each) do
         @source = FactoryGirl.create(:source)
         @works = FactoryGirl.create_list(:work_with_events, 10)
-        @source.update_cache
+        @status = FactoryGirl.create(:status)
       end
 
       it "JSON" do

@@ -19,6 +19,8 @@ class Facebook < Source
   def parse_data(result, work, options={})
     return result if result[:error]
 
+    result.extend Hashie::Extensions::DeepFetch
+
     # use depreciated v2.0 API if linkstat_url is used
     # requires user account registerd before August 2014
     if linkstat_url.present?

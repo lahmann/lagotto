@@ -4,7 +4,7 @@ class Status < ActiveRecord::Base
 
   RELEASES_URL = "https://api.github.com/repos/articlemetrics/lagotto/releases"
 
-  before_create :collect_status_info
+  before_create :collect_status_info, if: proc { Rails.env != "test" }
 
   default_scope { order("status.created_at DESC") }
 
@@ -13,7 +13,7 @@ class Status < ActiveRecord::Base
   end
 
   def collect_status_info
-    self.works_count = Work.count
+    self.works_count = Work.count unless works_count.present?
     self.works_new_count = Work.last_x_days(0).count
     self.events_count = RetrievalStatus.joins(:source).where("state > ?", 0)
       .where("name != ?", "relativemetric").sum(:event_count)

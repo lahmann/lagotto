@@ -9,6 +9,7 @@ class ScienceSeeker < Source
     events = result['feed'] && result.deep_fetch('feed', 'entry') { nil }
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
+      item.extend Hashie::Extensions::DeepFetch
       timestamp = get_iso8601_from_time(item.fetch("updated", nil))
 
       { "author" => get_authors([item.fetch('author', {}).fetch('name', "")]),

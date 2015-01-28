@@ -18,7 +18,8 @@ class Reddit < Source
       events_by_month: get_events_by_month(events),
       events_url: get_events_url(work),
       event_count: total,
-      event_metrics: get_event_metrics(comments: comments, likes: likes, total: total) }
+      event_metrics: get_event_metrics(comments: comments, likes: likes, total: total),
+      extra: nil }
   end
 
   def get_events(result)
@@ -26,8 +27,7 @@ class Reddit < Source
       data = item['data']
       timestamp = get_iso8601_from_epoch(data.fetch("created_utc", nil))
 
-     {
-        "author" => get_authors([data.fetch('author', "")]),
+     {  "author" => get_authors([data.fetch('author', "")]),
         "title" => data.fetch('title', nil),
         "container-title" => 'Reddit',
         "issued" => get_date_parts(timestamp),

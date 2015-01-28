@@ -82,15 +82,13 @@ describe PlosFulltext, type: :model, vcr: true do
       expect(response[:events_by_month].first).to eq(year: 2014, month: 9, total: 1)
 
       event = response[:events].last
-
-      expect(event[:event_csl]['author']).to eq([{"family"=>"Rougier", "given"=>"Nicolas P."}, {"family"=>"Droettboom", "given"=>"Michael"}, {"family"=>"Bourne", "given"=>"Philip E."}])
-      expect(event[:event_csl]['title']).to eq("Ten Simple Rules for Better Figures")
-      expect(event[:event_csl]['container-title']).to eq("PLOS Computational Biology")
-      expect(event[:event_csl]['issued']).to eq("date-parts"=>[[2014, 9, 11]])
-      expect(event[:event_csl]['type']).to eq("article-journal")
-      expect(event[:event_csl]['url']).to eq("http://dx.doi.org/10.1371/journal.pcbi.1003833")
-
-      expect(event[:event_time]).to eq("2014-09-11T00:00:00Z")
+      expect(event['author']).to eq([{"family"=>"Rougier", "given"=>"Nicolas P."}, {"family"=>"Droettboom", "given"=>"Michael"}, {"family"=>"Bourne", "given"=>"Philip E."}])
+      expect(event['title']).to eq("Ten Simple Rules for Better Figures")
+      expect(event['container-title']).to eq("PLOS Computational Biology")
+      expect(event['issued']).to eq("date-parts"=>[[2014, 9, 11]])
+      expect(event['type']).to eq("article-journal")
+      expect(event['URL']).to eq("http://dx.doi.org/10.1371/journal.pcbi.1003833")
+      expect(event['timestamp']).to eq("2014-09-11T00:00:00Z")
     end
 
     it "should catch timeout errors with the PLOS Search API" do

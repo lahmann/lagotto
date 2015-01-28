@@ -3,6 +3,7 @@
 class Nature < Source
   def get_events(result)
     Array(result['data']).map do |item|
+      item.extend Hashie::Extensions::DeepFetch
       timestamp = get_iso8601_from_time(item.fetch("post", {}).fetch("created_at", nil))
       url = item.fetch("post", {}).fetch("url", nil)
       url = "http://#{url}" unless url.blank? || url.start_with?("http://")

@@ -65,19 +65,19 @@ describe Wikipedia, type: :model, vcr: true do
     it "should report if the doi and canonical_url are missing" do
       work = FactoryGirl.build(:work, doi: nil, canonical_url: nil)
       result = {}
-      expect(subject.parse_data(result, work)).to eq(events: {}, :events_by_day=>[], :events_by_month=>[], events_url: nil, event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 })
+      expect(subject.parse_data(result, work)).to eq(events: [], :events_by_day=>[], :events_by_month=>[], events_url: nil, event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 }, extra: {})
     end
 
     it "should report if there are no events and event_count returned by the Wikipedia API" do
       result = { "en"=>0 }
-      expect(subject.parse_data(result, work)).to eq(events: {"en"=>0, "total"=>0}, :events_by_day=>[], :events_by_month=>[], events_url: "http://en.wikipedia.org/w/index.php?search=#{work.query_string}", event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 })
+      expect(subject.parse_data(result, work)).to eq(events: [], :events_by_day=>[], :events_by_month=>[], events_url: "http://en.wikipedia.org/w/index.php?search=#{work.query_string}", event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 }, extra: {"en"=>0, "total"=>0})
     end
 
     it "should report if there are events and event_count returned by the Wikipedia API" do
       work = FactoryGirl.build(:work, :doi => "10.1371/journal.pcbi.1002445")
       result = { "en"=>12 }
       response = subject.parse_data(result, work)
-      expect(response[:events].length).to eq(1 + 1)
+      expect(response[:extra].length).to eq(1 + 1)
       expect(response[:event_count]).to eq(12)
     end
 
@@ -85,7 +85,7 @@ describe Wikipedia, type: :model, vcr: true do
       work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0044271")
       result = { "en"=>12, "commons"=>8 }
       response = subject.parse_data(result, work)
-      expect(response[:events].length).to eq(1 + 1 + 1)
+      expect(response[:extra].length).to eq(1 + 1 + 1)
       expect(response[:event_count]).to eq(12 + 8)
     end
 
@@ -93,7 +93,7 @@ describe Wikipedia, type: :model, vcr: true do
       work = FactoryGirl.create(:work, :doi => "10.2307/683422")
       result = { "en"=>nil }
       response = subject.parse_data(result, work)
-      expect(response).to eq(:events=>{"en"=>nil, "total"=>0}, :events_by_day=>[], :events_by_month=>[], :events_url=>"http://en.wikipedia.org/w/index.php?search=#{work.query_string}", :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>nil, :likes=>nil, :citations=>0, :total=>0})
+      expect(response).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>"http://en.wikipedia.org/w/index.php?search=#{work.query_string}", :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>nil, :likes=>nil, :citations=>0, :total=>0}, extra: {"en"=>nil, "total"=>0})
     end
   end
 end

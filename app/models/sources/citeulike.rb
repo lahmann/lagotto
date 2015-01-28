@@ -12,9 +12,10 @@ class Citeulike < Source
     events = [events] if events.is_a?(Hash)
     Array(events).map do |item|
       timestamp = get_iso8601_from_time(item.fetch("post_time", nil))
+      author = get_authors([item.fetch("post", {}).fetch("username", nil)].reject(&:blank?))
 
-      { "author" => get_authors([item.fetch("post", {}).fetch("username", nil)]),
-        "title" => "No title",
+      { "author" => author.presence || nil,
+        "title" => "CiteULike bookmark",
         "container-title" => nil,
         "publisher" => "CiteULike",
         "issued" => get_date_parts(timestamp),

@@ -1,0 +1,58 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://www.reddit.com/search.json?limit=100&q=%2210.1371/journal.ppat.0008776%22%20OR%20%22http://www.plosone.org/article/info:doi/10.1371/journal.ppat.0008776%22
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Lagotto 3.14 - http://lagotto-mysql.local
+      Accept:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: ''
+    headers:
+      Date:
+      - Tue, 20 Jan 2015 14:36:14 GMT
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Length:
+      - '91'
+      Set-Cookie:
+      - __cfduid=d969e2de5e54d138b5bc61ca5adb675a41421764574; expires=Wed, 20-Jan-16
+        14:36:14 GMT; path=/; domain=.reddit.com; HttpOnly
+      X-Ua-Compatible:
+      - IE=edge
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+      Access-Control-Allow-Origin:
+      - "*"
+      X-Reddit-Tracking:
+      - https://pixel.redditmedia.com/pixel/of_destiny.png?v=0SSUTDtD9kwzOoiryvMC7fFG4R187D0zvuc88%2FEwa%2B1Dv%2BYoqg6Jet%2Bi2MSkmi%2B%2FXeSmifGjnHs%3D
+      X-Moose:
+      - majestic
+      Cache-Control:
+      - no-cache
+      Cf-Cache-Status:
+      - EXPIRED
+      Server:
+      - cloudflare-nginx
+      Cf-Ray:
+      - 1abc00cdbecd15cb-FRA
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: '{"kind": "Listing", "data": {"modhash": "", "children": [], "after":
+        null, "before": null}}'
+    http_version: 
+  recorded_at: Tue, 20 Jan 2015 14:36:15 GMT
+recorded_with: VCR 2.9.3

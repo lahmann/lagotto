@@ -14,12 +14,12 @@ describe Reddit, type: :model, vcr: true do
     it "should report if there are no events and event_count returned by the Reddit API" do
       work = FactoryGirl.build(:work, doi: "10.1371/journal.pone.0044294", canonical_url: "")
       response = subject.get_data(work)
-      expect(response).to eq(1)
+      expect(response).to eq({})
     end
 
     it "should report if there are events and event_count returned by the Reddit API" do
       response = subject.get_data(work)
-      expect(response).to eq(1)
+      expect(response).to eq("kind"=>"Listing", "data"=>{"modhash"=>"", "children"=>[], "after"=>nil, "before"=>nil})
     end
 
     it "should catch errors with the Reddit API" do
@@ -40,13 +40,15 @@ describe Reddit, type: :model, vcr: true do
     it "should report if the doi and canonical_url are missing" do
       work = FactoryGirl.build(:work, doi: nil, canonical_url: nil)
       result = {}
-      expect(subject.parse_data(result, work)).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>0, :citations=>nil, :total=>0})
+      result.extend Hashie::Extensions::DeepFetch
+      expect(subject.parse_data(result, work)).to eq(:events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>0, :citations=>nil, :total=>0}, extra: nil)
     end
 
     it "should report if there are no events and event_count returned by the Reddit API" do
       work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0044294")
       body = File.read(fixture_path + 'reddit_nil.json', encoding: 'UTF-8')
       result = JSON.parse(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response).to eq(events: [], event_count: 0, :events_by_day=>[], :events_by_month=>[], events_url: nil, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: 0, likes: 0, citations: nil, total: 0 })
     end
@@ -55,6 +57,7 @@ describe Reddit, type: :model, vcr: true do
       work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0008776", published_on: "2013-05-03")
       body = File.read(fixture_path + 'reddit.json', encoding: 'UTF-8')
       result = JSON.parse(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:events].length).to eq(3)
       expect(response[:event_count]).to eq(1171)

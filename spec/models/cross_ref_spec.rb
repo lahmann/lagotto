@@ -120,12 +120,14 @@ describe CrossRef, type: :model, vcr: true do
     it "should report if the doi is missing" do
       work = FactoryGirl.build(:work, :doi => nil)
       result = {}
+      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(null_response)
     end
 
     it "should report if there are no events and event_count returned by the CrossRef API" do
       body = File.read(fixture_path + 'cross_ref_nil.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response).to eq(null_response)
     end
@@ -133,6 +135,7 @@ describe CrossRef, type: :model, vcr: true do
     it "should report if there are events and event_count returned by the CrossRef API" do
       body = File.read(fixture_path + 'cross_ref.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:events].length).to eq(31)
       expect(response[:event_count]).to eq(31)
@@ -153,6 +156,7 @@ describe CrossRef, type: :model, vcr: true do
     it "should report if there is one event returned by the CrossRef API" do
       body = File.read(fixture_path + 'cross_ref_one.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:events].length).to eq(1)
       expect(response[:event_count]).to eq(1)
@@ -180,12 +184,14 @@ describe CrossRef, type: :model, vcr: true do
 
     it "should report if the doi is missing" do
       result = {}
+      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(null_response)
     end
 
     it "should report if there is an event_count of zero returned by the CrossRef OpenURL API" do
       body = File.read(fixture_path + 'cross_ref_openurl_nil.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response).to eq(null_response)
     end
@@ -193,6 +199,7 @@ describe CrossRef, type: :model, vcr: true do
     it "should report if there is an event_count greater than zero returned by the CrossRef OpenURL API" do
       body = File.read(fixture_path + 'cross_ref_openurl.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:event_count]).to eq(13)
     end

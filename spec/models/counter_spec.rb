@@ -130,23 +130,26 @@ describe Counter, type: :model, vcr: true do
   end
 
   context "parse_data" do
-    let(:null_response) { { events: [], :events_by_day=>[], :events_by_month=>[], events_url: nil, event_count: 0, event_metrics: { pdf: 0, html: 0, shares: nil, groups: nil, comments: nil, likes: nil, citations: nil, total: 0 } } }
+    let(:null_response) { { events: [], :events_by_day=>[], :events_by_month=>[], events_url: nil, event_count: 0, event_metrics: { pdf: 0, html: 0, shares: nil, groups: nil, comments: nil, likes: nil, citations: nil, total: 0 }, extra: [] } }
 
     it "should report if the doi is missing" do
       work = FactoryGirl.build(:work, :doi => nil)
       result = {}
+      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(null_response)
     end
 
     it "should report that there are no events if the doi has the wrong prefix" do
       work = FactoryGirl.build(:work, :doi => "10.5194/acp-12-12021-2012")
       result = {}
+      result.extend Hashie::Extensions::DeepFetch
       expect(subject.parse_data(result, work)).to eq(null_response)
     end
 
     it "should report if there are no events and event_count returned by the Counter API" do
       body = File.read(fixture_path + 'counter_nil.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response).to eq(null_response)
     end
@@ -154,8 +157,9 @@ describe Counter, type: :model, vcr: true do
     it "should report if there are events and event_count returned by the Counter API" do
       body = File.read(fixture_path + 'counter.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
-      expect(response[:events].length).to eq(37)
+      expect(response[:extra].length).to eq(37)
       expect(response[:events_by_month].length).to eq(37)
       expect(response[:events_by_month].first).to eq(month: 1, year: 2010, html: 299, pdf: 90)
       expect(response[:events_url]).to be_nil

@@ -41,7 +41,8 @@ class Wos < Source
       events_by_month: [],
       events_url: events_url,
       event_count: event_count,
-      event_metrics: get_event_metrics(citations: event_count) }
+      event_metrics: get_event_metrics(citations: event_count),
+      extra: nil }
   end
 
   def check_error_status(result, work)

@@ -163,6 +163,9 @@ class Source < ActiveRecord::Base
       # make sure we return a hash
       result = { 'data' => result } unless result.is_a?(Hash)
     end
+
+    # extend hash fetch method to nested hashes
+    result.extend Hashie::Extensions::DeepFetch
   end
 
   def parse_data(result, work, options = {})

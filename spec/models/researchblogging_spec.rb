@@ -49,20 +49,23 @@ describe Researchblogging, type: :model, vcr: true do
     it "should report if the doi is missing" do
       work = FactoryGirl.build(:work, :doi => "")
       result = {}
-      expect(subject.parse_data(result, work)).to eq(events: [], :events_by_day=>[], :events_by_month=>[], events_url: nil, event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 })
+      result.extend Hashie::Extensions::DeepFetch
+      expect(subject.parse_data(result, work)).to eq(events: [], :events_by_day=>[], :events_by_month=>[], events_url: nil, event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 }, extra: nil)
     end
 
     it "should report if there are no events and event_count returned by the ResearchBlogging API" do
       body = File.read(fixture_path + 'researchblogging_nil.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
-      expect(response).to eq(events: [], :events_by_day=>[], :events_by_month=>[], event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 }, events_url: nil)
+      expect(response).to eq(events: [], :events_by_day=>[], :events_by_month=>[], event_count: 0, event_metrics: { pdf: nil, html: nil, shares: nil, groups: nil, comments: nil, likes: nil, citations: 0, total: 0 }, events_url: nil, extra: nil)
     end
 
     it "should report if there are events and event_count returned by the ResearchBlogging API" do
       work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0035869", published_on: "2009-07-01")
       body = File.read(fixture_path + 'researchblogging.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:event_count]).to eq(8)
       expect(response[:events].length).to eq(8)
@@ -86,6 +89,7 @@ describe Researchblogging, type: :model, vcr: true do
       work = FactoryGirl.build(:work, :doi => "10.1371/journal.pone.0035869", published_on: "2012-10-01")
       body = File.read(fixture_path + 'researchblogging_one.xml')
       result = Hash.from_xml(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = subject.parse_data(result, work)
       expect(response[:event_count]).to eq(1)
       expect(response[:events].length).to eq(1)

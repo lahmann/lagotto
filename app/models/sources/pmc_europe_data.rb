@@ -26,7 +26,8 @@ class PmcEuropeData < Source
       events_by_month: [],
       events_url: events_url,
       event_count: event_count,
-      event_metrics: get_event_metrics(citations: event_count) }
+      event_metrics: get_event_metrics(citations: event_count),
+      extra: nil }
   end
 
   def get_events(result)

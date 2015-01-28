@@ -43,7 +43,7 @@ describe PlosComments, type: :model, vcr: true do
     it "should catch timeout errors with the PLOS comments API" do
       stub = stub_request(:get, subject.get_query_url(work)).to_return(status: [408])
       response = subject.get_data(work, options = { :source_id => subject.id })
-      expect(response).to eq(error: "http://api.plosjournals.org/v1/articles/#{work.doi}?comments", status: 408)
+      expect(response).to eq(error: "the server responded with status 408 for http://api.plosjournals.org/v1/articles/#{work.doi}?comments=", status: 408)
       expect(stub).to have_been_requested
       expect(Alert.count).to eq(1)
       alert = Alert.first
@@ -54,7 +54,7 @@ describe PlosComments, type: :model, vcr: true do
   end
 
   context "parse_data" do
-    let(:null_response) { { :events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>nil, :citations=>nil, :total=>0 } } }
+    let(:null_response) { { :events=>[], :events_by_day=>[], :events_by_month=>[], :events_url=>nil, :event_count=>0, :event_metrics=>{:pdf=>nil, :html=>nil, :shares=>nil, :groups=>nil, :comments=>0, :likes=>nil, :citations=>nil, :total=>0 }, :extra=>nil } }
 
     it "should report if the doi is missing" do
       work = FactoryGirl.build(:work, :doi => nil)

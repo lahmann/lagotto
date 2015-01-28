@@ -72,6 +72,7 @@ describe MemberList, :type => :model do
       import = CrossrefImport.new
       body = File.read(fixture_path + 'crossref_import.json')
       result = JSON.parse(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = import.parse_data(result)
       expect(response.length).to eq(10)
 
@@ -87,6 +88,7 @@ describe MemberList, :type => :model do
       import = CrossrefImport.new
       body = File.read(fixture_path + 'crossref_import.json')
       result = JSON.parse(body)
+      result.extend Hashie::Extensions::DeepFetch
       response = import.parse_data(result)
       expect(response.length).to eq(10)
 
@@ -104,6 +106,7 @@ describe MemberList, :type => :model do
       import = CrossrefImport.new
       body = File.read(fixture_path + 'crossref_import.json')
       result = JSON.parse(body)
+      result.extend Hashie::Extensions::DeepFetch
       items = import.parse_data(result)
       response = import.import_data(items)
       expect(response.length).to eq(10)
@@ -116,6 +119,7 @@ describe MemberList, :type => :model do
       import = CrossrefImport.new
       body = File.read(fixture_path + 'crossref_import.json')
       result = JSON.parse(body)
+      result.extend Hashie::Extensions::DeepFetch
       items = import.parse_data(result)
       response = import.import_data(items)
       expect(response.compact.length).to eq(10)
@@ -127,6 +131,7 @@ describe MemberList, :type => :model do
       import = CrossrefImport.new
       body = File.read(fixture_path + 'crossref_import.json')
       result = JSON.parse(body)
+      result.extend Hashie::Extensions::DeepFetch
       items = import.parse_data(result)
       items[0][:title] = nil
       response = import.import_data(items)

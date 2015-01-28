@@ -21,8 +21,11 @@ module Measurable
     end
 
     def get_sum(items, key, nested_key = nil)
-      Array(items).empty? ? 0 : Array(items).reduce(0) do |sum, hash|
-        value = hash.fetch(key, {}).fetch(nested_key, nil)
+      return 0 if items.blank?
+
+      items.reduce(0) do |sum, hash|
+        value = hash[key]
+        value = value[nested_key] if nested_key
         sum + value.to_i
       end
     end
@@ -38,6 +41,5 @@ module Measurable
 
       Time.at(epoch.to_i).utc.iso8601
     end
-
   end
 end

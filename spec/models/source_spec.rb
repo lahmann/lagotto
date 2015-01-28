@@ -21,12 +21,12 @@ describe Source, :type => :model do
     let(:work) { FactoryGirl.build(:work, :doi => "10.1371/journal.ppat.1000446", published_on: "2013-08-05") }
 
     it "should handle events" do
-      date = Time.zone.now.to_date - 2.weeks
-      date_two = Time.zone.now.to_date - 1.week
-      events = [{ "issued" => { "date-parts" => [[date.year, date.month, date.day]] }},
-                { "issued" => { "date-parts" => [[date.year, date.month, date.day]] }},
-                { "issued" => { "date-parts" => [[date_two.year, date_two.month, date_two.day]] }}]
-      expect(subject.get_events_by_day(events, work)).to eq([{:year=>2013, :month=>8, :day=>22, :total=>2}, {:year=>2013, :month=>8, :day=>29, :total=>1}])
+      time = Time.zone.now - 1.month
+      time_two = Time.zone.now - 1.week
+      events = [{ "timestamp" => time.utc.iso8601 },
+                { "timestamp" => time.utc.iso8601 },
+                { "timestamp" => time_two.utc.iso8601 }]
+      expect(subject.get_events_by_day(events, work)).to eq([{:year=>2013, :month=>8, :day=>5, :total=>2}, {:year=>2013, :month=>8, :day=>29, :total=>1}])
     end
 
     it "should handle empty lists" do
@@ -34,9 +34,9 @@ describe Source, :type => :model do
       expect(subject.get_events_by_day(events, work)).to eq([])
     end
 
-    it "should handle events without event_time" do
-      date = Time.zone.now.to_date - 1.month
-      events = [{ }, { "issued" => { "date-parts" => [[date.year, date.month, date.day]] }}]
+    it "should handle events without timestamp" do
+      time = Time.zone.now - 1.month
+      events = [{ }, { "timestamp" => time.utc.iso8601 }]
       expect(subject.get_events_by_day(events, work)).to eq([{:year=>2013, :month=>8, :day=>5, :total=>1}])
     end
   end
@@ -45,9 +45,9 @@ describe Source, :type => :model do
     before(:each) { allow(Time).to receive(:now).and_return(Time.mktime(2013, 9, 5)) }
 
     it "should handle events" do
-      date = Time.zone.now.to_date - 1.month
-      date_two = Time.zone.now.to_date - 1.week
-      events = [{ "issued" => { "date-parts" => [[date.year, date.month, date.day]] }}, { "issued" => { "date-parts" => [[date_two.year, date_two.month, date_two.day]] }}]
+      time = Time.zone.now - 1.month
+      time_two = Time.zone.now - 1.week
+      events = [{ "timestamp" => time.utc.iso8601 }, { "timestamp" => time_two.utc.iso8601 }]
       expect(subject.get_events_by_month(events)).to eq([{ year: 2013, month: 8, total: 2 }])
     end
 
@@ -57,8 +57,8 @@ describe Source, :type => :model do
     end
 
     it "should handle events without dates" do
-      date = Time.zone.now.to_date - 1.month
-      events = [{ }, { "issued" => { "date-parts" => [[date.year, date.month, date.day]] }}]
+      time = Time.zone.now - 1.month
+      events = [{ }, { "timestamp" => time.utc.iso8601 }]
       expect(subject.get_events_by_month(events)).to eq([{ year: 2013, month: 8, total: 1 }])
     end
   end

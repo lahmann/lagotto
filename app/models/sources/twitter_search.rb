@@ -27,7 +27,8 @@ class TwitterSearch < Source
       events_by_month: get_events_by_month(events),
       events_url: get_events_url(work),
       event_count: events.length,
-      event_metrics: get_event_metrics(:comments => events.length) }
+      event_metrics: get_event_metrics(:comments => events.length),
+      extra: nil }
   end
 
   def get_events(result)
