@@ -2,9 +2,9 @@ require "cgi"
 
 class History
   # we can get data_from_source in 3 different formats
-  # - hash with event_count = 0: SUCCESS NO DATA
-  # - hash with event_count > 0: SUCCESS
-  # - hash with error          : ERROR
+  # - hash with event_count == 0:         SUCCESS NO DATA
+  # - hash with event_count >  0:         SUCCESS
+  # - hash with event_count nil or error: ERROR
   #
   # SUCCESS NO DATA
   # The source knows about the work identifier, but returns an event_count of 0
@@ -24,13 +24,10 @@ class History
   # include HTTP request helpers
   include Networkable
 
-  # include CouchDB helpers
-  include Couchable
-
   # include metrics helpers
   include Measurable
 
-  attr_accessor :retrieval_status, :events, :event_count, :previous_count, :previous_retrieved_at, :event_metrics, :events_by_day, :events_by_month, :events_url, :status, :couchdb_id, :rs_rev, :rh_rev, :data
+  attr_accessor :retrieval_status, :works, :event_count, :previous_count, :previous_retrieved_at, :event_metrics, :events_by_day, :events_by_month, :events_url, :status, :rs_rev, :rh_rev, :data
 
   def initialize(rs_id, data = {})
     @retrieval_status = RetrievalStatus.find(rs_id)
@@ -50,19 +47,25 @@ class History
       @event_metrics = data[:event_metrics] || get_event_metrics(citations: 0)
       @events_url = data[:events_url]
 
-      save_to_mysql
+      save_to_retrieval_statuses
     end
 
     if success?
-      @events = data[:events]
-      @events_by_day = data[:events_by_day]
-      @events_by_month = data[:events_by_month]
+      @works = Array(data[:events])
 
-      save_to_couchdb
+      @events_by_day = data[:events_by_day]
+      @events_by_day = get_events_by_day if events_by_day.blank?
+
+      @events_by_month = data[:events_by_month]
+      @events_by_month = get_events_by_month if events_by_month.blank?
+
+      save_to_works
+      save_to_days
+      save_to_months
     end
   end
 
-  def save_to_mysql
+  def save_to_retrieval_statuses
     # save data to retrieval_status table
     retrieval_status.update_attributes(retrieved_at: retrieved_at,
                                        scheduled_at: retrieval_status.stale_at,
@@ -72,34 +75,31 @@ class History
                                        events_url: events_url)
   end
 
-  def save_to_couchdb
-    if events_by_day.blank? || events_by_month.blank?
-      # check for existing couchdb document
-      data_rev = get_lagotto_rev(couchdb_id)
+  def save_to_works
+    @works.map { |item| Work.find_or_create(item) }
+  end
 
-      if data_rev.present?
-        previous_data = get_lagotto_data(couchdb_id)
-        previous_data = {} if previous_data.nil? || previous_data[:error]
-      else
-        previous_data = {}
-      end
+  def save_to_days
+    @events_by_day.map { |item| Day.where(retrieval_status_id: retrieval_status.id,
+                                          day: item["day"],
+                                          month: item["month"],
+                                          year: item["year"]).first_or_create(
+                                          work_id: retrieval_status.work_id,
+                                          source_id: retrieval_status.source_id,
+                                          total_count: item["total_count"],
+                                          html_count: item["html_count"],
+                                          pdf_count: item["pdf_count"]) }
+  end
 
-      @events_by_day = get_events_by_day(previous_data['events_by_day']) if events_by_day.blank?
-      @events_by_month = get_events_by_month(previous_data['events_by_month']) if events_by_month.blank?
-
-      options = { data: data.clone }
-      options[:source_id] = retrieval_status.source_id
-
-      if data_rev.present?
-        options[:data][:_id] = "#{couchdb_id}"
-        options[:data][:_rev] = data_rev
-      end
-
-      @rs_rev = put_lagotto_data("#{ENV['COUCHDB_URL']}/#{couchdb_id}", options)
-    else
-      # only save the data to couchdb
-      @rs_rev = save_lagotto_data(couchdb_id, data: data.clone, source_id: retrieval_status.source_id)
-    end
+  def save_to_months
+    @events_by_month.map { |item| Month.where(retrieval_status_id: retrieval_status.id,
+                                              month: item["month"],
+                                              year: item["year"]).first_or_create(
+                                              work_id: retrieval_status.work_id,
+                                              source_id: retrieval_status.source_id,
+                                              total_count: item["total_count"],
+                                              html_count: item["html_count"],
+                                              pdf_count: item["pdf_count"]) }
   end
 
   def get_events_by_day(event_arr = nil)
@@ -119,14 +119,14 @@ class History
       item = { 'year' => today.year,
                'month' => today.month,
                'day' => today.day,
-               'html' => html,
-               'pdf' => pdf }
+               'html_count' => html,
+               'pdf_count' => pdf }
     else
       total = event_count - event_arr.reduce(0) { |sum, item| sum + item['total'] }
       item = { 'year' => today.year,
                'month' => today.month,
                'day' => today.day,
-               'total' => total }
+               'total_count' => total }
     end
 
     event_arr << item
@@ -144,14 +144,14 @@ class History
 
       item = { 'year' => today.year,
                'month' => today.month,
-               'html' => html,
-               'pdf' => pdf }
+               'html_count' => html,
+               'pdf_count' => pdf }
     else
       total = event_count - event_arr.reduce(0) { |sum, item| sum + item['total'] }
 
       item = { 'year' => today.year,
                'month' => today.month,
-               'total' => total }
+               'total_count' => total }
     end
 
     event_arr << item
@@ -163,11 +163,6 @@ class History
 
   def success?
     status == :success
-  end
-
-  def couchdb_id
-    pid = CGI.escape(retrieval_status.work.pid)
-    "#{retrieval_status.source.name}:#{pid}"
   end
 
   def skipped

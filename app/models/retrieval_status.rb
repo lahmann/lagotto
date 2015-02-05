@@ -82,10 +82,6 @@ class RetrievalStatus < ActiveRecord::Base
     end
   end
 
-  def events_csl
-    @events_csl ||= events.is_a?(Array) ? events.map { |event| event['event_csl'] }.compact : []
-  end
-
   def metrics
     @metrics ||= event_metrics.present? ? event_metrics : get_event_metrics(total: 0)
   end
