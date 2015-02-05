@@ -68,9 +68,9 @@ describe Orcid, type: :model, vcr: true do
       expect(event['author']).to eq([{"family"=>"Eisen", "given"=>"Jonathan A."}])
       expect(event['title']).to eq("ORCID profile")
       expect(event['container-title']).to be_nil
-      expect(event['issued']).to eq("date-parts"=>[[2012, 6, 19]])
-      expect(event['timestamp']).to eq("date-parts"=>[[2012, 6, 19]])
-      expect(event['type']).to eq("post")
+      expect(event['issued']).to eq("date-parts"=>[[]])
+      expect(event['timestamp']).to be_nil
+      expect(event['type']).to eq("entry")
     end
   end
 end

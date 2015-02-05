@@ -62,14 +62,13 @@ describe Twitter, type: :model, vcr: true do
 
       event = response[:events].first
 
-      expect(event[:event_csl]['author']).to eq([{"family"=>"Regrum", "given"=>""}])
-      expect(event[:event_csl]['title']).to eq("Don't be blinded by science http://t.co/YOWRhsXb")
-      expect(event[:event_csl]['container-title']).to eq("Twitter")
-      expect(event[:event_csl]['issued']).to eq("date-parts"=>[[2012, 5, 20]])
-      expect(event[:event_csl]['type']).to eq("personal_communication")
-
-      expect(event[:event_url]).to eq("http://twitter.com/regrum/status/204270013081849857")
-      expect(event[:event_time]).to eq("2012-05-20T17:59:00Z")
+      expect(event['author']).to eq([{"family"=>"Regrum", "given"=>""}])
+      expect(event['title']).to eq("Don't be blinded by science http://t.co/YOWRhsXb")
+      expect(event['container-title']).to eq("Twitter")
+      expect(event['issued']).to eq("date-parts"=>[[2012, 5, 20]])
+      expect(event['type']).to eq("personal_communication")
+      expect(event['URL']).to eq("http://twitter.com/regrum/status/204270013081849857")
+      expect(event['timestamp']).to eq("2012-05-20T17:59:00Z")
       event_data = event[:event]
 
       expect(event_data[:id]).to eq("204270013081849857")

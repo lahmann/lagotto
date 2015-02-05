@@ -16,7 +16,7 @@ class Reddit < Source
     { events: events,
       events_by_day: get_events_by_day(events, work),
       events_by_month: get_events_by_month(events),
-      events_url: get_events_url(work),
+      events_url: events_url,
       event_count: total,
       event_metrics: get_event_metrics(comments: comments, likes: likes, total: total),
       extra: nil }

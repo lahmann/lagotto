@@ -8,11 +8,11 @@ class Wordpress < Source
 
       { "author" => get_authors([item.fetch('author', "")]),
         "title" => item.fetch("title", nil),
-        'container-title' => nil,
-        'issued' => get_date_parts(timestamp),
-        'timestamp' => timestamp,
-        'URL' => item.fetch("link", nil),
-        'type' => 'post' }
+        "container-title" => nil,
+        "issued" => get_date_parts(timestamp),
+        "timestamp" => timestamp,
+        "URL" => item.fetch("link", nil),
+        "type" => 'post' }
     end
   end
 
